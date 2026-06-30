@@ -860,8 +860,71 @@ function closeM(){document.querySelectorAll('.modal-backdrop').forEach(m=>m.clas
 document.querySelectorAll('.modal-backdrop').forEach(b=>b.addEventListener('click',e=>{if(e.target===b)closeM()}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
 function toast(ic,title,sub,ms=3400){document.getElementById('ti').textContent=ic;document.getElementById('tt').textContent=title;document.getElementById('ts').textContent=sub;const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),ms)}
-function doLogin(){const e=document.getElementById('lemail').value;if(!e){toast('⚠️','Vul je e-mailadres in','');return}closeM();showApp();toast('👋','Welkom terug!','Health Score is bijgewerkt')}
-function doRegister(){const n=document.getElementById('rname').value,e=document.getElementById('remail').value,k=document.getElementById('rkent').value;if(!n||!e){toast('⚠️','Vul alle velden in','');return}document.getElementById('pname').textContent=n;document.getElementById('pemail').textContent=e;document.getElementById('pav').textContent=n.charAt(0).toUpperCase();document.getElementById('dash-title').textContent='Welkom, '+n.split(' ')[0]+'! 👋';closeM();showApp();toast('🚗','Welkom bij Carvital!',k?k+' toegevoegd · Score: 89/100':'Voeg je auto toe via Kenteken opzoeken')}
+const API_URL = "https://api.carvital.nl";
+
+async function doRegister(){
+  const name = document.getElementById('rname').value.trim();
+  const email = document.getElementById('remail').value.trim();
+  const password = document.querySelector('#modal-register input[type=password]').value;
+  const kenteken = document.getElementById('rkent').value.trim();
+  if(!name || !email || !password){ toast('⚠️','Vul alle velden in',''); return; }
+  if(password.length < 8){ toast('⚠️','Wachtwoord te kort','Minimaal 8 tekens'); return; }
+  try{
+    const r = await fetch(`${API_URL}/register`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name, email, password, kenteken: kenteken || null })
+    });
+    const data = await r.json();
+    if(!r.ok) throw new Error(data.detail || 'Registratie mislukt');
+    localStorage.setItem('cv_token', data.access_token);
+    localStorage.setItem('cv_user', JSON.stringify(data.user));
+    document.getElementById('pname').textContent = data.user.name;
+    document.getElementById('pemail').textContent = data.user.email;
+    document.getElementById('pav').textContent = data.user.name.charAt(0).toUpperCase();
+    document.getElementById('dash-title').textContent = 'Welkom, ' + data.user.name.split(' ')[0] + '! 👋';
+    closeM(); showApp();
+    toast('🚗','Welkom bij Carvital!', kenteken ? kenteken+' toegevoegd' : 'Voeg je auto toe via Kenteken opzoeken');
+  }catch(err){ toast('❌','Registratie mislukt', err.message); }
+}
+
+async function doLogin(){
+  const email = document.getElementById('lemail').value.trim();
+  const password = document.querySelector('#modal-login input[type=password]').value;
+  if(!email || !password){ toast('⚠️','Vul je gegevens in',''); return; }
+  try{
+    const r = await fetch(`${API_URL}/login`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password })
+    });
+    const data = await r.json();
+    if(!r.ok) throw new Error(data.detail || 'Inloggen mislukt');
+    localStorage.setItem('cv_token', data.access_token);
+    localStorage.setItem('cv_user', JSON.stringify(data.user));
+    document.getElementById('pname').textContent = data.user.name;
+    document.getElementById('pemail').textContent = data.user.email;
+    document.getElementById('pav').textContent = data.user.name.charAt(0).toUpperCase();
+    closeM(); showApp();
+    toast('👋','Welkom terug!','Je bent ingelogd');
+  }catch(err){ toast('❌','Inloggen mislukt', err.message); }
+}
+
+function restoreSession(){
+  const token = localStorage.getItem('cv_token');
+  const user = localStorage.getItem('cv_user');
+  if(token && user){
+    const u = JSON.parse(user);
+    document.getElementById('pname').textContent = u.name;
+    document.getElementById('pemail').textContent = u.email;
+    document.getElementById('pav').textContent = u.name.charAt(0).toUpperCase();
+  }
+}
+
+function logout(){
+  localStorage.removeItem('cv_token');
+  localStorage.removeItem('cv_user');
+  showPage('landing');
+  toast('👋','Uitgelogd','Tot snel!');
+}
 async function joinWL(){const e=document.getElementById('cta-email').value;if(!e||!e.includes('@')){toast('⚠️','Geldig e-mailadres vereist','');return}try{const r=await fetch('https://formspree.io/f/xdajbdwr',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:e,bron:'Carvital Waitlist'})});if(r.ok){document.getElementById('cta-email').value='';toast('✅','Aanmelding gelukt!','We houden je op de hoogte van de lancering!')}else{toast('⚠️','Er ging iets mis','Probeer opnieuw')}}catch(err){toast('⚠️','Er ging iets mis','')}}
 async function rdwFetch(url){const proxies=['https://corsproxy.io/?'+encodeURIComponent(url),'https://api.allorigins.win/raw?url='+encodeURIComponent(url)];for(const p of proxies){try{const r=await fetch(p,{signal:AbortSignal.timeout(6000)});if(r.ok)return await r.json()}catch(e){continue}}return await fetch(url).then(r=>r.json())}
 async function lkwL(){const raw=document.getElementById('lkw-f').value.replace(/-/g,'').toUpperCase().trim();if(raw.length<5){toast('⚠️','Voer een geldig kenteken in','');return}const ld=document.getElementById('lkw-load'),res=document.getElementById('lkw-res'),err=document.getElementById('lkw-err'),btn=document.getElementById('lkw-btn');ld.classList.add('show');res.classList.remove('show');err.classList.remove('show');btn.disabled=true;btn.innerHTML='<div class="spin" style="border-top-color:#fff"></div>';try{const d=await rdwFetch(`https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken=${raw}`);if(!d||!d.length)throw new Error('nf');const v=d[0];const merk=v.merk||'',model=v.handelsbenaming||'',jaar=v.datum_eerste_toelating?.substring(0,4)||'',brand=v.brandstof_omschrijving||'';document.getElementById('lkw-name').textContent=merk+' '+model;document.getElementById('lkw-meta').textContent=jaar+' · '+brand+' · '+(v.eerste_kleur||'');const age=new Date().getFullYear()-parseInt(jaar||2020);const score=Math.max(65,Math.min(97,Math.round(97-age*1.5+Math.floor(Math.random()*6))));const status=score>=85?'✅ Uitstekende conditie':score>=70?'👍 Goede conditie':'⚠️ Onderhoud aanbevolen';document.getElementById('lkw-score-num').textContent=score;document.getElementById('lkw-score-label').textContent=status;res.classList.add('show');toast('✅',merk+' '+model+' gevonden!','Bouwjaar '+jaar)}catch(e){err.classList.add('show');toast('❌','Niet gevonden','Probeer bijv. GZTS27')}finally{ld.classList.remove('show');btn.disabled=false;btn.innerHTML='🚗 Zoek mijn auto op'}}
@@ -879,7 +942,10 @@ function copyLink(){navigator.clipboard?.writeText(document.getElementById('shar
 function togThis(el){el.classList.toggle('on');el.classList.toggle('off')}
 function acceptCookies(){document.getElementById('cookie-banner').style.display='none';localStorage.setItem('cv_cookies','accepted');toast('✅','Cookies geaccepteerd','Bedankt!')}
 function declineCookies(){document.getElementById('cookie-banner').style.display='none';localStorage.setItem('cv_cookies','declined')}
-window.addEventListener('load',()=>{if(localStorage.getItem('cv_cookies')){document.getElementById('cookie-banner').style.display='none'}})
+window.addEventListener('load',()=>{
+  if(localStorage.getItem('cv_cookies')){document.getElementById('cookie-banner').style.display='none'}
+  restoreSession();
+})
 </script>
 </body>
 </html>
