@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light">
+<title>Carvital — Altijd weten hoe je auto ervoor staat</title>
+<meta name="description" content="Voer je kenteken in en zie direct hoe je auto ervoor staat. Digitaal onderhoudsboekje, APK-herinneringen en garages bij jou in de buurt.">
+<!-- Vercel Web Analytics is only loaded after cookie consent (see loadAnalytics) -->
+<!-- Bunny Fonts: EU-hosted, privacy-friendly drop-in for Google Fonts (no IP transfer to Google) -->
+<link href="https://fonts.bunny.net/css?family=nunito:400,500,600,700,800,900|inter:300,400,500,600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --gold:#E8940A;--gold2:#F5B335;--gold3:#FDD07A;
+  --bg:#F8F6F1;--bg2:#FFFFFF;--bg3:#F2EFE8;--bg4:#EAE6DC;
+  --dark:#1C1C1C;--dark2:#2D2D2D;
+  --text:#1C1C1C;--t2:#6B6B6B;--t3:#9B9B9B;
+  --green:#16A34A;--orange:#EA580C;--red:#DC2626;--blue:#2563EB;
+  --border:#E4DFD4;--border2:#CFC8B8;
+  --r:14px;--rl:22px;--rxl:30px;
+  --shadow:0 2px 12px rgba(0,0,0,0.07);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;color-scheme:light only}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;color-scheme:light}
+#page-landing{background:var(--bg)}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:500;height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(248,246,241,0.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:9px;cursor:pointer}
+.lm{width:34px;height:34px;background:var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:900;font-size:16px;color:#fff;box-shadow:0 2px 8px rgba(232,148,10,0.25)}
+.lt{font-family:'Nunito',sans-serif;font-weight:900;font-size:18px;color:var(--dark)}
+.beta{background:#FEF3C7;color:#92400E;font-size:10px;font-weight:700;padding:2px 7px;border-radius:50px;border:1px solid #FDE68A;margin-left:2px}
+.nav-r{display:flex;gap:8px;align-items:center}
+.nb{padding:8px 18px;border-radius:50px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;border:none}
+.nb-ghost{background:transparent;color:var(--t2);border:1.5px solid var(--border2)}
+.nb-ghost:hover{color:var(--dark);border-color:var(--dark)}
+.nb-gold{background:var(--gold);color:#fff;box-shadow:0 2px 8px rgba(232,148,10,0.25)}
+.nb-gold:hover{background:var(--gold2);transform:translateY(-1px)}
+
+.page{display:none;min-height:100vh;padding-top:62px}
+.page.active{display:block}
+#page-app{display:none}
+#page-app.active{display:flex;min-height:100vh}
+
+/* HERO */
+.hero{max-width:1080px;margin:0 auto;padding:56px 24px 48px;text-align:center;background:var(--bg)}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:50px;padding:6px 16px;margin-bottom:22px;font-size:12.5px;font-weight:600;color:#92400E}
+.badge-dot{width:7px;height:7px;background:var(--gold);border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-family:'Nunito',sans-serif;font-size:50px;font-weight:900;line-height:1.1;margin-bottom:16px;color:var(--dark);letter-spacing:-.5px;position:relative;z-index:1}
+h1 .g{color:var(--gold)}
+.hero-sub{font-size:17px;color:var(--t2);line-height:1.75;max-width:520px;margin:0 auto 36px}
+
+/* KENTEKEN */
+.kent-box{background:var(--bg2);border-radius:var(--rxl);padding:28px;max-width:580px;margin:0 auto 40px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
+.kent-label{font-size:13px;font-weight:600;color:var(--t2);margin-bottom:12px;text-align:left}
+.kent-row{display:flex;gap:10px;margin-bottom:0}
+.kent-input{flex:1;padding:15px 18px;border-radius:var(--r);background:var(--bg3);border:2px solid var(--border);color:var(--dark);font-family:'Nunito',sans-serif;font-size:22px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;text-align:center;outline:none;transition:all .2s}
+.kent-input:focus{border-color:var(--gold);background:#fff;box-shadow:0 0 0 4px rgba(232,148,10,.08)}
+.kent-input::placeholder{color:var(--t3);font-size:13px;letter-spacing:0;font-family:'Inter',sans-serif;font-weight:400}
+.kent-btn{padding:15px 22px;border-radius:var(--r);background:var(--gold);color:#fff;font-size:14.5px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;white-space:nowrap;box-shadow:0 2px 8px rgba(232,148,10,.25)}
+.kent-btn:hover{background:var(--gold2);transform:translateY(-1px)}
+.kent-loading{display:none;align-items:center;gap:10px;font-size:13.5px;color:var(--t2);margin-top:14px}
+.kent-loading.show{display:flex}
+.kent-result{display:none;margin-top:16px;background:linear-gradient(135deg,#FFFBEB,#fff);border:1px solid #FDE68A;border-radius:var(--r);padding:18px;text-align:left;animation:fadeIn .3s ease}
+.kent-result.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.kr-name{font-family:'Nunito',sans-serif;font-size:21px;font-weight:900;color:var(--dark);margin-bottom:3px}
+.kr-meta{font-size:12.5px;color:var(--t2);margin-bottom:14px}
+.kr-score{display:flex;align-items:center;gap:14px;margin-bottom:16px;padding:14px;background:#F0FDF4;border-radius:10px;border:1px solid #BBF7D0}
+.kr-score-num{font-family:'Nunito',sans-serif;font-size:46px;font-weight:900;color:var(--green);line-height:1}
+.kr-score-label{font-size:13.5px;font-weight:700;color:var(--green)}
+.kr-score-sub{font-size:12px;color:var(--t2);margin-top:3px}
+.kr-actions{display:flex;gap:9px;flex-wrap:wrap}
+.kent-error{display:none;color:var(--red);font-size:13px;margin-top:12px}
+.kent-error.show{display:block}
+
+.hero-trust{display:flex;justify-content:center;align-items:center;gap:24px;flex-wrap:wrap;font-size:13px;color:var(--t2);font-weight:500}
+.ht-item{display:flex;align-items:center;gap:6px}
+.ht-div{width:1px;height:16px;background:var(--border2)}
+
+/* FEATURES */
+.section{max-width:1080px;margin:0 auto;padding:60px 24px}
+.sec-title{font-family:'Nunito',sans-serif;font-size:32px;font-weight:900;text-align:center;margin-bottom:8px;color:var(--dark)}
+.sec-sub{text-align:center;color:var(--t2);font-size:15px;margin-bottom:36px}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.feat-card{background:var(--bg2);border-radius:var(--rl);padding:26px;border:1px solid var(--border);transition:all .25s;cursor:pointer;position:relative;overflow:hidden}
+.feat-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px);border-color:var(--border2)}
+.feat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--gold);transform:scaleX(0);transition:transform .25s;transform-origin:left}
+.feat-card:hover::after{transform:scaleX(1)}
+.feat-icon{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:23px;margin-bottom:16px}
+.feat-title{font-family:'Nunito',sans-serif;font-size:16.5px;font-weight:800;margin-bottom:8px;color:var(--dark)}
+.feat-desc{font-size:13.5px;color:var(--t2);line-height:1.68}
+
+/* HOW */
+.how-section{background:var(--dark);padding:60px 24px}
+.how-inner{max-width:1080px;margin:0 auto}
+.how-title{font-family:'Nunito',sans-serif;font-size:30px;font-weight:900;color:#fff;text-align:center;margin-bottom:6px}
+.how-sub{text-align:center;color:rgba(255,255,255,.45);font-size:14.5px;margin-bottom:40px}
+.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:rgba(255,255,255,.07);border-radius:var(--rl);overflow:hidden}
+.how-card{background:#252525;padding:26px 20px;position:relative}
+.how-num{font-family:'Nunito',sans-serif;font-size:44px;font-weight:900;color:rgba(232,148,10,.12);position:absolute;top:12px;right:14px;line-height:1}
+.how-icon{width:42px;height:42px;border-radius:12px;background:rgba(232,148,10,.1);border:1px solid rgba(232,148,10,.18);display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:14px}
+.how-card-title{font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:#fff;margin-bottom:7px}
+.how-card-desc{font-size:12.5px;color:rgba(255,255,255,.45);line-height:1.62}
+
+/* OVERDRACHT */
+.od-section{max-width:1080px;margin:0 auto;padding:60px 24px}
+.od-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.od-title{font-family:'Nunito',sans-serif;font-size:34px;font-weight:900;color:var(--dark);margin-bottom:14px;line-height:1.15}
+.od-title span{color:var(--gold)}
+.od-desc{font-size:15px;color:var(--t2);line-height:1.75;margin-bottom:22px}
+.od-points{display:flex;flex-direction:column;gap:11px}
+.od-point{display:flex;align-items:flex-start;gap:11px;font-size:13.5px;color:var(--t2);line-height:1.6}
+.od-check{width:26px;height:26px;border-radius:50%;background:#D1FAE5;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:1px;color:var(--green);font-weight:700}
+.od-card{background:var(--bg2);border-radius:var(--rxl);padding:26px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
+.od-car-top{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.od-car-ic{width:46px;height:46px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:21px}
+.od-car-name{font-family:'Nunito',sans-serif;font-size:17px;font-weight:900;color:var(--dark)}
+.od-car-detail{font-size:12px;color:var(--t2);margin-top:2px}
+.od-score-box{display:flex;align-items:center;gap:14px;padding:14px;background:#F0FDF4;border-radius:12px;border:1px solid #BBF7D0;margin-bottom:16px}
+.od-score-num{font-family:'Nunito',sans-serif;font-size:44px;font-weight:900;color:var(--green);line-height:1}
+.od-score-status{font-size:13px;font-weight:700;color:var(--green)}
+.od-history{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+.od-hist{display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--bg3);border-radius:10px;font-size:12.5px}
+.od-hist-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+.od-hist-name{flex:1;font-weight:500;color:var(--dark)}
+.od-hist-price{font-weight:700;color:var(--gold)}
+.od-qr-row{display:flex;align-items:center;gap:12px;padding:12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px}
+.od-qr{width:56px;height:56px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:4px;flex-shrink:0;border:1px solid var(--border)}
+.od-qr-info{font-size:12.5px;color:var(--dark2);line-height:1.5}
+.od-qr-info strong{display:block;font-weight:700;margin-bottom:2px;color:var(--dark)}
+
+/* GARAGES */
+.garage-section{background:var(--bg3);padding:60px 24px}
+.garage-inner{max-width:1080px;margin:0 auto}
+.garage-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.garage-card{background:var(--bg2);border-radius:var(--rl);padding:22px;border:1px solid var(--border);transition:all .2s;cursor:pointer}
+.garage-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.garage-card.featured{border-color:#FDE68A;background:linear-gradient(135deg,#FFFBEB,#fff)}
+.garage-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.garage-name{font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:var(--dark)}
+.garage-rating{font-size:12.5px;font-weight:700;color:var(--gold)}
+.garage-dist{font-size:11.5px;color:var(--t3);margin-top:2px}
+.garage-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.garage-tag{padding:3px 9px;border-radius:50px;background:var(--bg3);font-size:11px;color:var(--t2);border:1px solid var(--border)}
+.garage-info{font-size:13px;color:var(--t2);margin-bottom:14px;line-height:1.6}
+.garage-btn{width:100%;padding:10px;border-radius:10px;background:var(--gold);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;box-shadow:0 2px 6px rgba(232,148,10,.2)}
+.garage-btn:hover{background:var(--gold2)}
+
+/* CTA */
+.cta-section{background:var(--dark);padding:72px 24px}
+.cta-inner{max-width:560px;margin:0 auto;text-align:center}
+.cta-title{font-family:'Nunito',sans-serif;font-size:38px;font-weight:900;color:#fff;margin-bottom:12px;line-height:1.15}
+.cta-sub{font-size:15.5px;color:rgba(255,255,255,.55);margin-bottom:32px;line-height:1.7}
+.cta-form{display:flex;gap:10px;margin-bottom:14px}
+.cta-input{flex:1;padding:14px 18px;border-radius:var(--r);background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);color:#fff;font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.cta-input:focus{border-color:var(--gold)}
+.cta-input::placeholder{color:rgba(255,255,255,.3)}
+.cta-note{font-size:12px;color:rgba(255,255,255,.35)}
+.cta-note strong{color:var(--gold2)}
+
+/* FOOTER */
+footer{background:#111;padding:48px 24px 24px;border-top:1px solid rgba(255,255,255,.05)}
+.footer-inner{max-width:1080px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:48px;margin-bottom:32px}
+.footer-desc{font-size:13px;color:rgba(255,255,255,.35);line-height:1.7;margin-top:12px;max-width:220px}
+.footer-col-title{font-family:'Nunito',sans-serif;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:14px}
+.footer-link{display:block;font-size:13px;color:rgba(255,255,255,.3);text-decoration:none;margin-bottom:9px;cursor:pointer;transition:color .2s}
+.footer-link:hover{color:var(--gold2)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:20px;border-top:1px solid rgba(255,255,255,.05);font-size:12px;color:rgba(255,255,255,.25)}
+
+/* BUTTONS */
+.btn-primary{padding:13px 22px;border-radius:var(--r);background:var(--gold);color:#fff;font-size:14.5px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(232,148,10,.25)}
+.btn-primary:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-secondary{padding:13px 18px;border-radius:var(--r);border:1.5px solid var(--border2);background:transparent;color:var(--dark);font-size:14.5px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-secondary:hover{border-color:var(--dark);background:var(--bg3)}
+.btn-sm{padding:9px 16px;border-radius:50px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;border:none}
+.btn-sm-gold{background:var(--gold);color:#fff;box-shadow:0 1px 4px rgba(232,148,10,.25)}
+.btn-sm-gold:hover{background:var(--gold2)}
+.btn-sm-white{background:var(--bg3);color:var(--dark);border:1px solid var(--border2)}
+.btn-sm-white:hover{background:var(--bg4)}
+
+/* APP */
+.mobile-nav{display:none}
+.mnb{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:10px;color:var(--t3);cursor:pointer;padding:6px 4px;flex:1}
+.mnb .ic{font-size:19px}
+.mnb.active{color:var(--gold)}
+.mm-item{display:flex;align-items:center;gap:12px;padding:12px 4px;font-size:14px;color:var(--dark);cursor:pointer;border-bottom:1px solid var(--border)}
+.mm-item:last-child{border-bottom:none}
+.mm-item .ic{font-size:18px;width:24px;text-align:center}
+.sidebar{width:218px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:16px 10px;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto;display:flex;flex-direction:column}
+.sbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:5px;padding:0 10px}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:10px;cursor:pointer;transition:all .15s;font-size:13px;font-weight:500;color:var(--t2);margin-bottom:1px}
+.ni:hover{background:var(--bg3);color:var(--dark)}
+.ni.active{background:#FEF3C7;color:#92400E;font-weight:600}
+.ni .ic{font-size:16px;width:22px;text-align:center;flex-shrink:0}
+.ni .bc{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:50px}
+.sb-sec{margin-bottom:20px}
+.sb-car{background:var(--bg3);border-radius:10px;padding:11px 12px;border:1px solid var(--border);margin-bottom:6px}
+.sb-car-n{font-size:12.5px;font-weight:700;color:var(--dark);margin-bottom:1px}
+.sb-car-s{font-size:10.5px;color:var(--t3)}
+.sb-car-score{display:flex;align-items:center;gap:5px;margin-top:6px}
+.sb-bot{margin-top:auto;padding-top:13px;border-top:1px solid var(--border)}
+.amain{flex:1;overflow-y:auto;padding:26px;background:var(--bg);min-width:0}
+.view{display:none}
+.view.active{display:block;animation:vin .2s ease}
+@keyframes vin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.ahd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+.at{font-family:'Nunito',sans-serif;font-size:24px;font-weight:900;color:var(--dark)}
+.as2{font-size:12px;color:var(--t3);margin-top:3px}
+.cchip{display:flex;align-items:center;gap:9px;background:var(--bg2);border:1.5px solid var(--border);border-radius:50px;padding:7px 14px;cursor:pointer;transition:all .2s}
+.cchip:hover{border-color:var(--gold)}
+.cc-n{font-size:12.5px;font-weight:600;color:var(--dark)}
+.cc-s{font-size:10.5px;color:var(--t3)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.sp2{grid-column:span 2}
+.card{background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);padding:20px;box-shadow:var(--shadow)}
+.cl{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-bottom:12px;display:flex;align-items:center;gap:5px}
+.score-big{font-family:'Nunito',sans-serif;font-size:72px;font-weight:900;line-height:1;color:var(--green)}
+.score-big sub{font-size:24px;color:var(--t3);font-weight:400}
+.sch2{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:50px;font-size:11px;font-weight:700;margin-top:8px;margin-bottom:16px}
+.sbars{display:flex;flex-direction:column;gap:9px}
+.sbar{display:flex;align-items:center;gap:10px}
+.sb-lbl{font-size:11.5px;color:var(--t2);width:124px;flex-shrink:0}
+.sb-tr{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.sb-fl{height:100%;border-radius:3px;transition:width 2s ease}
+.sb-pct{font-size:10.5px;color:var(--t3);width:28px;text-align:right;flex-shrink:0}
+.apk-big{font-family:'Nunito',sans-serif;font-size:52px;font-weight:900;line-height:1;color:var(--gold)}
+.apk-tr{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:12px}
+.al2{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:10px;background:var(--bg3);cursor:pointer;transition:background .15s;margin-bottom:7px;border:1px solid var(--border)}
+.al2:hover{background:var(--bg4)}
+.al2:last-child{margin-bottom:0}
+.al-ic2{font-size:18px;flex-shrink:0}
+.al-b{flex:1;min-width:0}
+.al-t2{font-size:12.5px;font-weight:600;color:var(--dark);margin-bottom:2px}
+.al-s2{font-size:11px;color:var(--t3)}
+.al-a2{font-size:11px;font-weight:700;color:var(--gold);white-space:nowrap;flex-shrink:0}
+.mbars{display:flex;align-items:flex-end;gap:3px;height:48px;margin-top:10px}
+.mbar{flex:1;border-radius:3px 3px 0 0;cursor:pointer}
+.srows{display:flex;flex-direction:column}
+.srow{display:flex;justify-content:space-between;font-size:12.5px;padding:8px 0;border-bottom:1px solid var(--border)}
+.srow:last-child{border-bottom:none;padding-bottom:0}
+.sr-lb{color:var(--t2)}
+.sr-vl{font-weight:600;color:var(--dark)}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2.5px 8px;border-radius:50px;font-size:10px;font-weight:700}
+.bg{background:#D1FAE5;color:var(--green)}
+.bo{background:#FFEDD5;color:var(--orange)}
+.br{background:#FEE2E2;color:var(--red)}
+.bgo{background:#FEF3C7;color:#92400E}
+.bb{background:#DBEAFE;color:var(--blue)}
+.tl{display:flex;flex-direction:column}
+.tli{display:flex;gap:13px}
+.tls{display:flex;flex-direction:column;align-items:center;width:13px;flex-shrink:0}
+.tld{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.tlc{width:2px;flex:1;min-height:26px;background:var(--border);margin:4px 0}
+.tlb{flex:1;padding:2px 0 20px}
+.tlr{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:5px;margin-bottom:2px}
+.tlt{font-size:13.5px;font-weight:700;color:var(--dark)}
+.tlco{font-size:13.5px;font-weight:700;color:var(--gold)}
+.tlm{font-size:11px;color:var(--t3)}
+.tlg{font-size:11.5px;color:var(--t2);margin-top:4px}
+.kw{background:var(--bg2);border-radius:var(--rl);padding:24px;margin-bottom:17px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.kf{width:100%;max-width:290px;padding:14px 16px;border-radius:var(--r);background:var(--bg3);border:2px solid var(--border);color:var(--dark);font-family:'Nunito',sans-serif;font-size:24px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;text-align:center;outline:none;transition:all .2s;margin-bottom:12px;display:block}
+.kf:focus{border-color:var(--gold);background:#fff}
+.kf::placeholder{color:var(--t3);font-size:12.5px;letter-spacing:0;font-family:'Inter',sans-serif;font-weight:400}
+.rdw-rc{background:#FFFBEB;border:1px solid #FDE68A;border-radius:var(--rl);padding:21px;display:none;box-shadow:var(--shadow)}
+.rdw-rc.show{display:block;animation:fadeIn .32s ease}
+.rdw-n{font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--dark);margin-bottom:3px}
+.rdw-d{font-size:13px;color:var(--t2);margin-bottom:13px}
+.rdw-g{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;padding-top:16px;border-top:1px solid var(--border);margin-top:14px}
+.rdw-f label{font-size:10px;color:var(--t3);display:block;margin-bottom:2px}
+.rdw-f span{font-size:13px;font-weight:600;color:var(--dark)}
+.uz{border:2px dashed var(--border2);border-radius:var(--rl);padding:56px 34px;text-align:center;cursor:pointer;transition:all .3s;margin-bottom:17px;background:var(--bg2)}
+.uz:hover,.uz.drag{border-color:var(--gold);background:#FFFBEB}
+.air{background:var(--bg2);border:1px solid #FDE68A;border-radius:var(--rl);padding:21px;display:none;margin-bottom:17px;box-shadow:var(--shadow)}
+.air.show{display:block;animation:fadeIn .32s ease}
+.air-t{font-size:10.5px;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.07em;margin-bottom:15px}
+.ai-rw{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ai-rw:last-of-type{border-bottom:none}
+.ai-lb{font-size:11px;color:var(--t3);width:140px;flex-shrink:0}
+.ai-vl{font-size:13px;font-weight:600;color:var(--dark);flex:1}
+.gg{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.gc{background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);padding:19px;transition:all .2s;cursor:pointer;box-shadow:var(--shadow)}
+.gc:hover{border-color:var(--border2);box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.gc.rec{background:#FFFBEB;border-color:#FDE68A}
+.gc-n{font-family:'Nunito',sans-serif;font-size:14.5px;font-weight:800;color:var(--dark)}
+.gc-r{display:flex;align-items:center;gap:3px;font-size:12px;font-weight:700;color:var(--gold)}
+.gc-d{font-size:11px;color:var(--t3);margin-top:2px}
+.gtags{display:flex;gap:5px;flex-wrap:wrap;margin:10px 0}
+.gt{padding:3px 8px;border-radius:50px;background:var(--bg3);font-size:10px;color:var(--t2);border:1px solid var(--border)}
+.gc-p{font-size:12px;color:var(--t2);margin-bottom:13px}
+.gc-p strong{color:var(--dark)}
+.bk{width:100%;padding:10px;border-radius:9px;background:var(--gold);color:#fff;font-size:12.5px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;box-shadow:0 2px 6px rgba(232,148,10,.2)}
+.bk:hover{background:var(--gold2)}
+.rem-sec{margin-bottom:17px}
+.rst{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:9px}
+.rc{background:var(--bg2);border-radius:10px;border:1px solid var(--border);padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:6px;box-shadow:var(--shadow)}
+.rc:hover{background:var(--bg3)}
+.rdt{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.rb{flex:1}
+.rb-t{font-size:12.5px;font-weight:600;color:var(--dark);margin-bottom:2px}
+.rb-s{font-size:10.5px;color:var(--t3)}
+.kt{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-bottom:15px}
+.kc{background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);padding:19px;text-align:center;box-shadow:var(--shadow)}
+.kc-ic{font-size:24px;margin-bottom:7px}
+.kc-n{font-family:'Nunito',sans-serif;font-size:32px;font-weight:900;letter-spacing:-1px;margin-top:3px}
+.kc-lb{font-size:11px;color:var(--t3);margin-top:3px}
+.cbr{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.cb-lb{font-size:12px;color:var(--t2);width:132px;flex-shrink:0}
+.cb-tr{flex:1;height:7px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.cb-fl{height:100%;border-radius:4px;transition:width 1.5s ease}
+.cb-n{font-size:12px;font-weight:600;color:var(--dark);width:55px;text-align:right;flex-shrink:0}
+.th{background:#FFFBEB;border:1px solid #FDE68A;border-radius:var(--rxl);padding:36px;text-align:center;margin-bottom:17px;box-shadow:var(--shadow)}
+.th-t{font-family:'Nunito',sans-serif;font-size:26px;font-weight:900;color:var(--dark);margin-bottom:6px}
+.th-s{font-size:14px;color:var(--t2);margin-bottom:22px}
+.qrb{width:138px;height:138px;background:#fff;border-radius:14px;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;padding:10px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.shr{display:flex;gap:9px;max-width:380px;margin:0 auto}
+.shi{flex:1;padding:10px 13px;border-radius:10px;background:var(--bg3);border:1.5px solid var(--border);color:var(--dark);font-size:12px;font-family:'Inter',sans-serif;outline:none}
+.pt2{background:var(--bg2);border-radius:var(--rl);padding:22px;border:1px solid var(--border);margin-bottom:15px;display:flex;align-items:center;gap:20px;box-shadow:var(--shadow)}
+.pav2{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-size:26px;font-weight:900;color:#fff;flex-shrink:0}
+.pn2{font-family:'Nunito',sans-serif;font-size:20px;font-weight:900;color:var(--dark)}
+.pe2{font-size:13px;color:var(--t3);margin-top:3px}
+.tgr{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:10px 0;border-bottom:1px solid var(--border);color:var(--dark)}
+.tgr:last-child{border-bottom:none}
+.tog{width:40px;height:22px;border-radius:50px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.tog.on{background:var(--green)}
+.tog.off{background:var(--border2)}
+.tog-th{width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.tog.on .tog-th{left:21px}
+.tog.off .tog-th{left:2px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);z-index:600;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
+.modal-backdrop.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--bg2);border-radius:var(--rxl);padding:32px;width:440px;max-width:92vw;border:1px solid var(--border);transform:translateY(12px) scale(.98);transition:transform .22s;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.modal-backdrop.open .modal-box{transform:translateY(0) scale(1)}
+.m-title{font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--dark);margin-bottom:5px}
+.m-sub{font-size:13px;color:var(--t2);margin-bottom:22px;line-height:1.6}
+.fg{margin-bottom:12px}
+.fl{font-size:11.5px;font-weight:600;margin-bottom:5px;display:block;color:var(--t2)}
+.fi{width:100%;padding:11px 13px;border-radius:10px;background:var(--bg3);border:1.5px solid var(--border);color:var(--dark);font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.fi:focus{border-color:var(--gold)}
+.m-footer{text-align:center;margin-top:14px;font-size:12px;color:var(--t3)}
+.m-footer a{color:var(--gold);text-decoration:none;cursor:pointer}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.ts{padding:9px;border-radius:9px;border:1.5px solid var(--border);text-align:center;cursor:pointer;font-size:12px;font-weight:500;transition:all .15s;background:var(--bg3);color:var(--dark)}
+.ts:hover:not(.un){border-color:var(--gold);color:var(--gold);background:#FFFBEB}
+.ts.sel{background:#FEF3C7;border-color:var(--gold);color:#92400E;font-weight:700}
+.ts.un{opacity:.35;cursor:not-allowed;text-decoration:line-through}
+.spills{display:flex;gap:7px;flex-wrap:wrap}
+.spill{padding:7px 12px;border-radius:50px;border:1.5px solid var(--border);font-size:12px;cursor:pointer;transition:all .15s;background:var(--bg3);color:var(--t2)}
+.spill:hover,.spill.sel{background:#FEF3C7;border-color:var(--gold);color:#92400E;font-weight:600}
+.toast{position:fixed;bottom:24px;right:24px;z-index:700;background:var(--dark);border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-lg);transform:translateX(110%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);max-width:280px}
+.toast.show{transform:translateX(0)}
+.t-ic{font-size:19px;flex-shrink:0}
+.t-title{font-size:12.5px;font-weight:700;color:#fff}
+.t-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px}
+.spin{width:17px;height:17px;border:2px solid rgba(0,0,0,.1);border-top-color:var(--gold);border-radius:50%;animation:sp .65s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.ldr{display:flex;align-items:center;gap:10px;padding:14px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);margin-bottom:13px;box-shadow:var(--shadow)}
+.erb{background:#FEE2E2;border:1px solid #FECACA;border-radius:12px;padding:16px;display:none}
+.erb.show{display:block}
+
+/* DEMO vs INGELOGD */
+#page-app.is-user .demo-only{display:none}
+#page-app:not(.is-user) .user-only{display:none}
+.demo-banner{background:#DBEAFE;border:1px solid #BFDBFE;color:#1E40AF;border-radius:12px;padding:11px 15px;margin-bottom:16px;font-size:12.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.demo-banner button{margin-left:auto}
+.empty{background:var(--bg2);border:2px dashed var(--border2);border-radius:var(--rl);padding:40px 24px;text-align:center;color:var(--t2);font-size:13.5px;line-height:1.6}
+.empty .e-ic{font-size:40px;margin-bottom:10px}
+.empty .e-t{font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;color:var(--dark);margin-bottom:4px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+select.fi{appearance:auto}
+.chk{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:10px;cursor:pointer}
+.chk input{margin-top:2px;accent-color:var(--gold);flex-shrink:0}
+.chk a{color:var(--gold);cursor:pointer;font-weight:600}
+.m-err{display:none;background:#FEE2E2;border:1px solid #FECACA;color:var(--red);border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:12px}
+.m-err.show{display:block}
+.btn-danger{padding:10px 16px;border-radius:10px;border:1.5px solid #FECACA;background:#FEF2F2;color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.btn-danger:hover{background:#FEE2E2}
+.rec-del{background:none;border:none;color:var(--t3);cursor:pointer;font-size:12px;padding:2px 6px}
+.rec-del:hover{color:var(--red)}
+.nav-user{display:none}
+body.signed-in .nav-guest{display:none}
+body.signed-in .nav-user{display:inline-block}
+.legal h4{font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:var(--dark);margin:14px 0 4px}
+.legal ul{margin:6px 0 0 18px}
+#cookie-banner button{min-width:140px}
+@media(max-width:900px){
+  .hero{padding:40px 20px 32px}
+  h1{font-size:34px}
+  .feat-grid,.how-grid,.garage-grid{grid-template-columns:1fr}
+  .od-grid{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr;gap:24px}
+  .sidebar{display:none}
+  .amain{padding:16px;padding-bottom:78px}
+  .mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:400;background:rgba(248,246,241,0.98);backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  .g2,.g3,.kt,.gg{grid-template-columns:1fr}
+  .sp2{grid-column:span 1}
+  .rdw-g{grid-template-columns:repeat(2,1fr)}
+  .kent-row{flex-direction:column}
+  .cta-form{flex-direction:column}
+  nav .nb-ghost{display:none}
+  .ht-div{display:none}
+  .pt2{flex-wrap:wrap}
+  .pt2 button{width:100%;justify-content:center}
+  .frow{grid-template-columns:1fr}
+  #cookie-banner button{flex:1;min-width:0}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo" onclick="showPage('landing')">
+    <div class="lm">C</div>
+    <span class="lt">Carvital</span>
+    <span class="beta">BÈTA</span>
+  </div>
+  <div class="nav-r">
+    <button class="nb nb-ghost nav-guest" onclick="openM('login')">Inloggen</button>
+    <button class="nb nb-gold nav-guest" onclick="openM('register')">Gratis starten →</button>
+    <button class="nb nb-gold nav-user" onclick="showApp()">Mijn Carvital →</button>
+  </div>
+</nav>
+
+<!-- LANDING -->
+<div id="page-landing" class="page active">
+
+  <div class="hero">
+    <div class="hero-badge"><div class="badge-dot"></div>Nieuw gelanceerd in Nederland — word een van de eersten</div>
+    <h1>Altijd weten hoe<br>je <span class="g">auto</span> ervoor staat</h1>
+    <p class="hero-sub">Voer je kenteken in en zie direct de conditie van je auto. Upload facturen voor een volledig digitaal onderhoudsboekje. Vind de beste garage bij jou in de buurt. Gratis — altijd.</p>
+
+    <div class="kent-box">
+      <div class="kent-label">🔍 Voer je kenteken in en begin direct</div>
+      <div class="kent-row">
+        <input type="text" class="kent-input" id="lkw-f" placeholder="bijv. AB-123-C" maxlength="8" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+        <button class="kent-btn" onclick="lkwL()" id="lkw-btn">🚗 Zoek mijn auto op</button>
+      </div>
+      <div class="kent-loading" id="lkw-load"><div class="spin"></div><span>Autogegevens ophalen via RDW...</span></div>
+      <div class="kent-result" id="lkw-res">
+        <div class="kr-name" id="lkw-name">-</div>
+        <div class="kr-meta" id="lkw-meta">-</div>
+        <div class="kr-score">
+          <div class="kr-score-num" id="lkw-score-num">89</div>
+          <div>
+            <div class="kr-score-label" id="lkw-score-label">✅ Uitstekende conditie</div>
+            <div class="kr-score-sub">Indicatieve AutoHealth Score · op basis van bouwjaar en RDW-gegevens</div>
+          </div>
+        </div>
+        <div class="kr-actions">
+          <button class="btn-primary" style="font-size:14px;padding:11px 20px;border-radius:10px" onclick="openM('register')">Account aanmaken & beginnen →</button>
+          <button class="btn-secondary" style="font-size:14px;padding:11px 18px;border-radius:10px" onclick="showApp()">Bekijk de app demo</button>
+        </div>
+      </div>
+      <div class="kent-error" id="lkw-err">❌ Kenteken niet gevonden. Controleer het kenteken en probeer het opnieuw.</div>
+    </div>
+
+    <div class="hero-trust">
+      <div class="ht-item">✅ Gratis voor autobezitters</div>
+      <div class="ht-div"></div>
+      <div class="ht-item">🔒 Gegevens opgeslagen in de EU</div>
+      <div class="ht-div"></div>
+      <div class="ht-item">🇳🇱 Gemaakt in Nederland</div>
+      <div class="ht-div"></div>
+      <div class="ht-item">⚡ Start in 30 seconden</div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="section" style="padding-top:0">
+    <div class="sec-title">Alles voor je auto op één plek</div>
+    <p class="sec-sub">Simpel, snel en gratis — voor elke Nederlandse autobezitter</p>
+    <div class="feat-grid">
+      <div class="feat-card" onclick="showApp()">
+        <div class="feat-icon" style="background:#D1FAE5">🏥</div>
+        <div class="feat-title">AutoHealth Score</div>
+        <div class="feat-desc">Zie direct hoe je auto ervoor staat op een schaal van 0–100. Gebaseerd op APK, kilometerstand, distributieriem, remmen en vloeistoffen.</div>
+      </div>
+      <div class="feat-card" onclick="showApp()">
+        <div class="feat-icon" style="background:#FEF3C7">📄</div>
+        <div class="feat-title">Factuur uploaden</div>
+        <div class="feat-desc">Foto van je factuur uploaden is genoeg. Onze AI leest alles automatisch uit en werkt je Health Score en onderhoudsboekje direct bij.</div>
+      </div>
+      <div class="feat-card" onclick="showApp()">
+        <div class="feat-icon" style="background:#DBEAFE">📖</div>
+        <div class="feat-title">Digitaal Onderhoudsboekje</div>
+        <div class="feat-desc">Alle onderhoudsbeurten netjes bijgehouden. Bij verkoop overdraagbaar via QR-code — maakt je auto aantoonbaar meer waard.</div>
+      </div>
+      <div class="feat-card" onclick="showApp()">
+        <div class="feat-icon" style="background:#EDE9FE">🔔</div>
+        <div class="feat-title">Slimme Reminders</div>
+        <div class="feat-desc">Nooit meer je APK vergeten of onderhoud missen. Persoonlijke herinneringen op het juiste moment, gebaseerd op jouw auto en km-stand.</div>
+      </div>
+      <div class="feat-card" onclick="showApp()">
+        <div class="feat-icon" style="background:#FFE4E6">🗺️</div>
+        <div class="feat-title">Garage bij jou in de buurt</div>
+        <div class="feat-desc">Score daalt? Binnen 30 seconden een afspraak bij de beste garage bij jou in de buurt. AI beveelt de juiste garage aan voor jouw auto.</div>
+      </div>
+      <div class="feat-card" onclick="showApp()">
+        <div class="feat-icon" style="background:#FEF3C7">🔮</div>
+        <div class="feat-title">Voorspellende AI</div>
+        <div class="feat-desc">Op basis van facturen van vergelijkbare auto's voorspellen wij wanneer onderdelen bij jouw model aandacht nodig hebben — voordat ze kapotgaan.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how-section">
+    <div class="how-inner">
+      <div class="how-title">Hoe werkt het?</div>
+      <p class="how-sub">In 4 simpele stappen alles geregeld</p>
+      <div class="how-grid">
+        <div class="how-card"><div class="how-num">1</div><div class="how-icon">🔑</div><div class="how-card-title">Kenteken invoeren</div><div class="how-card-desc">Wij halen automatisch al je autogegevens op via de officiële RDW database. Geen gedoe.</div></div>
+        <div class="how-card"><div class="how-num">2</div><div class="how-icon">📄</div><div class="how-card-title">Facturen uploaden</div><div class="how-card-desc">Upload je onderhoudfacturen. AI leest alles uit en werkt je Health Score direct bij.</div></div>
+        <div class="how-card"><div class="how-num">3</div><div class="how-icon">🔔</div><div class="how-card-title">Reminders ontvangen</div><div class="how-card-desc">Persoonlijke meldingen als onderhoud nodig is. Op het juiste moment, voor jouw auto.</div></div>
+        <div class="how-card"><div class="how-num">4</div><div class="how-icon">🔧</div><div class="how-card-title">Garage boeken</div><div class="how-card-desc">Met één tik de beste garage in de buurt boeken. Geen bellen, geen wachten.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERDRACHT -->
+  <div class="od-section">
+    <div class="od-grid">
+      <div>
+        <div class="od-title">Je auto verkopen?<br><span>Geef de historie mee.</span></div>
+        <p class="od-desc">Met Carvital heeft elke koper direct inzicht in de volledige onderhoudshistorie. Dat wekt vertrouwen bij de koper en helpt je auto sneller te verkopen.</p>
+        <div class="od-points">
+          <div class="od-point"><div class="od-check">✓</div><span>Koper scant QR-code en ziet alle beurten direct op zijn telefoon</span></div>
+          <div class="od-point"><div class="od-check">✓</div><span>Een complete, controleerbare onderhoudshistorie geeft kopers vertrouwen</span></div>
+          <div class="od-point"><div class="od-check">✓</div><span>Koper activeert Carvital automatisch — geen extra moeite</span></div>
+          <div class="od-point"><div class="od-check">✓</div><span>Facturen worden bij elke beurt bewaard — geen twijfel over de onderhoudshistorie</span></div>
+        </div>
+      </div>
+      <div class="od-card">
+        <div class="od-car-top">
+          <div class="od-car-ic">🚗</div>
+          <div><div class="od-car-name">Volkswagen Golf</div><div class="od-car-detail">AB-123-C · 2018 · 87.432 km</div></div>
+        </div>
+        <div class="od-score-box">
+          <div class="od-score-num">89</div>
+          <div><div class="od-score-status">✅ Uitstekende conditie</div><div style="font-size:12px;color:var(--t2);margin-top:3px">AutoHealth Score · bijgewerkt vandaag</div></div>
+        </div>
+        <div class="od-history">
+          <div class="od-hist"><div class="od-hist-dot"></div><span class="od-hist-name">Grote onderhoudsbeurt</span><span class="od-hist-price">€ 389</span></div>
+          <div class="od-hist"><div class="od-hist-dot"></div><span class="od-hist-name">Distributieriem + waterpomp</span><span class="od-hist-price">€ 520</span></div>
+          <div class="od-hist"><div class="od-hist-dot"></div><span class="od-hist-name">APK keuring — geslaagd</span><span class="od-hist-price">€ 45</span></div>
+        </div>
+        <div class="od-qr-row">
+          <div class="od-qr">
+            <svg viewBox="0 0 60 60" width="48" height="48"><rect width="60" height="60" fill="white"/><rect x="5" y="5" width="20" height="20" fill="#1C1C1C"/><rect x="7" y="7" width="16" height="16" fill="white"/><rect x="9" y="9" width="12" height="12" fill="#1C1C1C"/><rect x="35" y="5" width="20" height="20" fill="#1C1C1C"/><rect x="37" y="7" width="16" height="16" fill="white"/><rect x="39" y="9" width="12" height="12" fill="#1C1C1C"/><rect x="5" y="35" width="20" height="20" fill="#1C1C1C"/><rect x="7" y="37" width="16" height="16" fill="white"/><rect x="9" y="39" width="12" height="12" fill="#1C1C1C"/><rect x="35" y="35" width="4" height="4" fill="#1C1C1C"/><rect x="41" y="35" width="4" height="4" fill="#1C1C1C"/><rect x="47" y="35" width="8" height="4" fill="#1C1C1C"/><rect x="35" y="41" width="8" height="4" fill="#1C1C1C"/><rect x="45" y="41" width="4" height="4" fill="#1C1C1C"/><rect x="35" y="47" width="4" height="8" fill="#1C1C1C"/><rect x="41" y="47" width="14" height="4" fill="#1C1C1C"/><rect x="51" y="47" width="4" height="8" fill="#1C1C1C"/></svg>
+          </div>
+          <div class="od-qr-info"><strong>Scan voor volledige historie</strong>Koper ziet direct alle beurten en activeert Carvital automatisch</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GARAGES -->
+  <div class="garage-section">
+    <div class="garage-inner">
+      <div class="sec-title">Garages bij jou in de buurt</div>
+      <p class="sec-sub">Carvital beveelt de beste garage aan op basis van jouw auto en locatie <span class="badge bb" style="margin-left:4px">Voorbeeldweergave</span></p>
+      <div class="garage-grid">
+        <div class="garage-card featured">
+          <div class="garage-top">
+            <div><div class="garage-name">Garage Vermeulen <span style="font-size:10px;color:#92400E;background:#FEF3C7;padding:2px 7px;border-radius:50px;margin-left:4px;font-weight:700">Aanbevolen</span></div><div class="garage-dist">📍 Utrecht Centrum</div></div>
+            <div class="garage-rating">⭐ 4.9</div>
+          </div>
+          <div class="garage-tags"><span class="garage-tag">VW Specialist</span><span class="garage-tag">APK erkend</span><span class="garage-tag">Remmen</span></div>
+          <div class="garage-info">Gespecialiseerd in Volkswagen, Audi en Seat. Bekend om eerlijke prijzen en snelle service. Ideaal voor jouw Golf.</div>
+          <button class="garage-btn" onclick="openM('register')">Afspraak inplannen →</button>
+        </div>
+        <div class="garage-card">
+          <div class="garage-top">
+            <div><div class="garage-name">AutoService Utrecht</div><div class="garage-dist">📍 Overvecht, Utrecht</div></div>
+            <div class="garage-rating">⭐ 4.7</div>
+          </div>
+          <div class="garage-tags"><span class="garage-tag">Alle merken</span><span class="garage-tag">APK erkend</span><span class="garage-tag">Snelservice</span></div>
+          <div class="garage-info">Erkend garagebedrijf voor alle merken. Snel geholpen zonder verrassingen. APK-keuring mogelijk op korte termijn.</div>
+          <button class="garage-btn" onclick="openM('register')">Afspraak inplannen →</button>
+        </div>
+        <div class="garage-card">
+          <div class="garage-top">
+            <div><div class="garage-name">Bandenservice Leidsche Rijn</div><div class="garage-dist">📍 Leidsche Rijn, Utrecht</div></div>
+            <div class="garage-rating">⭐ 4.5</div>
+          </div>
+          <div class="garage-tags"><span class="garage-tag">Banden specialist</span><span class="garage-tag">APK erkend</span><span class="garage-tag">Remmen</span></div>
+          <div class="garage-info">Sterke keuze voor banden, remmen en APK-keuringen. Vaak dezelfde week nog terecht.</div>
+          <button class="garage-btn" onclick="openM('register')">Afspraak inplannen →</button>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:20px;font-size:13px;color:var(--t3)">🔍 Bovenstaande garages zijn voorbeelden. Garage-aanbevelingen en online boeken volgen binnenkort.</div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <div class="cta-inner">
+      <div class="cta-title">Gratis beginnen duurt 30 seconden</div>
+      <p class="cta-sub">Geen creditcard nodig. Maak een account aan en zie direct hoe je auto ervoor staat.</p>
+      <div class="cta-form">
+        <input type="email" class="cta-input" placeholder="jouw@email.nl" id="cta-email">
+        <button class="btn-primary" onclick="ctaStart()" style="border-radius:var(--r);white-space:nowrap">Gratis starten →</button>
+      </div>
+      <div class="cta-note">✅ Gratis &nbsp;·&nbsp; Geen creditcard &nbsp;·&nbsp; <strong>Altijd opzegbaar</strong></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div>
+          <div class="logo"><div class="lm">C</div><span class="lt" style="color:#fff">Carvital</span><span class="beta">BÈTA</span></div>
+          <div class="footer-desc">De slimste manier om voor je auto te zorgen. Gratis voor autobezitters — altijd.</div>
+        </div>
+        <div><div class="footer-col-title">App</div><a class="footer-link" onclick="showApp()">Health Score</a><a class="footer-link" onclick="showApp()">Onderhoudsboekje</a><a class="footer-link" onclick="showApp()">Garage Finder</a><a class="footer-link" onclick="showApp()">Reminders</a></div>
+        <div><div class="footer-col-title">Bedrijf</div><a class="footer-link" onclick="openInfo('about')">Over ons</a><a class="footer-link" onclick="openInfo('garages')">Voor Garages</a><a class="footer-link" onclick="openInfo('blog')">Blog</a><a class="footer-link" onclick="openInfo('contact')">Contact</a></div>
+        <div><div class="footer-col-title">Legal</div><a class="footer-link" onclick="openInfo('privacy')">Privacy</a><a class="footer-link" onclick="openInfo('terms')">Voorwaarden</a><a class="footer-link" onclick="openInfo('gdpr')">AVG / GDPR</a><a class="footer-link" onclick="openInfo('cookies')">Cookies</a><a class="footer-link" onclick="openCookieSettings()">Cookie-instellingen</a></div>
+      </div>
+      <div class="footer-bottom" style="flex-wrap:wrap;gap:8px"><span>© 2026 Carvital · <span class="co-info"></span></span><span>🇳🇱 Nederland · Data in de EU · BÈTA versie</span></div>
+    </div>
+  </footer>
+</div>
+
+<!-- APP -->
+<div id="page-app" class="page">
+  <div class="sidebar">
+    <div class="sb-sec"><div class="sbl">Menu</div>
+      <div class="ni active" onclick="sv('dashboard',this)"><span class="ic">🏠</span> Dashboard</div>
+      <div class="ni" onclick="sv('kenteken',this)"><span class="ic">🔍</span> Kenteken opzoeken</div>
+      <div class="ni" onclick="sv('onderhoud',this)"><span class="ic">📖</span> Onderhoudsboekje</div>
+      <div class="ni" onclick="sv('upload',this)"><span class="ic">📄</span> Factuur uploaden</div>
+      <div class="ni" onclick="sv('reminders',this)"><span class="ic">🔔</span> Reminders <span class="bc" id="rem-count">3</span></div>
+      <div class="ni" onclick="sv('garages',this)"><span class="ic">🗺️</span> Garages</div>
+      <div class="ni" onclick="sv('kosten',this)"><span class="ic">💰</span> Kostenoverzicht</div>
+      <div class="ni" onclick="sv('overdracht',this)"><span class="ic">🤝</span> Overdracht</div>
+      <div class="ni" onclick="sv('profiel',this)"><span class="ic">👤</span> Profiel</div>
+    </div>
+    <div class="sb-sec"><div class="sbl">Mijn Auto's</div>
+      <div id="sb-cars" class="user-only"></div>
+      <div class="sb-car demo-only"><div class="sb-car-n">Volkswagen Golf</div><div class="sb-car-s">AB-123-C · 2018 · 87.432 km</div><div class="sb-car-score"><span style="background:#D1FAE5;color:var(--green);padding:2px 8px;border-radius:50px;font-size:10px;font-weight:700">89/100</span><span class="badge bg">Uitstekend</span></div></div>
+      <div class="ni" onclick="sv('kenteken',document.querySelectorAll('.ni')[1])" style="color:var(--gold);font-size:12.5px"><span class="ic">＋</span> Auto toevoegen</div>
+    </div>
+    <div class="sb-bot"><div class="ni" onclick="showPage('landing')"><span class="ic">←</span> Naar website</div></div>
+  </div>
+  <div class="mobile-nav" id="mobile-nav">
+    <button class="mnb active" onclick="mnv('dashboard',this)"><span class="ic">🏠</span>Dashboard</button>
+    <button class="mnb" onclick="mnv('kenteken',this)"><span class="ic">🔍</span>Kenteken</button>
+    <button class="mnb" onclick="mnv('onderhoud',this)"><span class="ic">📖</span>Boekje</button>
+    <button class="mnb" onclick="mnv('garages',this)"><span class="ic">🗺️</span>Garages</button>
+    <button class="mnb" onclick="openM('meer')"><span class="ic">☰</span>Meer</button>
+  </div>
+  <div class="amain">
+    <div class="demo-banner demo-only">👀 <span>Je bekijkt een <strong>demo met voorbeelddata</strong>. Maak een gratis account aan om je eigen auto bij te houden.</span><button class="btn-sm btn-sm-gold" onclick="openM('register')">Gratis account</button></div>
+
+    <div id="view-dashboard" class="view active">
+      <div class="demo-only">
+      <div class="ahd"><div><div style="font-size:13px;color:var(--t3);margin-bottom:3px">Goedemorgen 👋</div><div class="at" id="dash-title">Mijn Dashboard</div></div><div class="cchip"><span>🚗</span><div><div class="cc-n">Volkswagen Golf</div><div class="cc-s">AB-123-C · 2018</div></div><span style="color:var(--t3);font-size:11px">▾</span></div></div>
+      <div class="g2" style="margin-bottom:14px">
+        <div class="card sp2" style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+          <div><div class="cl">🏥 AutoHealth Score</div><div class="score-big">89<sub>/100</sub></div><span class="sch2" style="background:#D1FAE5;color:var(--green)">✅ Uitstekende conditie</span></div>
+          <div style="flex:1;min-width:195px"><div class="sbars">
+            <div class="sbar"><span class="sb-lbl">Motor & Aandrijving</span><div class="sb-tr"><div class="sb-fl" style="width:95%;background:var(--green)"></div></div><span class="sb-pct">95%</span></div>
+            <div class="sbar"><span class="sb-lbl">Remsysteem</span><div class="sb-tr"><div class="sb-fl" style="width:72%;background:var(--orange)"></div></div><span class="sb-pct">72%</span></div>
+            <div class="sbar"><span class="sb-lbl">Banden & Ophanging</span><div class="sb-tr"><div class="sb-fl" style="width:88%;background:var(--green)"></div></div><span class="sb-pct">88%</span></div>
+            <div class="sbar"><span class="sb-lbl">Vloeistoffen</span><div class="sb-tr"><div class="sb-fl" style="width:91%;background:var(--green)"></div></div><span class="sb-pct">91%</span></div>
+            <div class="sbar"><span class="sb-lbl">Elektrisch systeem</span><div class="sb-tr"><div class="sb-fl" style="width:96%;background:var(--green)"></div></div><span class="sb-pct">96%</span></div>
+          </div></div>
+        </div>
+      </div>
+      <div class="g3" style="margin-bottom:14px">
+        <div class="card"><div class="cl">📋 Volgende APK</div><div class="apk-big">21</div><div style="font-size:12px;color:var(--t3);margin-top:2px">dagen · 18 maart 2027</div><div class="apk-tr"><div style="width:7%;height:100%;background:var(--gold);border-radius:3px"></div></div><button class="bk" style="margin-top:13px" onclick="sv('garages',document.querySelectorAll('.ni')[5])">APK inplannen →</button></div>
+        <div class="card"><div class="cl">💰 Verwachte kosten</div><div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--green)">€ 320 – 520</div><div style="font-size:11px;color:var(--t3);margin-top:3px">Aankomende 6 maanden</div><div class="mbars"><div class="mbar" style="height:30%;background:rgba(22,163,74,.2)"></div><div class="mbar" style="height:50%;background:rgba(22,163,74,.2)"></div><div class="mbar" style="height:40%;background:rgba(22,163,74,.2)"></div><div class="mbar" style="height:80%;background:rgba(232,148,10,.3)"></div><div class="mbar" style="height:60%;background:rgba(22,163,74,.2)"></div><div class="mbar" style="height:35%;background:rgba(22,163,74,.2)"></div></div></div>
+        <div class="card"><div class="cl">📊 Mijn Auto</div><div class="srows"><div class="srow"><span class="sr-lb">Kilometerstand</span><span class="sr-vl">87.432 km</span></div><div class="srow"><span class="sr-lb">Laatste beurt</span><span class="sr-vl">3 mnd geleden</span></div><div class="srow"><span class="sr-lb">Facturen</span><span class="sr-vl">12 stuks</span></div><div class="srow" style="border:none"><span class="sr-lb">Totaal bespaard</span><span class="sr-vl" style="color:var(--green)">€ 840</span></div></div></div>
+      </div>
+      <div class="card"><div class="cl">⚠️ Aandachtspunten <span class="badge bo" style="margin-left:4px">3 actief</span></div>
+        <div class="al2" onclick="sv('garages',document.querySelectorAll('.ni')[5])"><div class="al-ic2">🔴</div><div class="al-b"><div class="al-t2">Remblokken achter — vervangen aanbevolen over ±4.200 km</div><div class="al-s2">Op basis van kilometerstand en vergelijkbare modellen</div></div><div class="al-a2">Garage →</div></div>
+        <div class="al2"><div class="al-ic2">🟡</div><div class="al-b"><div class="al-t2">Bandenspanning controleren</div><div class="al-s2">Laatste controle 3 maanden geleden · aanbevolen: 2.3 bar</div></div><div class="al-a2">Info →</div></div>
+        <div class="al2" onclick="sv('garages',document.querySelectorAll('.ni')[5])"><div class="al-ic2">🟠</div><div class="al-b"><div class="al-t2">Grote beurt over ±12.000 km</div><div class="al-s2">Olie, filters, bougies — plan dit tijdig in</div></div><div class="al-a2">Inplannen →</div></div>
+      </div>
+      </div>
+      <div class="user-only" id="u-dashboard"></div>
+    </div>
+
+    <div id="view-kenteken" class="view">
+      <div class="ahd"><div><div class="at">Kenteken opzoeken</div><div class="as2">Live koppeling met de officiële RDW database</div></div></div>
+      <div class="kw">
+        <div style="font-size:13px;font-weight:600;color:var(--t2);margin-bottom:12px">Voer een Nederlands kenteken in</div>
+        <input type="text" class="kf" id="kfield" placeholder="bijv. AB-123-C" maxlength="8" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+        <button class="btn-primary" id="rdw-btn" onclick="rdwL()" style="border-radius:10px;font-size:13.5px;padding:11px 22px">🔍 Zoek op in RDW</button>
+        <div style="margin-top:10px;font-size:12px;color:var(--t3)">Met of zonder koppeltekens · gegevens komen rechtstreeks van RDW open data</div>
+      </div>
+      <div id="rdw-loading" class="ldr" style="display:none"><div class="spin"></div><div><div style="font-size:13px;font-weight:600;color:var(--dark)">RDW raadplegen...</div><div style="font-size:11px;color:var(--t3)">Even geduld</div></div></div>
+      <div id="rdw-result" class="rdw-rc">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+          <div><div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:6px;padding:3px 10px;font-size:13px;font-weight:700;color:#92400E;margin-bottom:8px;display:inline-block" id="r-plate">-</div><div class="rdw-n" id="r-name">-</div><div class="rdw-d" id="r-detail">-</div></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap" id="r-badges"></div>
+        </div>
+        <div class="rdw-g">
+          <div class="rdw-f"><label>Merk</label><span id="r-merk">-</span></div>
+          <div class="rdw-f"><label>Model</label><span id="r-model">-</span></div>
+          <div class="rdw-f"><label>Bouwjaar</label><span id="r-jaar">-</span></div>
+          <div class="rdw-f"><label>Brandstof</label><span id="r-brand">-</span></div>
+          <div class="rdw-f"><label>Kleur</label><span id="r-kleur">-</span></div>
+          <div class="rdw-f"><label>Carrosserie</label><span id="r-carro">-</span></div>
+          <div class="rdw-f"><label>Vermogen</label><span id="r-verm">-</span></div>
+          <div class="rdw-f"><label>APK vervaldatum</label><span id="r-apk">-</span></div>
+          <div class="rdw-f"><label>Cilinders</label><span id="r-cyl">-</span></div>
+          <div class="rdw-f"><label>Massa</label><span id="r-massa">-</span></div>
+          <div class="rdw-f"><label>CO₂ uitstoot</label><span id="r-co2">-</span></div>
+          <div class="rdw-f"><label>Zitplaatsen</label><span id="r-zit">-</span></div>
+        </div>
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:flex;gap:9px;flex-wrap:wrap">
+          <button class="btn-primary" style="border-radius:10px;font-size:13px;padding:10px 19px" onclick="addCar()">✅ Toevoegen aan Carvital</button>
+          <button class="btn-secondary" style="border-radius:10px;font-size:13px;padding:10px 16px" onclick="sv('garages',document.querySelectorAll('.ni')[5])">🔧 Garage zoeken</button>
+        </div>
+      </div>
+      <div id="rdw-error" class="erb"><div style="font-size:13.5px;font-weight:700;color:var(--red);margin-bottom:3px">❌ Kenteken niet gevonden</div><div style="font-size:12px;color:var(--t2)">Controleer het kenteken en probeer het opnieuw.</div></div>
+    </div>
+
+    <div id="view-onderhoud" class="view">
+      <div class="demo-only">
+      <div class="ahd"><div><div class="at">Digitaal Onderhoudsboekje</div><div class="as2">VW Golf · AB-123-C · 12 AI-geverifieerde records</div></div><button class="btn-primary" style="border-radius:10px;font-size:13px;padding:9px 17px" onclick="sv('upload',document.querySelectorAll('.ni')[3])">+ Factuur toevoegen</button></div>
+      <div class="card"><div class="tl">
+        <div class="tli"><div class="tls"><div class="tld" style="background:var(--green)"></div><div class="tlc"></div></div><div class="tlb"><div class="tlr"><div class="tlt">Grote onderhoudsbeurt</div><div class="tlco">€ 389</div></div><div class="tlm">15 nov 2024 · 85.000 km <span class="badge bg" style="margin-left:6px">✓ AI</span></div><div class="tlg">🔧 Garage Vermeulen, Utrecht</div></div></div>
+        <div class="tli"><div class="tls"><div class="tld" style="background:var(--green)"></div><div class="tlc"></div></div><div class="tlb"><div class="tlr"><div class="tlt">Winterbanden gemonteerd</div><div class="tlco">€ 80</div></div><div class="tlm">2 okt 2024 · 83.200 km <span class="badge bg" style="margin-left:6px">✓ AI</span></div><div class="tlg">🔧 Bandenservice Amsterdam-Noord</div></div></div>
+        <div class="tli"><div class="tls"><div class="tld" style="background:var(--gold)"></div><div class="tlc"></div></div><div class="tlb"><div class="tlr"><div class="tlt">APK keuring — geslaagd</div><div class="tlco">€ 45</div></div><div class="tlm">18 mrt 2024 · 78.500 km <span class="badge bgo" style="margin-left:6px">APK</span></div><div class="tlg">🔧 RDW Keuringsstation Utrecht</div></div></div>
+        <div class="tli"><div class="tls"><div class="tld" style="background:var(--green)"></div><div class="tlc"></div></div><div class="tlb"><div class="tlr"><div class="tlt">Remblokken voor vervangen</div><div class="tlco">€ 210</div></div><div class="tlm">12 jan 2024 · 75.000 km <span class="badge bg" style="margin-left:6px">✓ AI</span></div><div class="tlg">🔧 Garage De Vries, Amsterdam</div></div></div>
+        <div class="tli"><div class="tls"><div class="tld" style="background:var(--green)"></div><div class="tlc"></div></div><div class="tlb"><div class="tlr"><div class="tlt">Distributieriem + waterpomp</div><div class="tlco">€ 520</div></div><div class="tlm">8 jun 2022 · 60.000 km <span class="badge bg" style="margin-left:6px">✓ AI</span></div><div class="tlg">🔧 Merkdealer Zeist</div></div></div>
+        <div class="tli"><div class="tls"><div class="tld" style="background:var(--green)"></div></div><div class="tlb"><div class="tlr"><div class="tlt">Olie & filter verversen</div><div class="tlco">€ 89</div></div><div class="tlm">3 jul 2023 · 70.000 km <span class="badge bg" style="margin-left:6px">✓ AI</span></div><div class="tlg">🔧 Garage Vermeulen, Utrecht</div></div></div>
+      </div></div>
+      </div>
+      <div class="user-only" id="u-onderhoud"></div>
+    </div>
+
+    <div id="view-upload" class="view">
+      <div class="demo-only">
+      <div class="ahd"><div><div class="at">Factuur uploaden</div><div class="as2">AI leest automatisch alle gegevens uit en werkt je Health Score bij</div></div></div>
+      <div class="uz" id="uzone" onclick="doUpload()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="event.preventDefault();this.classList.remove('drag');doUpload()">
+        <div style="font-size:48px;margin-bottom:14px">📸</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:19px;font-weight:800;margin-bottom:7px;color:var(--dark)">Foto of PDF van factuur</div>
+        <div style="font-size:13.5px;color:var(--t2)">Klik om te uploaden of sleep hierheen · JPG, PNG, PDF · max 20MB</div>
+      </div>
+      <div id="upload-loader" class="ldr" style="display:none"><div class="spin"></div><div><div style="font-size:13px;font-weight:600;color:var(--dark)">AI analyseert factuur...</div><div style="font-size:11px;color:var(--t3)">Even geduld</div></div></div>
+      <div id="ai-result" class="air">
+        <div class="air-t">✨ AI heeft de volgende gegevens uitgelezen</div>
+        <div class="ai-rw"><div class="ai-lb">Datum beurt</div><div class="ai-vl">15 november 2024</div></div>
+        <div class="ai-rw"><div class="ai-lb">Kilometerstand</div><div class="ai-vl">85.000 km</div></div>
+        <div class="ai-rw"><div class="ai-lb">Garage</div><div class="ai-vl">Garage Vermeulen, Utrecht</div></div>
+        <div class="ai-rw"><div class="ai-lb">Werkzaamheden</div><div class="ai-vl">Grote onderhoudsbeurt, olie, filters, bougies</div></div>
+        <div class="ai-rw"><div class="ai-lb">Totaalbedrag</div><div class="ai-vl" style="color:var(--gold);font-family:'Nunito',sans-serif;font-size:20px;font-weight:900">€ 389</div></div>
+        <div class="ai-rw"><div class="ai-lb">Health Score effect</div><div class="ai-vl"><span class="badge bg">+4 punten → 89/100</span></div></div>
+        <div style="display:flex;gap:9px;margin-top:16px">
+          <button class="btn-primary" style="border-radius:10px;font-size:13px;padding:10px 19px" onclick="saveF()">✅ Opslaan in mijn boekje</button>
+          <button class="btn-secondary" style="border-radius:10px;font-size:13px;padding:10px 16px" onclick="document.getElementById('ai-result').classList.remove('show')">Annuleren</button>
+        </div>
+      </div>
+      <div class="g2" style="margin-top:14px">
+        <div class="card"><div class="cl">✨ Wat AI uitleest</div><div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:var(--t2)"><div>✓ Datum van de beurt</div><div>✓ Kilometerstand</div><div>✓ Welke onderdelen vervangen</div><div>✓ Naam van de garage</div><div>✓ Totaalbedrag</div></div></div>
+        <div class="card"><div class="cl">🔄 Wat er dan gebeurt</div><div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:var(--t2)"><div>→ Onderhoudsboekje bijgewerkt</div><div>→ Health Score herberekend</div><div>→ Volgende beurt voorspeld</div><div>→ AI wordt slimmer</div><div>→ Overdracht-QR bijgewerkt</div></div></div>
+      </div>
+      </div>
+      <div class="user-only" id="u-upload"></div>
+    </div>
+
+    <div id="view-reminders" class="view">
+      <div class="demo-only">
+      <div class="ahd"><div><div class="at">Slimme Reminders</div><div class="as2">Persoonlijk voor jouw Volkswagen Golf</div></div></div>
+      <div class="rem-sec"><div class="rst"><span style="color:var(--red)">●</span> Urgent — nu actie vereist</div>
+        <div class="rc"><div class="rdt" style="background:var(--red)"></div><div class="rb"><div class="rb-t">APK verloopt over 21 dagen</div><div class="rb-s">Verloopt op 18 maart 2027 · Boek nu voor beste beschikbaarheid</div></div><button class="bk" style="padding:7px 13px;width:auto;border-radius:50px;font-size:11.5px" onclick="sv('garages',document.querySelectorAll('.ni')[5])">Nu boeken</button></div>
+      </div>
+      <div class="rem-sec"><div class="rst"><span style="color:var(--orange)">●</span> Binnenkort — plan in</div>
+        <div class="rc"><div class="rdt" style="background:var(--orange)"></div><div class="rb"><div class="rb-t">Remblokken achter — over ±4.200 km</div><div class="rb-s">Op basis van kilometerstand en vergelijkbare modellen</div></div><span style="font-size:11px;color:var(--t3);white-space:nowrap">~3 mnd</span></div>
+        <div class="rc"><div class="rdt" style="background:var(--orange)"></div><div class="rb"><div class="rb-t">Grote beurt — over ±12.000 km</div><div class="rb-s">Olie, filters, bougies — plan tijdig in</div></div><span style="font-size:11px;color:var(--t3);white-space:nowrap">~8 mnd</span></div>
+        <div class="rc"><div class="rdt" style="background:var(--orange)"></div><div class="rb"><div class="rb-t">Zomerbanden wisselen</div><div class="rb-s">Als temperatuur stijgt boven 7°C</div></div><span style="font-size:11px;color:var(--t3);white-space:nowrap">mei 2026</span></div>
+      </div>
+      <div class="rem-sec"><div class="rst"><span style="color:var(--green)">●</span> Op schema — goed bezig!</div>
+        <div class="rc"><div class="rdt" style="background:var(--green)"></div><div class="rb"><div class="rb-t">Motorolie — OK</div><div class="rb-s">Vervangen bij 85.000 km · volgende bij 100.000 km</div></div><span class="badge bg">OK</span></div>
+        <div class="rc"><div class="rdt" style="background:var(--green)"></div><div class="rb"><div class="rb-t">Distributieriem — OK</div><div class="rb-s">Vervangen bij 60.000 km · volgende bij 150.000 km</div></div><span class="badge bg">OK</span></div>
+        <div class="rc"><div class="rdt" style="background:var(--green)"></div><div class="rb"><div class="rb-t">Accu — OK</div><div class="rb-s">Leeftijd 2 jaar · gemiddelde levensduur 4–5 jaar</div></div><span class="badge bg">OK</span></div>
+      </div>
+      </div>
+      <div class="user-only" id="u-reminders"></div>
+    </div>
+
+    <div id="view-garages" class="view">
+      <div class="ahd"><div><div class="at">Garages bij jou in de buurt</div><div class="as2" id="garage-sub">Utrecht (standaard locatie)</div></div><button class="btn-secondary" style="border-radius:10px;font-size:12.5px;padding:9px 16px" onclick="getGeo()">📍 Gebruik mijn locatie</button></div>
+      <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:13px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+        <span style="font-size:20px">🤖</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--dark)">Aanbevolen voor jouw VW Golf</div><div style="font-size:12px;color:var(--t3)">Op basis van: APK nodig · Remblokken achter · 87.432 km</div></div>
+        <span class="badge bgo">Gepersonaliseerd</span>
+      </div>
+      <div class="demo-banner">ℹ️ <span>Garage-aanbevelingen en online boeken zijn nog in ontwikkeling. Onderstaande garages zijn <strong>voorbeelden</strong>.</span></div>
+      <div class="gg">
+        <div class="gc rec"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px"><div><div class="gc-n">Garage Vermeulen <span class="badge bgo" style="font-size:9px;margin-left:4px">⭐ Aanbevolen</span></div><div class="gc-d">📍 Utrecht Centrum</div></div><div class="gc-r">⭐ 4.9</div></div><div class="gtags"><span class="gt">VW Specialist</span><span class="gt">APK</span><span class="gt">Remmen</span></div><div class="gc-p">Gespecialiseerd in VW, Audi en Seat. Ideaal voor jouw Golf.</div><button class="bk" onclick="openBooking('Garage Vermeulen','Utrecht Centrum')">Afspraak inplannen</button></div>
+        <div class="gc"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px"><div><div class="gc-n">AutoService Utrecht</div><div class="gc-d">📍 Overvecht, Utrecht</div></div><div class="gc-r">⭐ 4.7</div></div><div class="gtags"><span class="gt">Alle merken</span><span class="gt">APK</span></div><div class="gc-p">Erkend voor alle merken. Snel geholpen zonder verrassingen.</div><button class="bk" onclick="openBooking('AutoService Utrecht','Overvecht')">Afspraak inplannen</button></div>
+        <div class="gc"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px"><div><div class="gc-n">Bandenservice Leidsche Rijn</div><div class="gc-d">📍 Leidsche Rijn</div></div><div class="gc-r">⭐ 4.5</div></div><div class="gtags"><span class="gt">Banden</span><span class="gt">APK</span></div><div class="gc-p">Sterk voor banden en APK. Vaak dezelfde week nog terecht.</div><button class="bk" onclick="openBooking('Bandenservice Leidsche Rijn','Leidsche Rijn')">Afspraak inplannen</button></div>
+        <div class="gc"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px"><div><div class="gc-n">Merkdealer Zeist</div><div class="gc-d">📍 Zeist</div></div><div class="gc-r">⭐ 4.6</div></div><div class="gtags"><span class="gt">Officieel dealer</span><span class="gt">Garantie</span></div><div class="gc-p">Merkdealer met originele onderdelen en garantie op werk.</div><button class="bk" onclick="openBooking('Merkdealer Zeist','Zeist')">Afspraak inplannen</button></div>
+      </div>
+    </div>
+
+    <div id="view-kosten" class="view">
+      <div class="demo-only">
+      <div class="ahd"><div><div class="at">Kostenoverzicht</div><div class="as2">Alle autokosten inzichtelijk · 2024</div></div></div>
+      <div class="kt">
+        <div class="kc"><div class="kc-ic">🔧</div><div style="font-size:11px;color:var(--t3)">Onderhoud 2024</div><div class="kc-n" style="color:var(--gold)">€ 724</div><div class="kc-lb">4 beurten dit jaar</div></div>
+        <div class="kc"><div class="kc-ic">✅</div><div style="font-size:11px;color:var(--t3)">Bespaard</div><div class="kc-n" style="color:var(--green)">€ 840</div><div class="kc-lb">Door vroeg ingrijpen</div></div>
+        <div class="kc"><div class="kc-ic">📊</div><div style="font-size:11px;color:var(--t3)">Per kilometer</div><div class="kc-n">€ 0,12</div><div class="kc-lb">Onderhoud per km</div></div>
+      </div>
+      <div class="card">
+        <div class="cl">📋 Per categorie</div>
+        <div style="margin-top:8px">
+          <div class="cbr"><span class="cb-lb">Grote beurten</span><div class="cb-tr"><div class="cb-fl" style="width:54%;background:var(--gold)"></div></div><span class="cb-n">€ 389</span></div>
+          <div class="cbr"><span class="cb-lb">Remmen</span><div class="cb-tr"><div class="cb-fl" style="width:29%;background:var(--blue)"></div></div><span class="cb-n">€ 210</span></div>
+          <div class="cbr"><span class="cb-lb">Banden</span><div class="cb-tr"><div class="cb-fl" style="width:11%;background:var(--green)"></div></div><span class="cb-n">€ 80</span></div>
+          <div class="cbr"><span class="cb-lb">APK</span><div class="cb-tr"><div class="cb-fl" style="width:6%;background:var(--orange)"></div></div><span class="cb-n">€ 45</span></div>
+        </div>
+      </div>
+      </div>
+      <div class="user-only" id="u-kosten"></div>
+    </div>
+
+    <div id="view-overdracht" class="view">
+      <div class="demo-only">
+      <div class="ahd"><div><div class="at">Auto Overdragen</div><div class="as2">Geef de volledige historie mee bij verkoop</div></div></div>
+      <div class="th">
+        <div style="font-size:48px;margin-bottom:14px">🚗</div>
+        <div class="th-t">Volkswagen Golf · AB-123-C</div>
+        <div class="th-s">12 AI-geverifieerde beurten · Health Score 89/100 · Volledig overdraagbaar</div>
+        <div class="qrb"><svg viewBox="0 0 120 120" width="116" height="116"><rect width="120" height="120" fill="white"/><rect x="10" y="10" width="40" height="40" fill="#1C1C1C"/><rect x="14" y="14" width="32" height="32" fill="white"/><rect x="18" y="18" width="24" height="24" fill="#1C1C1C"/><rect x="70" y="10" width="40" height="40" fill="#1C1C1C"/><rect x="74" y="14" width="32" height="32" fill="white"/><rect x="78" y="18" width="24" height="24" fill="#1C1C1C"/><rect x="10" y="70" width="40" height="40" fill="#1C1C1C"/><rect x="14" y="74" width="32" height="32" fill="white"/><rect x="18" y="78" width="24" height="24" fill="#1C1C1C"/><rect x="70" y="70" width="8" height="8" fill="#1C1C1C"/><rect x="82" y="70" width="8" height="8" fill="#1C1C1C"/><rect x="94" y="70" width="16" height="8" fill="#1C1C1C"/><rect x="70" y="82" width="16" height="8" fill="#1C1C1C"/><rect x="90" y="82" width="8" height="8" fill="#1C1C1C"/><rect x="70" y="94" width="8" height="16" fill="#1C1C1C"/><rect x="82" y="94" width="28" height="8" fill="#1C1C1C"/><rect x="102" y="94" width="8" height="16" fill="#1C1C1C"/></svg></div>
+        <div style="font-size:13px;color:var(--t2);margin-bottom:18px">Koper scant QR → ziet volledige historie → activeert Carvital automatisch</div>
+        <div class="shr"><input class="shi" type="text" value="carvital.nl/auto/AB-123-C/historie" readonly id="share-url"><button class="btn-primary" style="border-radius:10px;font-size:12.5px;padding:10px 16px;white-space:nowrap" onclick="copyLink()">📋 Kopieer</button></div>
+      </div>
+      <div class="g3">
+        <div class="card" style="text-align:center"><div style="font-size:28px;margin-bottom:6px">📋</div><div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--dark)">12</div><div style="font-size:12px;color:var(--t3);margin-top:3px">Geverifieerde beurten</div></div>
+        <div class="card" style="text-align:center"><div style="font-size:28px;margin-bottom:6px">💰</div><div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--dark)">€ 2.340</div><div style="font-size:12px;color:var(--t3);margin-top:3px">Totaal onderhoud</div></div>
+        <div class="card" style="text-align:center"><div style="font-size:28px;margin-bottom:6px">📈</div><div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--green)">Meer waard</div><div style="font-size:12px;color:var(--t3);margin-top:3px">Door volledige historie</div></div>
+      </div>
+      </div>
+      <div class="user-only" id="u-overdracht"></div>
+    </div>
+
+    <div id="view-profiel" class="view">
+      <div class="demo-only">
+      <div class="ahd"><div><div class="at">Mijn Profiel</div><div class="as2">Account & instellingen</div></div></div>
+      <div class="pt2"><div class="pav2" id="pav">A</div><div style="flex:1"><div class="pn2" id="pname">Alex van den Berg</div><div class="pe2" id="pemail">alex@email.nl</div><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><span class="badge bg">✓ Bevestigd</span><span class="badge bgo">Gratis account</span></div></div><button class="btn-secondary" style="border-radius:10px;font-size:13px;padding:9px 16px;flex-shrink:0" onclick="logout()">Uitloggen</button></div>
+      <div class="g2">
+        <div class="card"><div class="cl">📊 Statistieken</div><div class="srows"><div class="srow"><span class="sr-lb">Auto's</span><span class="sr-vl">1</span></div><div class="srow"><span class="sr-lb">Facturen</span><span class="sr-vl">12</span></div><div class="srow"><span class="sr-lb">Bookings</span><span class="sr-vl">3</span></div><div class="srow" style="border:none"><span class="sr-lb">Bespaard</span><span class="sr-vl" style="color:var(--green)">€ 840</span></div></div></div>
+        <div class="card"><div class="cl">🔔 Notificaties</div>
+          <div style="margin-top:4px">
+            <div class="tgr"><span>APK herinneringen</span><div class="tog on" onclick="togThis(this)"><div class="tog-th"></div></div></div>
+            <div class="tgr"><span>Onderhoudsalerts</span><div class="tog on" onclick="togThis(this)"><div class="tog-th"></div></div></div>
+            <div class="tgr"><span>Garage aanbiedingen</span><div class="tog off" onclick="togThis(this)"><div class="tog-th"></div></div></div>
+            <div class="tgr" style="border:none"><span>Prijswijzigingen</span><div class="tog on" onclick="togThis(this)"><div class="tog-th"></div></div></div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <div class="user-only" id="u-profiel"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- INFO MODAL -->
+<div class="modal-backdrop" id="modal-info">
+  <div class="modal-box" style="text-align:left">
+    <div class="m-title" id="info-title">-</div>
+    <div id="info-body" style="font-size:13.5px;color:var(--t2);line-height:1.75;max-height:52vh;overflow-y:auto;padding-right:4px"></div>
+    <div class="m-footer"><a onclick="closeInfo()">Sluiten</a></div>
+  </div>
+</div>
+
+<!-- MOBILE MEER MENU -->
+<div class="modal-backdrop" id="modal-meer">
+  <div class="modal-box">
+    <div class="m-title">Meer</div>
+    <div style="margin-top:6px">
+      <div class="mm-item" onclick="mnv2('upload')"><span class="ic">📄</span> Factuur uploaden</div>
+      <div class="mm-item" onclick="mnv2('reminders')"><span class="ic">🔔</span> Reminders</div>
+      <div class="mm-item" onclick="mnv2('kosten')"><span class="ic">💰</span> Kostenoverzicht</div>
+      <div class="mm-item" onclick="mnv2('overdracht')"><span class="ic">🤝</span> Overdracht</div>
+      <div class="mm-item" onclick="mnv2('profiel')"><span class="ic">👤</span> Profiel</div>
+      <div class="mm-item" onclick="closeM();showPage('landing')"><span class="ic">←</span> Naar website</div>
+    </div>
+    <div class="m-footer"><a onclick="closeM()">Sluiten</a></div>
+  </div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div class="modal-backdrop" id="modal-booking">
+  <div class="modal-box">
+    <div class="m-title">Afspraak inplannen</div>
+    <div class="m-sub" id="booking-name">Laden...</div>
+    <div class="fg"><div class="fl">Wat wilt u laten doen?</div><div class="spills"><span class="spill" onclick="this.classList.toggle('sel')">APK keuring</span><span class="spill" onclick="this.classList.toggle('sel')">Remblokken</span><span class="spill" onclick="this.classList.toggle('sel')">Olie</span><span class="spill" onclick="this.classList.toggle('sel')">Banden</span><span class="spill" onclick="this.classList.toggle('sel')">Algemene check</span></div></div>
+    <div class="fg"><div class="fl">Datum</div><input type="date" class="fi" id="bdate"></div>
+    <div class="fg"><div class="fl">Tijdslot</div><div class="tgrid"><div class="ts" onclick="selT(this)">08:00</div><div class="ts" onclick="selT(this)">09:00</div><div class="ts un">10:00</div><div class="ts" onclick="selT(this)">11:00</div><div class="ts un">13:00</div><div class="ts" onclick="selT(this)">14:00</div><div class="ts" onclick="selT(this)">15:00</div><div class="ts un">16:00</div><div class="ts" onclick="selT(this)">17:00</div></div></div>
+    <div class="fg"><div class="fl">Opmerkingen</div><input type="text" class="fi" placeholder="Optioneel"></div>
+    <button class="btn-primary" style="width:100%;justify-content:center;border-radius:10px" onclick="confirmBooking()">✅ Afspraak bevestigen</button>
+    <div class="m-footer"><a onclick="closeM()">Annuleren</a></div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div class="modal-backdrop" id="modal-login">
+  <div class="modal-box">
+    <div class="m-title">Welkom terug 👋</div>
+    <div class="m-sub">Log in op je Carvital account</div>
+    <div class="m-err" id="login-err"></div>
+    <form onsubmit="event.preventDefault();doLogin()">
+      <div class="fg"><label class="fl" for="lemail">E-mailadres</label><input type="email" class="fi" id="lemail" placeholder="jouw@email.nl" autocomplete="email" required></div>
+      <div class="fg"><label class="fl" for="lpass">Wachtwoord</label><input type="password" class="fi" id="lpass" placeholder="••••••••" autocomplete="current-password" required></div>
+      <button type="submit" class="btn-primary" id="login-btn" style="width:100%;justify-content:center;border-radius:10px">Inloggen →</button>
+    </form>
+    <div class="m-footer"><a onclick="openM('forgot')">Wachtwoord vergeten?</a></div>
+    <div class="m-footer">Geen account? <a onclick="openM('register')">Gratis aanmelden</a> · <a onclick="closeM()">Sluiten</a></div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div class="modal-backdrop" id="modal-register">
+  <div class="modal-box">
+    <div class="m-title">Gratis beginnen 🚗</div>
+    <div class="m-sub">Voeg je auto toe en zie direct je Health Score. Gratis — altijd.</div>
+    <div class="m-err" id="reg-err"></div>
+    <form onsubmit="event.preventDefault();doRegister()">
+      <div class="fg"><label class="fl" for="rname">Jouw naam</label><input type="text" class="fi" id="rname" placeholder="Voornaam achternaam" autocomplete="name" maxlength="100" required></div>
+      <div class="fg"><label class="fl" for="remail">E-mailadres</label><input type="email" class="fi" id="remail" placeholder="jouw@email.nl" autocomplete="email" required></div>
+      <div class="fg"><label class="fl" for="rpass">Wachtwoord</label><input type="password" class="fi" id="rpass" placeholder="Min. 8 tekens" autocomplete="new-password" minlength="8" required></div>
+      <div class="fg"><label class="fl" for="rkent">Kenteken (optioneel)</label><input type="text" class="fi" id="rkent" placeholder="bijv. AB-123-C" oninput="this.value=this.value.toUpperCase()" maxlength="8"></div>
+      <label class="chk"><input type="checkbox" id="rterms"><span>Ik ben 16 jaar of ouder en ga akkoord met de <a onclick="event.preventDefault();openInfo('terms',true)">voorwaarden</a>. Ik heb het <a onclick="event.preventDefault();openInfo('privacy',true)">privacybeleid</a> gelezen.</span></label>
+      <label class="chk"><input type="checkbox" id="rmarketing"><span>Ja, stuur mij af en toe tips en nieuws over Carvital per e-mail (optioneel, altijd uit te zetten).</span></label>
+      <button type="submit" class="btn-primary" id="reg-btn" style="width:100%;justify-content:center;border-radius:10px">Account aanmaken & beginnen →</button>
+    </form>
+    <div class="m-footer">Al een account? <a onclick="openM('login')">Inloggen</a> · <a onclick="closeM()">Sluiten</a></div>
+  </div>
+</div>
+
+<!-- CHECK EMAIL -->
+<div class="modal-backdrop" id="modal-check-email">
+  <div class="modal-box" style="text-align:center">
+    <div style="font-size:46px;margin-bottom:10px">📬</div>
+    <div class="m-title">Bevestig je e-mailadres</div>
+    <div class="m-sub">We hebben een bevestigingslink gestuurd naar <strong id="check-email-addr"></strong>. Klik op de link om je account te activeren. Geen mail ontvangen? Kijk ook in je spam.</div>
+    <div class="m-footer"><a onclick="closeM()">Sluiten</a></div>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD -->
+<div class="modal-backdrop" id="modal-forgot">
+  <div class="modal-box">
+    <div class="m-title">Wachtwoord vergeten</div>
+    <div class="m-sub">Vul je e-mailadres in. Je ontvangt een link om een nieuw wachtwoord in te stellen.</div>
+    <div class="m-err" id="forgot-err"></div>
+    <form onsubmit="event.preventDefault();doForgot()">
+      <div class="fg"><label class="fl" for="femail">E-mailadres</label><input type="email" class="fi" id="femail" placeholder="jouw@email.nl" autocomplete="email" required></div>
+      <button type="submit" class="btn-primary" id="forgot-btn" style="width:100%;justify-content:center;border-radius:10px">Stuur resetlink →</button>
+    </form>
+    <div class="m-footer"><a onclick="openM('login')">Terug naar inloggen</a></div>
+  </div>
+</div>
+
+<!-- NEW PASSWORD (after reset link, or from profile) -->
+<div class="modal-backdrop" id="modal-newpass">
+  <div class="modal-box">
+    <div class="m-title">Nieuw wachtwoord</div>
+    <div class="m-sub">Kies een nieuw wachtwoord van minimaal 8 tekens.</div>
+    <div class="m-err" id="newpass-err"></div>
+    <form onsubmit="event.preventDefault();doNewPassword()">
+      <div class="fg"><label class="fl" for="npass">Nieuw wachtwoord</label><input type="password" class="fi" id="npass" autocomplete="new-password" minlength="8" required></div>
+      <button type="submit" class="btn-primary" id="newpass-btn" style="width:100%;justify-content:center;border-radius:10px">Wachtwoord opslaan</button>
+    </form>
+    <div class="m-footer"><a onclick="closeM()">Annuleren</a></div>
+  </div>
+</div>
+
+<!-- DELETE ACCOUNT -->
+<div class="modal-backdrop" id="modal-delete">
+  <div class="modal-box">
+    <div class="m-title">Account verwijderen</div>
+    <div class="m-sub">Hiermee verwijderen we je account, auto's, onderhoudsboekje en geüploade facturen definitief. Dit kan niet ongedaan worden gemaakt. Tip: download eerst je gegevens via je profiel.</div>
+    <div class="m-err" id="delete-err"></div>
+    <div class="fg"><label class="fl" for="delete-confirm">Typ <strong>VERWIJDER</strong> om te bevestigen</label><input type="text" class="fi" id="delete-confirm" autocomplete="off"></div>
+    <button class="btn-danger" id="delete-btn" style="width:100%" onclick="doDeleteAccount()">Account definitief verwijderen</button>
+    <div class="m-footer"><a onclick="closeM()">Annuleren</a></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="t-ic" id="ti">✅</div><div><div class="t-title" id="tt">-</div><div class="t-sub" id="ts">-</div></div></div>
+
+<div id="cookie-banner" role="dialog" aria-label="Cookie-instellingen" style="position:fixed;bottom:0;left:0;right:0;z-index:800;background:#fff;border-top:1px solid #E4DFD4;padding:16px 24px;display:none;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:0 -4px 24px rgba(0,0,0,0.08)">
+  <div style="flex:1;min-width:200px">
+    <div style="font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:#1C1C1C;margin-bottom:3px">🍪 Cookies en statistieken</div>
+    <div style="font-size:12.5px;color:#6B6B6B;line-height:1.5">We gebruiken alleen noodzakelijke opslag om je ingelogd te houden. Met jouw toestemming meten we ook anoniem hoe de site wordt gebruikt (Vercel Web Analytics, zonder cookies of advertentietracking). Je kunt je keuze altijd wijzigen via "Cookie-instellingen" onderaan de pagina. <a onclick="openInfo('cookies')" style="color:#E8940A;text-decoration:none;font-weight:600;cursor:pointer">Cookiebeleid</a></div>
+  </div>
+  <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap">
+    <button onclick="declineCookies()" style="padding:9px 18px;border-radius:50px;background:#fff;color:#1C1C1C;font-size:13px;font-weight:700;border:1.5px solid #1C1C1C;cursor:pointer;font-family:'Inter',sans-serif">Alleen noodzakelijk</button>
+    <button onclick="acceptCookies()" style="padding:9px 18px;border-radius:50px;background:#fff;color:#1C1C1C;font-size:13px;font-weight:700;border:1.5px solid #1C1C1C;cursor:pointer;font-family:'Inter',sans-serif">Statistieken toestaan</button>
+  </div>
+</div>
+
+<script>
+// ---------- config ----------
+// Vul deze waarden in vanuit Supabase: Project Settings -> API. De anon key is publiek en mag in de frontend staan;
+// de database wordt beschermd door Row Level Security (zie supabase/schema.sql).
+const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+
+// Bedrijfsgegevens: verplicht op je website (Handelsregisterwet / Richtlijn elektronische handel) en in het privacybeleid.
+const COMPANY = {
+  name: 'Carvital B.V.',
+  address: '[straat + huisnummer], [postcode] Utrecht',
+  kvk: '[KvK-nummer]',
+  btw: '[btw-id]',
+  email: 'hallo@carvital.nl',
+  privacyEmail: 'privacy@carvital.nl',
+};
+const TERMS_VERSION = '2026-09-23';
+
+const emailLinkInUrl = /access_token=|error_description=/.test(location.hash);
+const sb = window.supabase && !SUPABASE_URL.includes('YOUR-PROJECT')
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+
+let selTime='',selGarage='';
+let currentUser=null,profile=null,cars=[],records=[],activeCarId=null,lastRdw=null;
+
+function showPage(p){document.querySelectorAll('.page').forEach(x=>{x.classList.remove('active');x.style.display=''});if(p==='app'){const a=document.getElementById('page-app');a.classList.add('active');a.style.display='flex'}else document.getElementById('page-landing').classList.add('active');window.scrollTo(0,0)}
+function showApp(){closeM();showPage('app')}
+function sv(name,el){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+name).classList.add('active');document.querySelectorAll('.ni').forEach(i=>i.classList.remove('active'));if(!el)el=document.querySelector(`.ni[onclick^="sv('${name}'"]`);if(el)el.classList.add('active');window.scrollTo(0,0)}
+function mnv(name,el){sv(name);document.querySelectorAll('.mnb').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active')}
+function mnv2(name){closeM();sv(name);document.querySelectorAll('.mnb').forEach(b=>b.classList.remove('active'))}
+function openM(id){closeM();const m=document.getElementById('modal-'+id);if(m)m.classList.add('open')}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+// ---------- juridische teksten ----------
+const P='<p style="margin-top:10px">';
+const INFO_CONTENT={
+  about:{title:'Over Carvital',body:`<p>Carvital is een Nederlands platform dat autobezitters helpt om precies te weten hoe hun auto ervoor staat — zonder gedoe.</p>${P}Wij combineren de officiële RDW-data met jouw onderhoudshistorie tot één heldere, indicatieve AutoHealth Score. Zo weet je wanneer onderhoud nodig is en geef je bij verkoop de volledige historie mee aan de koper.</p>${P}Carvital is momenteel in bèta en wordt actief doorontwikkeld samen met onze eerste gebruikers.</p>`},
+  garages:{title:'Voor Garages',body:`<p>Sluit je garage aan bij Carvital en bereik autobezitters op het moment dat zij onderhoud nodig hebben.</p>${P}We bouwen aan aanbevelingen op basis van merk, locatie en het profiel van de auto, en aan online boeken direct in je agenda.</p>${P}Interesse om als een van de eerste garages aan te sluiten? Mail ons op <strong>garages@carvital.nl</strong>.</p>`},
+  blog:{title:'Blog',body:`<p>Onze blog is nog in de maak — hier gaan we binnenkort schrijven over auto-onderhoud, kosten besparen en updates uit de Carvital bèta.</p>${P}Wil je op de hoogte blijven? Maak een gratis account aan en vink bij aanmelden nieuws en tips aan.</p>`},
+  contact:{title:'Contact',body:`<p>We horen graag van je — of het nu gaat om een vraag, feedback op de bèta, of een samenwerking.</p><div style="margin-top:14px;display:flex;flex-direction:column;gap:8px"><div>📧 <strong>${COMPANY.email}</strong></div><div>🏢 ${COMPANY.name} · ${COMPANY.address}</div><div>KvK ${COMPANY.kvk} · btw ${COMPANY.btw}</div></div>`},
+  privacy:{title:'Privacyverklaring',body:`<div class="legal">
+<p><em>Versie ${TERMS_VERSION}</em></p>
+<h4>1. Wie zijn wij?</h4><p>${COMPANY.name}, ${COMPANY.address}, KvK ${COMPANY.kvk}, is verwerkingsverantwoordelijke voor de persoonsgegevens die via Carvital worden verwerkt. Vragen over privacy: <strong>${COMPANY.privacyEmail}</strong>.</p>
+<h4>2. Welke gegevens verwerken we?</h4><ul>
+<li><strong>Account:</strong> naam, e-mailadres en wachtwoord (alleen versleuteld/gehasht opgeslagen).</li>
+<li><strong>Auto:</strong> kenteken en de openbare RDW-gegevens van dat kenteken (merk, model, bouwjaar, APK-datum), en de kilometerstand als je die invult.</li>
+<li><strong>Onderhoud:</strong> de beurten die je invoert (datum, km-stand, omschrijving, garage, bedrag) en facturen die je uploadt. Facturen kunnen zelf persoonsgegevens bevatten, zoals je adres.</li>
+<li><strong>Voorkeuren:</strong> je instellingen voor herinneringen en nieuwsbrief, en wanneer je akkoord ging met de voorwaarden.</li>
+<li><strong>Technisch:</strong> IP-adres en tijdstip in serverlogs van onze hostingpartijen, voor beveiliging.</li>
+<li><strong>Locatie:</strong> alleen als je zelf op "Gebruik mijn locatie" klikt. Je locatie wordt alleen in je browser gebruikt en niet door ons opgeslagen.</li></ul>
+${P}Zoek je op de homepage een kenteken op zonder account, dan gaat dat kenteken rechtstreeks van jouw browser naar de openbare RDW-database. Wij slaan dat niet op.</p>
+<h4>3. Waarvoor en op welke grondslag?</h4><ul>
+<li>Je account, onderhoudsboekje, Health Score en herinneringen: <strong>uitvoering van de overeenkomst</strong> (art. 6 lid 1 sub b AVG).</li>
+<li>Nieuws en tips per e-mail: <strong>toestemming</strong> (art. 6 lid 1 sub a AVG). Je kunt die altijd intrekken in je profiel.</li>
+<li>Anonieme bezoekersstatistieken: <strong>toestemming</strong> via de cookiebanner.</li>
+<li>Beveiliging en het voorkomen van misbruik: <strong>gerechtvaardigd belang</strong> (art. 6 lid 1 sub f AVG).</li></ul>
+${P}De AutoHealth Score is een indicatieve berekening. We nemen geen besluiten over je die rechtsgevolgen hebben of je in aanmerkelijke mate treffen (art. 22 AVG).</p>
+<h4>4. Hoe lang bewaren we je gegevens?</h4><p>Zolang je account bestaat. Verwijder je je account, dan verwijderen we je gegevens en facturen direct; kopieën in back-ups worden binnen 30 dagen automatisch overschreven. Serverlogs bewaren we maximaal 90 dagen.</p>
+<h4>5. Met wie delen we gegevens?</h4><p>We verkopen je gegevens nooit. We werken met deze verwerkers, met wie we een verwerkersovereenkomst hebben:</p><ul>
+<li><strong>Supabase</strong> — database, inloggen en opslag van facturen. Je gegevens staan op servers in de EU (Frankfurt).</li>
+<li><strong>Vercel</strong> — hosting van de website en (met toestemming) anonieme statistieken.</li>
+<li><strong>bunny.net</strong> (lettertypen, EU) en <strong>jsDelivr</strong> (laden van programmacode) — deze zien alleen je IP-adres bij het laden van de pagina.</li></ul>
+${P}Supabase en Vercel zijn bedrijven uit de Verenigde Staten. Voor een eventuele doorgifte buiten de EER vertrouwen we op het EU-US Data Privacy Framework en/of de standaardcontractbepalingen van de Europese Commissie.</p>
+<h4>6. Beveiliging</h4><p>Alle verbindingen zijn versleuteld (HTTPS). Wachtwoorden worden gehasht opgeslagen. Elke gebruiker kan technisch alleen zijn eigen gegevens en facturen inzien.</p>
+<h4>7. Jouw rechten</h4><p>Je hebt recht op inzage, correctie, verwijdering, beperking, overdraagbaarheid en bezwaar, en je kunt gegeven toestemming altijd intrekken. Veel regel je direct zelf onder <strong>Profiel</strong>: je gegevens downloaden, je naam en voorkeuren aanpassen en je account verwijderen. Voor andere verzoeken mail je <strong>${COMPANY.privacyEmail}</strong>; we reageren binnen een maand.</p>
+<h4>8. Klacht</h4><p>Ben je niet tevreden over hoe we met je gegevens omgaan? Laat het ons weten. Je hebt ook het recht een klacht in te dienen bij de Autoriteit Persoonsgegevens (autoriteitpersoonsgegevens.nl).</p>
+<h4>9. Leeftijd</h4><p>Carvital is bedoeld voor personen van 16 jaar en ouder.</p></div>`},
+  terms:{title:'Gebruiksvoorwaarden',body:`<div class="legal">
+<p><em>Versie ${TERMS_VERSION}</em></p>
+<h4>1. Wie zijn wij</h4><p>Carvital wordt aangeboden door ${COMPANY.name}, ${COMPANY.address}, KvK ${COMPANY.kvk}, ${COMPANY.email}.</p>
+<h4>2. De dienst</h4><p>Carvital is gratis voor autobezitters. Carvital is in bèta: functies kunnen wijzigen, tijdelijk niet beschikbaar zijn of worden beëindigd. Wijzigen we de voorwaarden op een voor jou belangrijke manier, dan laten we je dat vooraf weten.</p>
+<h4>3. Geen vervanging van professioneel advies</h4><p>De AutoHealth Score, herinneringen en voorspellingen zijn indicatief, gebaseerd op openbare RDW-gegevens en de gegevens die jij invoert. Ze vervangen geen inspectie of advies van een erkende garage. De RDW-gegevens komen van de RDW; wij kunnen de juistheid daarvan niet garanderen.</p>
+<h4>4. Jouw account</h4><p>Je moet 16 jaar of ouder zijn. Houd je wachtwoord geheim. Upload alleen facturen en gegevens die je mag delen en die geen inbreuk maken op rechten van anderen. Je kunt je account op elk moment zelf verwijderen via Profiel.</p>
+<h4>5. Misbruik</h4><p>Bij misbruik, zoals het uploaden van onrechtmatige inhoud of pogingen om toegang te krijgen tot gegevens van anderen, mogen we je account blokkeren of verwijderen.</p>
+<h4>6. Aansprakelijkheid</h4><p>Omdat de dienst gratis is en in bèta, zijn we niet aansprakelijk voor indirecte schade of voor beslissingen die je neemt op basis van de indicatieve score, voor zover de wet dat toestaat. Dit geldt niet bij opzet of bewuste roekeloosheid van onze kant, en doet niets af aan je wettelijke rechten als consument.</p>
+<h4>7. Toepasselijk recht</h4><p>Op deze voorwaarden is Nederlands recht van toepassing. Heb je een klacht, neem dan eerst contact met ons op via ${COMPANY.email}; we reageren binnen 14 dagen.</p></div>`},
+  gdpr:{title:'AVG / GDPR',body:`<p>Carvital verwerkt persoonsgegevens volgens de Algemene Verordening Gegevensbescherming (AVG). Je gegevens worden opgeslagen in de EU.</p>${P}Je hebt te allen tijde recht op:</p><ul style="margin:10px 0 0 18px;display:flex;flex-direction:column;gap:5px"><li>Inzage en dataportabiliteit — download je gegevens zelf onder <strong>Profiel → Mijn gegevens downloaden</strong></li><li>Correctie — pas je naam, auto's en beurten zelf aan in de app</li><li>Verwijdering ("recht op vergetelheid") — <strong>Profiel → Account verwijderen</strong></li><li>Intrekken van toestemming — zet de nieuwsbrief uit in je profiel, of wijzig je cookiekeuze onderaan de pagina</li><li>Bezwaar en beperking van verwerking</li></ul>${P}Lukt iets niet zelf? Mail <strong>${COMPANY.privacyEmail}</strong>. We reageren binnen een maand. Je kunt ook een klacht indienen bij de Autoriteit Persoonsgegevens. Lees meer in onze <a style="color:var(--gold);cursor:pointer" onclick="openInfo('privacy')">privacyverklaring</a>.</p>`},
+  cookies:{title:'Cookiebeleid',body:`<div class="legal"><p>Carvital plaatst geen advertentie- of trackingcookies.</p>
+<h4>Noodzakelijk (geen toestemming nodig)</h4><ul><li><strong>Inlogsessie</strong> (localStorage, <code>sb-…-auth-token</code>) — houdt je ingelogd tot je uitlogt.</li><li><strong>Cookiekeuze</strong> (localStorage, <code>cv_cookies</code>) — onthoudt je keuze in de cookiebanner.</li><li><strong>Kenteken bij aanmelden</strong> (localStorage, <code>cv_pending_kenteken</code>) — tijdelijk, tot je e-mailadres is bevestigd.</li></ul>
+<h4>Statistieken (alleen met toestemming)</h4><ul><li><strong>Vercel Web Analytics</strong> — telt anoniem paginabezoeken, zonder cookies en zonder je te volgen over andere websites.</li></ul>
+${P}Je kunt je keuze altijd wijzigen via <a style="color:var(--gold);cursor:pointer" onclick="openCookieSettings()">Cookie-instellingen</a>.</p></div>`}
+};
+let infoBack=null;
+function openInfo(key,back){
+  const d=INFO_CONTENT[key];
+  if(!d)return;
+  document.getElementById('info-title').textContent=d.title;
+  document.getElementById('info-body').innerHTML=d.body;
+  infoBack=back?document.querySelector('.modal-backdrop.open')?.id.replace('modal-',''):null;
+  openM('info');
+}
+function closeInfo(){if(infoBack){openM(infoBack);infoBack=null}else closeM()}
+function closeM(){document.querySelectorAll('.modal-backdrop').forEach(m=>m.classList.remove('open'))}
+document.querySelectorAll('.modal-backdrop').forEach(b=>b.addEventListener('click',e=>{if(e.target===b)closeM()}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
+function toast(ic,title,sub,ms=3400){document.getElementById('ti').textContent=ic;document.getElementById('tt').textContent=title;document.getElementById('ts').textContent=sub;const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),ms)}
+
+// ---------- authenticatie (Supabase Auth) ----------
+function requireSb(errId){
+  if(sb)return true;
+  const msg='Inloggen is nog niet geconfigureerd. Vul SUPABASE_URL en SUPABASE_ANON_KEY in.';
+  if(errId)mErr(errId,msg);else toast('⚙️','Nog niet geconfigureerd',msg);
+  return false;
+}
+function mErr(id,msg){const e=document.getElementById(id);e.textContent=msg||'';e.classList.toggle('show',!!msg)}
+function busy(id,on,label){const b=document.getElementById(id);if(on){b.dataset.label=b.innerHTML;b.disabled=true;b.innerHTML='<div class="spin" style="border-top-color:#fff"></div>'}else{b.disabled=false;b.innerHTML=label||b.dataset.label}}
+function authMsg(err){
+  const m=(err&&err.message)||'';
+  if(/invalid login credentials/i.test(m))return 'E-mailadres of wachtwoord klopt niet.';
+  if(/email not confirmed/i.test(m))return 'Bevestig eerst je e-mailadres via de link in je mailbox.';
+  if(/already registered/i.test(m))return 'Er bestaat al een account met dit e-mailadres.';
+  if(/password should be/i.test(m))return 'Kies een sterker wachtwoord (minimaal 8 tekens).';
+  if(/security purposes|rate limit/i.test(m))return 'Te veel pogingen. Probeer het over een minuut opnieuw.';
+  if(/failed to fetch|network/i.test(m))return 'Geen verbinding. Controleer je internet en probeer opnieuw.';
+  return m||'Er ging iets mis. Probeer het opnieuw.';
+}
+
+async function doRegister(){
+  mErr('reg-err','');
+  const name=document.getElementById('rname').value.trim();
+  const email=document.getElementById('remail').value.trim();
+  const password=document.getElementById('rpass').value;
+  const kenteken=normKent(document.getElementById('rkent').value);
+  const terms=document.getElementById('rterms').checked;
+  const marketing=document.getElementById('rmarketing').checked;
+  if(!name||!email||!password)return mErr('reg-err','Vul je naam, e-mailadres en wachtwoord in.');
+  if(password.length<8)return mErr('reg-err','Je wachtwoord moet minimaal 8 tekens hebben.');
+  if(!terms)return mErr('reg-err','Om een account aan te maken moet je 16 jaar of ouder zijn en akkoord gaan met de voorwaarden.');
+  if(!requireSb('reg-err'))return;
+  busy('reg-btn',true);
+  const {data,error}=await sb.auth.signUp({email,password,options:{
+    emailRedirectTo:location.origin+location.pathname,
+    data:{name,marketing_opt_in:marketing,terms_version:TERMS_VERSION,terms_accepted_at:new Date().toISOString()}
+  }});
+  busy('reg-btn',false);
+  if(error)return mErr('reg-err',authMsg(error));
+  if(kenteken.length>=4)try{localStorage.setItem('cv_pending_kenteken',kenteken)}catch(e){}
+  if(data.session){closeM();showApp();toast('🚗','Welkom bij Carvital!',kenteken?kenteken+' wordt toegevoegd':'Voeg je auto toe via Kenteken opzoeken')}
+  else{document.getElementById('check-email-addr').textContent=email;openM('check-email')}
+}
+
+async function doLogin(){
+  mErr('login-err','');
+  const email=document.getElementById('lemail').value.trim();
+  const password=document.getElementById('lpass').value;
+  if(!email||!password)return mErr('login-err','Vul je e-mailadres en wachtwoord in.');
+  if(!requireSb('login-err'))return;
+  busy('login-btn',true);
+  const {error}=await sb.auth.signInWithPassword({email,password});
+  busy('login-btn',false);
+  if(error)return mErr('login-err',authMsg(error));
+  document.getElementById('lpass').value='';
+  closeM();showApp();toast('👋','Welkom terug!','Je bent ingelogd');
+}
+
+async function doForgot(){
+  mErr('forgot-err','');
+  const email=document.getElementById('femail').value.trim();
+  if(!email)return mErr('forgot-err','Vul je e-mailadres in.');
+  if(!requireSb('forgot-err'))return;
+  busy('forgot-btn',true);
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+  busy('forgot-btn',false);
+  if(error)return mErr('forgot-err',authMsg(error));
+  closeM();toast('📬','Check je mailbox','Als dit adres bij ons bekend is, ontvang je een resetlink',5000);
+}
+
+async function doNewPassword(){
+  mErr('newpass-err','');
+  const password=document.getElementById('npass').value;
+  if(password.length<8)return mErr('newpass-err','Je wachtwoord moet minimaal 8 tekens hebben.');
+  busy('newpass-btn',true);
+  const {error}=await sb.auth.updateUser({password});
+  busy('newpass-btn',false);
+  if(error)return mErr('newpass-err',authMsg(error));
+  document.getElementById('npass').value='';
+  closeM();toast('🔒','Wachtwoord gewijzigd','');
+}
+
+async function logout(){
+  if(sb)await sb.auth.signOut();
+  onSignedOut();
+  showPage('landing');
+  toast('👋','Uitgelogd','Tot snel!');
+}
+
+function initAuth(){
+  if(!sb)return;
+  sb.auth.onAuthStateChange((event,session)=>{
+    if(event==='PASSWORD_RECOVERY'){showApp();setTimeout(()=>openM('newpass'),0)}
+    const u=session?.user||null;
+    if(u&&u.id!==currentUser?.id){
+      currentUser=u;
+      // Supabase raadt aan om geen andere Supabase-calls direct in deze callback te awaiten
+      setTimeout(()=>onSignedIn(event),0);
+    }else if(u){currentUser=u}
+    else if(!u&&currentUser){onSignedOut()}
+  });
+}
+
+async function onSignedIn(event){
+  document.body.classList.add('signed-in');
+  document.getElementById('page-app').classList.add('is-user');
+  if(emailLinkInUrl&&event==='SIGNED_IN'){showApp();toast('✅','E-mailadres bevestigd','Welkom bij Carvital!')}
+  await loadUserData();
+  let pending=null;try{pending=localStorage.getItem('cv_pending_kenteken');localStorage.removeItem('cv_pending_kenteken')}catch(e){}
+  if(pending&&!cars.some(c=>c.kenteken===pending)){
+    try{await saveCar(await fetchRdw(pending));toast('🚗','Auto toegevoegd',pending)}catch(e){toast('⚠️','Kenteken niet gevonden',pending+' — voeg je auto toe via Kenteken opzoeken')}
+  }
+}
+
+function onSignedOut(){
+  currentUser=null;profile=null;cars=[];records=[];activeCarId=null;
+  document.body.classList.remove('signed-in');
+  document.getElementById('page-app').classList.remove('is-user');
+  document.querySelectorAll('.user-only').forEach(el=>el.innerHTML='');
+  const rc=document.getElementById('rem-count');rc.textContent='3';rc.style.display='';
+}
+
+// ---------- gegevens (Supabase database) ----------
+async function loadUserData(){
+  const [p,c,r]=await Promise.all([
+    sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle(),
+    sb.from('cars').select('*').order('created_at'),
+    sb.from('maintenance_records').select('*').order('datum',{ascending:false})
+  ]);
+  const err=p.error||c.error||r.error;
+  if(err)toast('⚠️','Gegevens laden mislukt',err.message);
+  profile=p.data||{name:currentUser.user_metadata?.name||'',notify_apk:true,notify_maintenance:true,marketing_opt_in:false};
+  cars=c.data||[];records=r.data||[];
+  if(!cars.some(x=>x.id===activeCarId))activeCarId=cars[0]?.id||null;
+  renderUser();
+}
+
+async function saveCar(car){
+  const {error}=await sb.from('cars').upsert({
+    user_id:currentUser.id,kenteken:car.kenteken,merk:car.merk,model:car.model,bouwjaar:car.bouwjaar,
+    brandstof:car.brandstof,kleur:car.kleur,apk_vervaldatum:car.apk_vervaldatum
+  },{onConflict:'user_id,kenteken'});
+  if(error)throw error;
+  await loadUserData();
+  activeCarId=cars.find(c=>c.kenteken===car.kenteken)?.id||activeCarId;
+  renderUser();
+}
+
+async function removeCar(id){
+  const car=cars.find(c=>c.id===id);
+  if(!car||!confirm(`${car.merk||''} ${car.model||''} (${fmtKent(car.kenteken)}) en het bijbehorende onderhoudsboekje verwijderen?`))return;
+  const paths=records.filter(r=>r.car_id===id&&r.invoice_path).map(r=>r.invoice_path);
+  if(paths.length)await sb.storage.from('invoices').remove(paths);
+  const {error}=await sb.from('cars').delete().eq('id',id);
+  if(error)return toast('❌','Verwijderen mislukt',error.message);
+  toast('🗑️','Auto verwijderd','');
+  await loadUserData();
+}
+
+async function saveRecord(){
+  mErr('rec-err','');
+  const car_id=document.getElementById('rec-car').value;
+  const datum=document.getElementById('rec-datum').value;
+  const km=parseInt(document.getElementById('rec-km').value,10);
+  const omschrijving=document.getElementById('rec-oms').value.trim();
+  const categorie=document.getElementById('rec-cat').value;
+  const garage=document.getElementById('rec-garage').value.trim();
+  const bedragRaw=document.getElementById('rec-bedrag').value.replace(',','.');
+  const file=document.getElementById('rec-file').files[0];
+  if(!car_id||!datum||!omschrijving)return mErr('rec-err','Vul in ieder geval de auto, datum en omschrijving in.');
+  if(file&&file.size>20*1024*1024)return mErr('rec-err','Bestand is groter dan 20 MB.');
+  busy('rec-btn',true);
+  let invoice_path=null;
+  if(file){
+    const ext=(file.name.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'');
+    invoice_path=`${currentUser.id}/${crypto.randomUUID()}.${ext}`;
+    const up=await sb.storage.from('invoices').upload(invoice_path,file,{contentType:file.type});
+    if(up.error){busy('rec-btn',false);return mErr('rec-err','Uploaden mislukt: '+up.error.message)}
+  }
+  const {error}=await sb.from('maintenance_records').insert({
+    user_id:currentUser.id,car_id,datum,omschrijving,categorie,garage:garage||null,invoice_path,
+    kilometerstand:Number.isFinite(km)?km:null,bedrag:bedragRaw?Number(bedragRaw):null
+  });
+  if(!error&&Number.isFinite(km)){
+    const car=cars.find(c=>c.id===car_id);
+    if(car&&(car.kilometerstand||0)<km)await sb.from('cars').update({kilometerstand:km}).eq('id',car_id);
+  }
+  busy('rec-btn',false);
+  if(error){if(invoice_path)await sb.storage.from('invoices').remove([invoice_path]);return mErr('rec-err',error.message)}
+  toast('✅','Opgeslagen!','Onderhoudsboekje en Health Score bijgewerkt');
+  activeCarId=car_id;
+  await loadUserData();
+  sv('onderhoud');
+}
+
+async function deleteRecord(id){
+  const rec=records.find(r=>r.id===id);
+  if(!rec||!confirm(`"${rec.omschrijving}" verwijderen uit je onderhoudsboekje?`))return;
+  if(rec.invoice_path)await sb.storage.from('invoices').remove([rec.invoice_path]);
+  const {error}=await sb.from('maintenance_records').delete().eq('id',id);
+  if(error)return toast('❌','Verwijderen mislukt',error.message);
+  await loadUserData();
+}
+
+async function openInvoice(id){
+  const rec=records.find(r=>r.id===id);
+  const {data,error}=await sb.storage.from('invoices').createSignedUrl(rec.invoice_path,60);
+  if(error)return toast('❌','Factuur openen mislukt',error.message);
+  window.open(data.signedUrl,'_blank','noopener');
+}
+
+async function saveProfile(fields){
+  const {error}=await sb.from('profiles').update(fields).eq('id',currentUser.id);
+  if(error){toast('❌','Opslaan mislukt',error.message);return false}
+  Object.assign(profile,fields);
+  return true;
+}
+async function saveName(){
+  const name=document.getElementById('p-name').value.trim();
+  if(!name)return toast('⚠️','Naam mag niet leeg zijn','');
+  if(await saveProfile({name})){await sb.auth.updateUser({data:{name}});renderUser();toast('✅','Naam opgeslagen','')}
+}
+async function togPref(el,key){
+  const val=!profile[key];
+  const fields={[key]:val};
+  if(key==='marketing_opt_in')fields.marketing_opt_in_at=val?new Date().toISOString():null;
+  if(await saveProfile(fields)){el.classList.toggle('on',val);el.classList.toggle('off',!val)}
+}
+
+// AVG art. 15 & 20: alle gegevens van de gebruiker als JSON-download
+async function exportData(){
+  const [p,c,r]=await Promise.all([
+    sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle(),
+    sb.from('cars').select('*'),
+    sb.from('maintenance_records').select('*')
+  ]);
+  const out={
+    exported_at:new Date().toISOString(),
+    account:{id:currentUser.id,email:currentUser.email,created_at:currentUser.created_at,last_sign_in_at:currentUser.last_sign_in_at},
+    profile:p.data,cars:c.data,maintenance_records:r.data,
+    note:'Geüploade facturen kun je openen via je onderhoudsboekje.'
+  };
+  const url=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}));
+  const a=document.createElement('a');a.href=url;a.download=`carvital-gegevens-${new Date().toISOString().slice(0,10)}.json`;a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast('📦','Gegevens gedownload','');
+}
+
+// AVG art. 17: account + alle gegevens verwijderen
+async function doDeleteAccount(){
+  mErr('delete-err','');
+  if(document.getElementById('delete-confirm').value.trim()!=='VERWIJDER')return mErr('delete-err','Typ VERWIJDER om te bevestigen.');
+  busy('delete-btn',true);
+  const paths=records.filter(r=>r.invoice_path).map(r=>r.invoice_path);
+  const {data:rest}=await sb.storage.from('invoices').list(currentUser.id,{limit:1000});
+  (rest||[]).forEach(f=>{const p=`${currentUser.id}/${f.name}`;if(!paths.includes(p))paths.push(p)});
+  if(paths.length){const rm=await sb.storage.from('invoices').remove(paths);if(rm.error){busy('delete-btn',false);return mErr('delete-err','Facturen verwijderen mislukt: '+rm.error.message)}}
+  const {error}=await sb.rpc('delete_my_account');
+  busy('delete-btn',false);
+  if(error)return mErr('delete-err','Verwijderen mislukt: '+error.message);
+  document.getElementById('delete-confirm').value='';
+  await sb.auth.signOut({scope:'local'});
+  onSignedOut();closeM();showPage('landing');
+  toast('🗑️','Account verwijderd','Al je gegevens zijn gewist',5000);
+}
+
+// ---------- berekeningen ----------
+function normKent(v){return String(v||'').replace(/[^A-Za-z0-9]/g,'').toUpperCase()}
+function fmtKent(k){
+  // Nederlandse kentekens: groepen splitsen waar letters en cijfers wisselen, of anders in blokken van 2
+  const parts=k.match(/[A-Z]+|[0-9]+/g)||[k];
+  return parts.length>=3?parts.join('-'):(k.match(/.{1,2}/g)||[k]).join('-');
+}
+function rdwDate(s){return s&&s.length===8?`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`:null}
+function daysUntil(iso){return Math.round((new Date(iso)-new Date(new Date().toDateString()))/864e5)}
+function monthsSince(iso){const d=new Date(iso),n=new Date();return (n.getFullYear()-d.getFullYear())*12+n.getMonth()-d.getMonth()}
+function fmtDate(iso,opts={day:'numeric',month:'long',year:'numeric'}){return iso?new Date(iso).toLocaleDateString('nl-NL',opts):'-'}
+function eur(n){const v=Number(n||0);return '€ '+v.toLocaleString('nl-NL',{minimumFractionDigits:v%1?2:0,maximumFractionDigits:2})}
+function beurten(n){return n+(n===1?' beurt':' beurten')}
+function nf(n){return Number(n).toLocaleString('nl-NL')}
+
+// Indicatieve score: bouwjaar, APK-status en hoe recent er onderhoud is geregistreerd
+function healthScore(car,recs){
+  let s=100;
+  const age=car.bouwjaar?new Date().getFullYear()-car.bouwjaar:10;
+  s-=Math.min(25,age*1.5);
+  if(car.apk_vervaldatum){const d=daysUntil(car.apk_vervaldatum);if(d<0)s-=20;else if(d<30)s-=8}
+  if(recs){
+    const last=recs[0];
+    if(!last)s-=10;else{const m=monthsSince(last.datum);if(m>24)s-=12;else if(m>12)s-=6}
+  }
+  return Math.max(0,Math.min(100,Math.round(s)));
+}
+function scoreStyle(s){
+  return s>=85?{label:'✅ Uitstekende conditie',short:'Uitstekend',c:'var(--green)',bg:'#D1FAE5',badge:'bg'}
+    :s>=70?{label:'👍 Goede conditie',short:'Goed',c:'var(--green)',bg:'#D1FAE5',badge:'bg'}
+    :s>=50?{label:'⚠️ Onderhoud aanbevolen',short:'Aandacht',c:'var(--orange)',bg:'#FFEDD5',badge:'bo'}
+    :{label:'🔴 Aandacht nodig',short:'Actie nodig',c:'var(--red)',bg:'#FEE2E2',badge:'br'};
+}
+function carReminders(car,recs){
+  const out=[];
+  if(car.apk_vervaldatum){
+    const d=daysUntil(car.apk_vervaldatum),dt=fmtDate(car.apk_vervaldatum);
+    if(d<0)out.push({lvl:'red',t:'APK is verlopen',s:`Verlopen op ${dt} · je mag zo niet de weg op`,garage:true});
+    else if(d<=60)out.push({lvl:'red',t:`APK verloopt over ${d} dagen`,s:`Verloopt op ${dt} · plan tijdig een keuring`,garage:true});
+    else out.push({lvl:'green',t:'APK geldig',s:`Geldig tot ${dt}`});
+  }
+  const service=recs.find(r=>r.categorie==='onderhoud');
+  if(!service)out.push({lvl:'orange',t:'Nog geen onderhoudsbeurt geregistreerd',s:'Voeg je laatste beurt toe voor een betere Health Score',upload:true});
+  else{
+    const m=monthsSince(service.datum);
+    if(m>=12)out.push({lvl:'orange',t:`Laatste onderhoudsbeurt ${m} maanden geleden`,s:'Meestal wordt één beurt per jaar of per 15.000–30.000 km aanbevolen',garage:true});
+    else out.push({lvl:'green',t:'Onderhoud op schema',s:`Laatste beurt ${fmtDate(service.datum)}${service.kilometerstand?' · '+nf(service.kilometerstand)+' km':''}`});
+  }
+  const mo=new Date().getMonth();
+  if(mo>=9&&mo<=10)out.push({lvl:'orange',t:'Winterbanden overwegen',s:'Als de temperatuur onder 7°C komt'});
+  if(mo>=2&&mo<=3)out.push({lvl:'orange',t:'Zomerbanden wisselen',s:'Als de temperatuur boven 7°C komt'});
+  return out;
+}
+
+// ---------- weergave ingelogde gebruiker ----------
+function activeCar(){return cars.find(c=>c.id===activeCarId)||null}
+function carRecs(car){return car?records.filter(r=>r.car_id===car.id):[]}
+function setActiveCar(id){activeCarId=id;renderUser()}
+function carSelect(id,onchange){
+  if(cars.length<2)return '';
+  return `<select class="fi" id="${id}" style="width:auto" ${onchange?`onchange="setActiveCar(this.value)"`:''}>${cars.map(c=>`<option value="${c.id}" ${c.id===activeCarId?'selected':''}>${esc(c.merk)} ${esc(c.model)} · ${esc(fmtKent(c.kenteken))}</option>`).join('')}</select>`;
+}
+const EMPTY_CAR=`<div class="empty"><div class="e-ic">🚗</div><div class="e-t">Voeg je eerste auto toe</div>Zoek je kenteken op; wij halen de gegevens op bij de RDW.<div style="margin-top:14px"><button class="btn-primary" style="border-radius:10px" onclick="sv('kenteken')">🔍 Kenteken opzoeken</button></div></div>`;
+function head(title,sub,right=''){return `<div class="ahd"><div><div class="at">${title}</div><div class="as2">${sub}</div></div>${right}</div>`}
+function remRow(r){
+  const col={red:'var(--red)',orange:'var(--orange)',green:'var(--green)'}[r.lvl];
+  const btn=r.garage?`<button class="bk" style="padding:7px 13px;width:auto;border-radius:50px;font-size:11.5px" onclick="sv('garages')">Garage</button>`:r.upload?`<button class="bk" style="padding:7px 13px;width:auto;border-radius:50px;font-size:11.5px" onclick="sv('upload')">Toevoegen</button>`:r.lvl==='green'?'<span class="badge bg">OK</span>':'';
+  return `<div class="rc"><div class="rdt" style="background:${col}"></div><div class="rb"><div class="rb-t">${esc(r.t)}</div><div class="rb-s">${esc(r.s)}</div></div>${btn}</div>`;
+}
+
+function renderUser(){
+  if(!currentUser)return;
+  const car=activeCar(),recs=carRecs(car);
+  const name=profile?.name||currentUser.email;
+  const first=name.split(' ')[0];
+  const h=new Date().getHours(),greet=h<12?'Goedemorgen':h<18?'Goedemiddag':'Goedenavond';
+  const rems=car?carReminders(car,recs):[];
+  const open=rems.filter(r=>r.lvl!=='green');
+  const rc=document.getElementById('rem-count');rc.textContent=open.length;rc.style.display=open.length?'':'none';
+
+  // sidebar
+  document.getElementById('sb-cars').innerHTML=cars.map(c=>{
+    const s=healthScore(c,carRecs(c)),st=scoreStyle(s);
+    return `<div class="sb-car" style="cursor:pointer;${c.id===activeCarId?'border-color:var(--gold)':''}" onclick="setActiveCar('${c.id}')"><div class="sb-car-n">${esc(c.merk)} ${esc(c.model)}</div><div class="sb-car-s">${esc(fmtKent(c.kenteken))}${c.bouwjaar?' · '+c.bouwjaar:''}${c.kilometerstand?' · '+nf(c.kilometerstand)+' km':''}</div><div class="sb-car-score"><span style="background:${st.bg};color:${st.c};padding:2px 8px;border-radius:50px;font-size:10px;font-weight:700">${s}/100</span><span class="badge ${st.badge}">${st.short}</span></div></div>`;
+  }).join('')||'<div style="font-size:12px;color:var(--t3);padding:0 10px 6px">Nog geen auto toegevoegd</div>';
+
+  // dashboard
+  let dash=`<div class="ahd"><div><div style="font-size:13px;color:var(--t3);margin-bottom:3px">${greet} 👋</div><div class="at">Welkom, ${esc(first)}!</div></div>${carSelect('dash-car',true)}</div>`;
+  if(!car)dash+=EMPTY_CAR;
+  else{
+    const s=healthScore(car,recs),st=scoreStyle(s);
+    const year=new Date().getFullYear(),yearCost=recs.filter(r=>new Date(r.datum).getFullYear()===year).reduce((a,r)=>a+Number(r.bedrag||0),0);
+    const apkDays=car.apk_vervaldatum?daysUntil(car.apk_vervaldatum):null;
+    dash+=`<div class="card" style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px"><div><div class="cl">🏥 AutoHealth Score</div><div class="score-big" style="color:${st.c}">${s}<sub>/100</sub></div><span class="sch2" style="background:${st.bg};color:${st.c}">${st.label}</span></div><div style="flex:1;min-width:195px;font-size:12.5px;color:var(--t2);line-height:1.7"><div class="cl">ℹ️ Hoe berekend</div>Indicatieve score op basis van het bouwjaar (${car.bouwjaar||'onbekend'}), de APK-status bij de RDW en je geregistreerde onderhoud (${beurten(recs.length)}). Voeg beurten toe voor een nauwkeuriger beeld. Geen vervanging voor een inspectie door een garage.</div></div>
+<div class="g3" style="margin-bottom:14px">
+<div class="card"><div class="cl">📋 Volgende APK</div>${apkDays===null?'<div style="font-size:13px;color:var(--t3)">Onbekend</div>':`<div class="apk-big" style="${apkDays<0?'color:var(--red)':''}">${apkDays<0?'Verlopen':apkDays}</div><div style="font-size:12px;color:var(--t3);margin-top:2px">${apkDays<0?'sinds':'dagen ·'} ${fmtDate(car.apk_vervaldatum)}</div>`}</div>
+<div class="card"><div class="cl">💰 Onderhoud ${year}</div><div style="font-family:'Nunito',sans-serif;font-size:26px;font-weight:900;color:var(--gold)">${eur(yearCost)}</div><div style="font-size:11px;color:var(--t3);margin-top:3px">${beurten(recs.filter(r=>new Date(r.datum).getFullYear()===year).length)} dit jaar</div></div>
+<div class="card"><div class="cl">📊 Mijn Auto</div><div class="srows"><div class="srow"><span class="sr-lb">Kenteken</span><span class="sr-vl">${esc(fmtKent(car.kenteken))}</span></div><div class="srow"><span class="sr-lb">Kilometerstand</span><span class="sr-vl">${car.kilometerstand?nf(car.kilometerstand)+' km':'-'}</span></div><div class="srow"><span class="sr-lb">Laatste beurt</span><span class="sr-vl">${recs[0]?fmtDate(recs[0].datum,{month:'short',year:'numeric'}):'-'}</span></div><div class="srow" style="border:none"><span class="sr-lb">Brandstof</span><span class="sr-vl">${esc(car.brandstof||'-')}</span></div></div></div></div>
+<div class="card"><div class="cl">⚠️ Aandachtspunten ${open.length?`<span class="badge bo" style="margin-left:4px">${open.length} actief</span>`:''}</div>${open.length?open.map(remRow).join(''):'<div style="font-size:13px;color:var(--t2)">Alles op schema 🎉</div>'}</div>`;
+  }
+  document.getElementById('u-dashboard').innerHTML=dash;
+
+  // onderhoudsboekje
+  let ob=head('Digitaal Onderhoudsboekje',car?`${esc(car.merk)} ${esc(car.model)} · ${esc(fmtKent(car.kenteken))} · ${beurten(recs.length)}`:'Nog geen auto',car?`<div style="display:flex;gap:8px;flex-wrap:wrap">${carSelect('ob-car',true)}<button class="btn-primary" style="border-radius:10px;font-size:13px;padding:9px 17px" onclick="sv('upload')">+ Beurt toevoegen</button></div>`:'');
+  if(!car)ob+=EMPTY_CAR;
+  else if(!recs.length)ob+=`<div class="empty"><div class="e-ic">📖</div><div class="e-t">Je boekje is nog leeg</div>Voeg je laatste onderhoudsbeurt, APK of reparatie toe.<div style="margin-top:14px"><button class="btn-primary" style="border-radius:10px" onclick="sv('upload')">+ Beurt toevoegen</button></div></div>`;
+  else ob+=`<div class="card"><div class="tl">${recs.map((r,i)=>`<div class="tli"><div class="tls"><div class="tld" style="background:${r.categorie==='apk'?'var(--gold)':'var(--green)'}"></div>${i<recs.length-1?'<div class="tlc"></div>':''}</div><div class="tlb"><div class="tlr"><div class="tlt">${esc(r.omschrijving)}</div><div class="tlco">${r.bedrag!=null?eur(r.bedrag):''}</div></div><div class="tlm">${fmtDate(r.datum,{day:'numeric',month:'short',year:'numeric'})}${r.kilometerstand?' · '+nf(r.kilometerstand)+' km':''} <span class="badge ${r.categorie==='apk'?'bgo':'bb'}" style="margin-left:6px">${esc(r.categorie)}</span></div>${r.garage?`<div class="tlg">🔧 ${esc(r.garage)}</div>`:''}<div style="margin-top:4px">${r.invoice_path?`<button class="rec-del" style="color:var(--gold)" onclick="openInvoice('${r.id}')">📎 Factuur bekijken</button>`:''}<button class="rec-del" onclick="deleteRecord('${r.id}')">🗑️ Verwijderen</button></div></div></div>`).join('')}</div></div>`;
+  document.getElementById('u-onderhoud').innerHTML=ob;
+
+  // beurt toevoegen
+  let up=head('Beurt toevoegen','Voeg een onderhoudsbeurt, APK of reparatie toe aan je boekje');
+  if(!cars.length)up+=EMPTY_CAR;
+  else up+=`<div class="card" style="max-width:640px"><div class="m-err" id="rec-err"></div>
+<div class="fg"><label class="fl" for="rec-car">Auto</label><select class="fi" id="rec-car">${cars.map(c=>`<option value="${c.id}" ${c.id===activeCarId?'selected':''}>${esc(c.merk)} ${esc(c.model)} · ${esc(fmtKent(c.kenteken))}</option>`).join('')}</select></div>
+<div class="frow"><div class="fg"><label class="fl" for="rec-datum">Datum</label><input type="date" class="fi" id="rec-datum" max="${new Date().toISOString().slice(0,10)}" value="${new Date().toISOString().slice(0,10)}"></div><div class="fg"><label class="fl" for="rec-km">Kilometerstand</label><input type="number" class="fi" id="rec-km" min="0" max="2000000" placeholder="bijv. 85000"></div></div>
+<div class="fg"><label class="fl" for="rec-oms">Wat is er gedaan?</label><input type="text" class="fi" id="rec-oms" maxlength="200" placeholder="bijv. Grote onderhoudsbeurt, olie en filters"></div>
+<div class="frow"><div class="fg"><label class="fl" for="rec-cat">Categorie</label><select class="fi" id="rec-cat"><option value="onderhoud">Onderhoudsbeurt</option><option value="apk">APK</option><option value="remmen">Remmen</option><option value="banden">Banden</option><option value="reparatie">Reparatie</option><option value="overig">Overig</option></select></div><div class="fg"><label class="fl" for="rec-bedrag">Bedrag (€)</label><input type="text" inputmode="decimal" class="fi" id="rec-bedrag" placeholder="bijv. 389"></div></div>
+<div class="fg"><label class="fl" for="rec-garage">Garage (optioneel)</label><input type="text" class="fi" id="rec-garage" maxlength="120" placeholder="Naam en plaats"></div>
+<div class="fg"><label class="fl" for="rec-file">Factuur (optioneel · JPG, PNG, WEBP of PDF · max 20 MB)</label><input type="file" class="fi" id="rec-file" accept="image/jpeg,image/png,image/webp,application/pdf"><div style="font-size:11px;color:var(--t3);margin-top:4px">🔒 Facturen worden privé opgeslagen in de EU; alleen jij kunt ze openen.</div></div>
+<button class="btn-primary" id="rec-btn" style="border-radius:10px" onclick="saveRecord()">✅ Opslaan in mijn boekje</button></div>`;
+  document.getElementById('u-upload').innerHTML=up;
+
+  // reminders
+  let rm=head('Slimme Reminders',car?`Voor jouw ${esc(car.merk)} ${esc(car.model)}`:'Nog geen auto',carSelect('rm-car',true));
+  if(!car)rm+=EMPTY_CAR;
+  else{
+    const grp=(lvl,title,col)=>{const l=rems.filter(r=>r.lvl===lvl);return l.length?`<div class="rem-sec"><div class="rst"><span style="color:${col}">●</span> ${title}</div>${l.map(remRow).join('')}</div>`:''};
+    rm+=grp('red','Urgent — nu actie vereist','var(--red)')+grp('orange','Binnenkort — plan in','var(--orange)')+grp('green','Op schema — goed bezig!','var(--green)');
+  }
+  document.getElementById('u-reminders').innerHTML=rm;
+
+  // kosten
+  let ko=head('Kostenoverzicht',car?`${esc(car.merk)} ${esc(car.model)} · alle geregistreerde kosten`:'Nog geen auto',carSelect('ko-car',true));
+  if(!car)ko+=EMPTY_CAR;
+  else{
+    const year=new Date().getFullYear();
+    const total=recs.reduce((a,r)=>a+Number(r.bedrag||0),0);
+    const yr=recs.filter(r=>new Date(r.datum).getFullYear()===year);
+    const kms=recs.map(r=>r.kilometerstand).filter(Boolean);
+    const span=kms.length>1?Math.max(...kms)-Math.min(...kms):0;
+    const cats={};recs.forEach(r=>{cats[r.categorie]=(cats[r.categorie]||0)+Number(r.bedrag||0)});
+    const max=Math.max(1,...Object.values(cats));
+    const colors={onderhoud:'var(--gold)',remmen:'var(--blue)',banden:'var(--green)',apk:'var(--orange)',reparatie:'var(--red)',overig:'var(--t3)'};
+    ko+=`<div class="kt"><div class="kc"><div class="kc-ic">🔧</div><div style="font-size:11px;color:var(--t3)">Onderhoud ${year}</div><div class="kc-n" style="color:var(--gold)">${eur(yr.reduce((a,r)=>a+Number(r.bedrag||0),0))}</div><div class="kc-lb">${beurten(yr.length)} dit jaar</div></div><div class="kc"><div class="kc-ic">📚</div><div style="font-size:11px;color:var(--t3)">Totaal geregistreerd</div><div class="kc-n">${eur(total)}</div><div class="kc-lb">${beurten(recs.length)}</div></div><div class="kc"><div class="kc-ic">📊</div><div style="font-size:11px;color:var(--t3)">Per kilometer</div><div class="kc-n">${span?'€ '+(total/span).toLocaleString('nl-NL',{maximumFractionDigits:2}):'-'}</div><div class="kc-lb">${span?'over '+nf(span)+' km':'Vul km-standen in'}</div></div></div>
+<div class="card"><div class="cl">📋 Per categorie</div><div style="margin-top:8px">${Object.keys(cats).length?Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="cbr"><span class="cb-lb" style="text-transform:capitalize">${esc(k)}</span><div class="cb-tr"><div class="cb-fl" style="width:${Math.round(v/max*100)}%;background:${colors[k]||'var(--t3)'}"></div></div><span class="cb-n">${eur(v)}</span></div>`).join(''):'<div style="font-size:13px;color:var(--t2)">Nog geen kosten geregistreerd.</div>'}</div></div>`;
+  }
+  document.getElementById('u-kosten').innerHTML=ko;
+
+  // overdracht
+  document.getElementById('u-overdracht').innerHTML=head('Auto Overdragen','Geef de volledige historie mee bij verkoop')+`<div class="empty"><div class="e-ic">🤝</div><div class="e-t">Binnenkort beschikbaar</div>Straks deel je met één QR-code je complete onderhoudshistorie met een koper. Tot die tijd kun je al je gegevens downloaden via je profiel.<div style="margin-top:14px"><button class="btn-secondary" style="border-radius:10px" onclick="exportData()">📦 Mijn gegevens downloaden</button></div></div>`;
+
+  // profiel
+  const tog=(key,label)=>`<div class="tgr"><span>${label}</span><div class="tog ${profile[key]?'on':'off'}" role="switch" aria-checked="${!!profile[key]}" onclick="togPref(this,'${key}')"><div class="tog-th"></div></div></div>`;
+  document.getElementById('u-profiel').innerHTML=head('Mijn Profiel','Account, privacy & instellingen')+
+`<div class="pt2"><div class="pav2">${esc(name.charAt(0).toUpperCase())}</div><div style="flex:1;min-width:0"><div class="pn2">${esc(name)}</div><div class="pe2">${esc(currentUser.email)}</div><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${currentUser.email_confirmed_at?'<span class="badge bg">✓ E-mail bevestigd</span>':'<span class="badge bo">E-mail niet bevestigd</span>'}<span class="badge bgo">Gratis account</span></div></div><button class="btn-secondary" style="border-radius:10px;font-size:13px;padding:9px 16px;flex-shrink:0" onclick="logout()">Uitloggen</button></div>
+<div class="g2" style="margin-bottom:14px">
+<div class="card"><div class="cl">✏️ Gegevens</div><div class="fg"><label class="fl" for="p-name">Naam</label><input class="fi" id="p-name" maxlength="100" value="${esc(profile.name||'')}"></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-sm btn-sm-gold" onclick="saveName()">Naam opslaan</button><button class="btn-sm btn-sm-white" onclick="openM('newpass')">Wachtwoord wijzigen</button></div></div>
+<div class="card"><div class="cl">🔔 Voorkeuren</div>${tog('notify_apk','APK-herinneringen')}${tog('notify_maintenance','Onderhoudsalerts')}${tog('marketing_opt_in','Nieuws en tips per e-mail')}<div style="font-size:11px;color:var(--t3);margin-top:8px">Herinneringen per e-mail volgen binnenkort. Je voorkeuren worden nu al bewaard.</div></div>
+</div>
+<div class="card" style="margin-bottom:14px"><div class="cl">🚗 Mijn auto's</div>${cars.length?cars.map(c=>`<div class="tgr"><span>${esc(c.merk)} ${esc(c.model)} · ${esc(fmtKent(c.kenteken))}</span><button class="rec-del" onclick="removeCar('${c.id}')">🗑️ Verwijderen</button></div>`).join(''):'<div style="font-size:13px;color:var(--t2)">Nog geen auto toegevoegd.</div>'}<button class="btn-sm btn-sm-white" style="margin-top:10px" onclick="sv('kenteken')">＋ Auto toevoegen</button></div>
+<div class="card"><div class="cl">🔒 Privacy (AVG)</div><div style="font-size:12.5px;color:var(--t2);line-height:1.6;margin-bottom:12px">Je gegevens staan in de EU en zijn alleen voor jou zichtbaar. Je kunt ze op elk moment downloaden of laten verwijderen. <a style="color:var(--gold);cursor:pointer" onclick="openInfo('privacy')">Privacyverklaring</a></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-secondary" style="border-radius:10px;font-size:13px;padding:10px 16px" onclick="exportData()">📦 Mijn gegevens downloaden</button><button class="btn-danger" onclick="openM('delete')">Account verwijderen</button></div></div>`;
+}
+
+// ---------- CTA ----------
+function ctaStart(){const e=document.getElementById('cta-email').value.trim();document.getElementById('remail').value=e;openM('register');document.getElementById(e?'rname':'remail').focus()}
+
+// ---------- RDW open data (rechtstreeks, zonder proxy van derden) ----------
+async function fetchRdw(kenteken){
+  const k=normKent(kenteken);
+  const get=url=>fetch(url,{signal:AbortSignal.timeout(8000)}).then(r=>{if(!r.ok)throw new Error('rdw');return r.json()});
+  const [base,fuel]=await Promise.all([
+    get(`https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken=${k}`),
+    get(`https://opendata.rdw.nl/resource/8ys7-d773.json?kenteken=${k}`).catch(()=>[])
+  ]);
+  if(!base||!base.length)throw new Error('nf');
+  const v=base[0],f=fuel[0]||{};
+  return {
+    kenteken:k,raw:v,fuel:f,
+    merk:v.merk||'',model:v.handelsbenaming||'',
+    bouwjaar:v.datum_eerste_toelating?parseInt(v.datum_eerste_toelating.slice(0,4),10):null,
+    brandstof:fuel.map(x=>x.brandstof_omschrijving).filter(Boolean).join(' / ')||null,
+    kleur:v.eerste_kleur||null,
+    apk_vervaldatum:rdwDate(v.vervaldatum_apk)
+  };
+}
+async function lkwL(){const raw=normKent(document.getElementById('lkw-f').value);if(raw.length<4){toast('⚠️','Voer een geldig kenteken in','');return}const ld=document.getElementById('lkw-load'),res=document.getElementById('lkw-res'),err=document.getElementById('lkw-err'),btn=document.getElementById('lkw-btn');ld.classList.add('show');res.classList.remove('show');err.classList.remove('show');btn.disabled=true;btn.innerHTML='<div class="spin" style="border-top-color:#fff"></div>';try{const car=await fetchRdw(raw);lastRdw=car;document.getElementById('lkw-name').textContent=car.merk+' '+car.model;document.getElementById('lkw-meta').textContent=[car.bouwjaar,car.brandstof,car.kleur,car.apk_vervaldatum&&'APK tot '+fmtDate(car.apk_vervaldatum)].filter(Boolean).join(' · ');const score=healthScore(car,null),st=scoreStyle(score);document.getElementById('lkw-score-num').textContent=score;document.getElementById('lkw-score-num').style.color=st.c;document.getElementById('lkw-score-label').textContent=st.label;document.getElementById('lkw-score-label').style.color=st.c;document.getElementById('rkent').value=raw;res.classList.add('show');toast('✅',car.merk+' '+car.model+' gevonden!',car.bouwjaar?'Bouwjaar '+car.bouwjaar:'')}catch(e){err.classList.add('show');toast('❌','Niet gevonden','Controleer het kenteken')}finally{ld.classList.remove('show');btn.disabled=false;btn.innerHTML='🚗 Zoek mijn auto op'}}
+document.getElementById('lkw-f')?.addEventListener('keydown',e=>{if(e.key==='Enter')lkwL()});
+async function rdwL(){const raw=normKent(document.getElementById('kfield').value);if(raw.length<4){toast('⚠️','Voer een geldig kenteken in','');return}const ld=document.getElementById('rdw-loading'),res=document.getElementById('rdw-result'),err=document.getElementById('rdw-error'),btn=document.getElementById('rdw-btn');ld.style.display='flex';res.classList.remove('show');err.classList.remove('show');btn.disabled=true;btn.innerHTML='<div class="spin"></div> Zoeken...';try{const car=await fetchRdw(raw),v=car.raw,f=car.fuel;lastRdw=car;const set=(id,t)=>document.getElementById(id).textContent=t||'-';set('r-plate',fmtKent(raw));set('r-name',car.merk+' '+car.model);set('r-detail',[car.bouwjaar,car.brandstof,car.kleur].filter(Boolean).join(' · '));set('r-merk',car.merk);set('r-model',car.model);set('r-jaar',car.bouwjaar);set('r-brand',car.brandstof);set('r-kleur',car.kleur);set('r-carro',v.inrichting);set('r-verm',f.nettomaximumvermogen&&Math.round(f.nettomaximumvermogen)+' kW');set('r-cyl',v.aantal_cilinders);set('r-massa',v.massa_ledig_voertuig&&v.massa_ledig_voertuig+' kg');set('r-co2',f.co2_uitstoot_gecombineerd&&f.co2_uitstoot_gecombineerd+' g/km');set('r-zit',v.aantal_zitplaatsen);set('r-apk',car.apk_vervaldatum&&fmtDate(car.apk_vervaldatum));let apkBadge='<span class="badge bg">APK geldig</span>';if(car.apk_vervaldatum){const diff=daysUntil(car.apk_vervaldatum);if(diff<0)apkBadge='<span class="badge br">⚠️ APK verlopen</span>';else if(diff<30)apkBadge='<span class="badge bo">⏰ Bijna verlopen</span>'}const recall=v.openstaande_terugroepactie_indicator==='Ja'?'<span class="badge br" style="margin-left:5px">⚠️ Openstaande terugroepactie</span>':'';document.getElementById('r-badges').innerHTML=apkBadge+recall;res.classList.add('show');toast('✅','Auto gevonden!',car.merk+' '+car.model)}catch(e){err.classList.add('show');toast('❌','Kenteken niet gevonden','')}finally{ld.style.display='none';btn.disabled=false;btn.innerHTML='🔍 Zoek op in RDW'}}
+document.getElementById('kfield')?.addEventListener('keydown',e=>{if(e.key==='Enter')rdwL()});
+async function addCar(){
+  if(!lastRdw)return;
+  if(!currentUser){document.getElementById('rkent').value=lastRdw.kenteken;openM('register');return}
+  try{await saveCar(lastRdw);toast('🚗','Auto toegevoegd!',lastRdw.merk+' '+lastRdw.model);sv('dashboard')}
+  catch(e){toast('❌','Toevoegen mislukt',e.message)}
+}
+function getGeo(){if(navigator.geolocation){navigator.geolocation.getCurrentPosition(()=>{document.getElementById('garage-sub').textContent='Op basis van jouw huidige locatie'},()=>{document.getElementById('garage-sub').textContent='Utrecht (standaard locatie)'})}else{document.getElementById('garage-sub').textContent='Utrecht (standaard locatie)'}}
+function doUpload(){const z=document.getElementById('uzone'),l=document.getElementById('upload-loader');z.classList.add('drag');l.style.display='flex';setTimeout(()=>{z.classList.remove('drag');l.style.display='none';document.getElementById('ai-result').classList.add('show');toast('🧠','Factuur uitgelezen!','Controleer en sla op')},2000)}
+function saveF(){document.getElementById('ai-result').classList.remove('show');toast('✅','Opgeslagen! (demo)','Maak een account aan om echt op te slaan');setTimeout(()=>sv('onderhoud'),800)}
+function openBooking(g,d){if(currentUser){toast('🛠️','Binnenkort beschikbaar','Online boeken bij garages komt eraan');return}selGarage=g;selTime='';document.getElementById('booking-name').textContent=g+' · '+d+' (demo)';document.querySelectorAll('.ts').forEach(s=>s.classList.remove('sel'));const t=new Date();t.setDate(t.getDate()+1);const bd=document.getElementById('bdate');bd.min=bd.value=t.toISOString().split('T')[0];openM('booking')}
+function selT(el){document.querySelectorAll('.ts').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');selTime=el.textContent}
+function confirmBooking(){if(!selTime){toast('⚠️','Kies een tijdslot','');return}const d=document.getElementById('bdate').value,ds=new Date(d).toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long'});closeM();toast('📅','Demo: afspraak ingepland',selGarage+' · '+ds+' om '+selTime)}
+function copyLink(){navigator.clipboard?.writeText(document.getElementById('share-url').value).catch(()=>{});toast('🔗','Link gekopieerd!','Stuur naar de koper!')}
+function togThis(el){el.classList.toggle('on');el.classList.toggle('off')}
+
+// ---------- cookies & analytics (Telecommunicatiewet art. 11.7a) ----------
+function getConsent(){try{return localStorage.getItem('cv_cookies')}catch(e){return null}}
+function setConsent(v){try{localStorage.setItem('cv_cookies',v)}catch(e){}}
+function loadAnalytics(){
+  if(window.va)return;
+  window.va=function(){(window.vaq=window.vaq||[]).push(arguments)};
+  const s=document.createElement('script');s.defer=true;s.src='/_vercel/insights/script.js';document.head.appendChild(s);
+}
+function acceptCookies(){setConsent('accepted');document.getElementById('cookie-banner').style.display='none';loadAnalytics()}
+function declineCookies(){
+  const wasAccepted=getConsent()==='accepted';
+  setConsent('declined');document.getElementById('cookie-banner').style.display='none';
+  if(wasAccepted&&window.va)location.reload(); // stop het al geladen analytics-script
+}
+function openCookieSettings(){closeM();document.getElementById('cookie-banner').style.display='flex'}
+
+// ---------- start ----------
+document.querySelectorAll('.co-info').forEach(el=>el.textContent=`${COMPANY.name} · KvK ${COMPANY.kvk} · ${COMPANY.email}`);
+const consent=getConsent();
+if(consent==='accepted')loadAnalytics();
+else if(!consent)document.getElementById('cookie-banner').style.display='flex';
+initAuth();
+// deelbare links naar juridische teksten, bijv. carvital.nl/#privacy
+function openInfoFromHash(){const k=location.hash.slice(1);if(INFO_CONTENT[k])openInfo(k)}
+window.addEventListener('hashchange',openInfoFromHash);
+openInfoFromHash();
+</script>
+</body>
+</html>
