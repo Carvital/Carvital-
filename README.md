@@ -5,7 +5,7 @@ Static site (`index.html`, hosted on Vercel) with Supabase for authentication, d
 ## Setup
 
 1. **Create a Supabase project** at supabase.com. Choose the region **Central EU (Frankfurt)**. That keeps the data in the EU, which the privacy statement promises.
-2. **Create the database:** go to SQL Editor → New query, paste `supabase/schema.sql` and click Run.
+2. **Create the database:** go to SQL Editor → New query, paste `supabase/schema.sql` and click Run. The script is safe to run again after it changes (for example to add the `share_links` table).
 3. **Connect the frontend:** under Project Settings → API, copy the Project URL and the `anon` public key into `SUPABASE_URL` and `SUPABASE_ANON_KEY` at the top of the `<script>` in `index.html`. The anon key is meant to be public. Row Level Security makes sure every user only sees their own data. Never put the `service_role` key in the frontend.
 4. **Auth settings** (Authentication → URL Configuration / Providers → Email):
    - Site URL: `https://carvital.nl` (or your Vercel URL). Add `http://localhost:5500` under Redirect URLs for local testing.
@@ -32,3 +32,4 @@ Then open http://localhost:5500.
 - Users can export their data themselves (JSON), and delete their account including invoices, under Profiel.
 - Invoices go into a private bucket. Each user can only access their own folder.
 - Location is only used when the user clicks the location button, and it is not stored.
+- Sharing the history with a buyer (Overdracht) is opt-in per car. The public link (`#historie=<token>`) shows the car and records only: no name, e-mail or invoices. The owner can revoke it at any time.

@@ -135,3 +135,54 @@ drop policy if exists "own invoices delete" on storage.objects;
 create policy "own invoices delete" on storage.objects
   for delete to authenticated
   using (bucket_id = 'invoices' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- ---------- share links: hand the maintenance history to a buyer ----------
+-- The owner creates a link for one car. Anyone with the token can read that car's history
+-- through get_shared_history(), without logging in. Names, e-mail and invoices are never shared.
+create table if not exists public.share_links (
+  token text primary key default replace(gen_random_uuid()::text, '-', ''),
+  user_id uuid not null references auth.users (id) on delete cascade default auth.uid(),
+  car_id uuid not null references public.cars (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (car_id)
+);
+
+alter table public.share_links enable row level security;
+
+drop policy if exists "own share links" on public.share_links;
+create policy "own share links" on public.share_links
+  for all using (user_id = auth.uid())
+  with check (
+    user_id = auth.uid()
+    and exists (select 1 from public.cars c where c.id = car_id and c.user_id = auth.uid())
+  );
+
+create or replace function public.get_shared_history(p_token text)
+returns json
+language sql
+stable
+security definer set search_path = ''
+as $$
+  select json_build_object(
+    'shared_at', s.created_at,
+    'car', json_build_object(
+      'kenteken', c.kenteken, 'merk', c.merk, 'model', c.model, 'bouwjaar', c.bouwjaar,
+      'brandstof', c.brandstof, 'kleur', c.kleur, 'apk_vervaldatum', c.apk_vervaldatum,
+      'kilometerstand', c.kilometerstand
+    ),
+    'records', coalesce((
+      select json_agg(json_build_object(
+        'datum', r.datum, 'kilometerstand', r.kilometerstand, 'omschrijving', r.omschrijving,
+        'categorie', r.categorie, 'garage', r.garage, 'bedrag', r.bedrag,
+        'has_invoice', r.invoice_path is not null
+      ) order by r.datum desc, r.created_at desc)
+      from public.maintenance_records r where r.car_id = c.id
+    ), '[]'::json)
+  )
+  from public.share_links s
+  join public.cars c on c.id = s.car_id
+  where s.token = p_token;
+$$;
+
+revoke all on function public.get_shared_history(text) from public;
+grant execute on function public.get_shared_history(text) to anon, authenticated;
