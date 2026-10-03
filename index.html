@@ -296,6 +296,11 @@ footer{background:#111;padding:48px 24px 24px;border-top:1px solid rgba(255,255,
 .gt{padding:3px 8px;border-radius:50px;background:var(--bg3);font-size:10px;color:var(--t2);border:1px solid var(--border)}
 .gc-p{font-size:12px;color:var(--t2);margin-bottom:13px}
 .gc-p strong{color:var(--dark)}
+.garage-search{display:flex;gap:8px;flex-wrap:wrap}
+.garage-search #garage-q{flex:1;min-width:180px}
+.garage-search #garage-r{width:auto}
+.gc-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.gc-act a{flex:1;min-width:80px;text-align:center;text-decoration:none;justify-content:center}
 .bk{width:100%;padding:10px;border-radius:9px;background:var(--gold);color:#fff;font-size:12.5px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;box-shadow:0 2px 6px rgba(232,148,10,.2)}
 .bk:hover{background:var(--gold2)}
 .rem-sec{margin-bottom:17px}
@@ -389,6 +394,8 @@ select.fi{appearance:auto}
 .nav-user{display:none}
 body.signed-in .nav-guest{display:none}
 body.signed-in .nav-user{display:inline-block}
+.ni.user-flex,.mm-item.user-flex{display:none}
+body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
 .legal h4{font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:var(--dark);margin:14px 0 4px}
 .legal ul{margin:6px 0 0 18px}
 #cookie-banner button{min-width:140px}
@@ -649,7 +656,7 @@ body.signed-in .nav-user{display:inline-block}
       <div class="sb-car demo-only"><div class="sb-car-n">Volkswagen Golf</div><div class="sb-car-s">AB-123-C · 2018 · 87.432 km</div><div class="sb-car-score"><span style="background:#D1FAE5;color:var(--green);padding:2px 8px;border-radius:50px;font-size:10px;font-weight:700">89/100</span><span class="badge bg">Uitstekend</span></div></div>
       <div class="ni" onclick="sv('kenteken',document.querySelectorAll('.ni')[1])" style="color:var(--gold);font-size:12.5px"><span class="ic">＋</span> Auto toevoegen</div>
     </div>
-    <div class="sb-bot"><div class="ni" onclick="showPage('landing')"><span class="ic">←</span> Naar website</div></div>
+    <div class="sb-bot"><div class="ni" onclick="showPage('landing')"><span class="ic">←</span> Naar website</div><div class="ni user-flex" onclick="logout()"><span class="ic">🚪</span> Uitloggen</div></div>
   </div>
   <div class="mobile-nav" id="mobile-nav">
     <button class="mnb active" onclick="mnv('dashboard',this)"><span class="ic">🏠</span>Dashboard</button>
@@ -792,19 +799,12 @@ body.signed-in .nav-user{display:inline-block}
     </div>
 
     <div id="view-garages" class="view">
-      <div class="ahd"><div><div class="at">Garages bij jou in de buurt</div><div class="as2" id="garage-sub">Utrecht (standaard locatie)</div></div><button class="btn-secondary" style="border-radius:10px;font-size:12.5px;padding:9px 16px" onclick="getGeo()">📍 Gebruik mijn locatie</button></div>
-      <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:13px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
-        <span style="font-size:20px">🤖</span>
-        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--dark)">Aanbevolen voor jouw VW Golf</div><div style="font-size:12px;color:var(--t3)">Op basis van: APK nodig · Remblokken achter · 87.432 km</div></div>
-        <span class="badge bgo">Gepersonaliseerd</span>
+      <div class="ahd"><div><div class="at">Garages bij jou in de buurt</div><div class="as2" id="garage-sub">Zoek op postcode of plaats, of gebruik je locatie</div></div></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="garage-search"><input class="fi" id="garage-q" placeholder="Postcode of plaats, bijv. 3511 AB" maxlength="60" autocomplete="postal-code" onkeydown="if(event.key==='Enter')searchGarages()"><select class="fi" id="garage-r" aria-label="Zoekstraal"><option value="3000">3 km</option><option value="5000" selected>5 km</option><option value="10000">10 km</option><option value="20000">20 km</option></select><button class="btn-primary" id="garage-btn" style="border-radius:10px;font-size:13px;padding:10px 16px" onclick="searchGarages()">🔍 Zoeken</button><button class="btn-secondary" id="geo-btn" style="border-radius:10px;font-size:13px;padding:10px 16px" onclick="getGeo()">📍 Mijn locatie</button></div>
+        <div style="font-size:11px;color:var(--t3);margin-top:8px">🔒 Je zoekopdracht of afgeronde locatie gaat alleen naar OpenStreetMap om garages op te zoeken. Wij slaan niets op.</div>
       </div>
-      <div class="demo-banner">ℹ️ <span>Garage-aanbevelingen en online boeken zijn nog in ontwikkeling. Onderstaande garages zijn <strong>voorbeelden</strong>.</span></div>
-      <div class="gg">
-        <div class="gc rec"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px"><div><div class="gc-n">Garage Vermeulen <span class="badge bgo" style="font-size:9px;margin-left:4px">⭐ Aanbevolen</span></div><div class="gc-d">📍 Utrecht Centrum</div></div><div class="gc-r">⭐ 4.9</div></div><div class="gtags"><span class="gt">VW Specialist</span><span class="gt">APK</span><span class="gt">Remmen</span></div><div class="gc-p">Gespecialiseerd in VW, Audi en Seat. Ideaal voor jouw Golf.</div><button class="bk" onclick="openBooking('Garage Vermeulen','Utrecht Centrum')">Afspraak inplannen</button></div>
-        <div class="gc"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px"><div><div class="gc-n">AutoService Utrecht</div><div class="gc-d">📍 Overvecht, Utrecht</div></div><div class="gc-r">⭐ 4.7</div></div><div class="gtags"><span class="gt">Alle merken</span><span class="gt">APK</span></div><div class="gc-p">Erkend voor alle merken. Snel geholpen zonder verrassingen.</div><button class="bk" onclick="openBooking('AutoService Utrecht','Overvecht')">Afspraak inplannen</button></div>
-        <div class="gc"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px"><div><div class="gc-n">Bandenservice Leidsche Rijn</div><div class="gc-d">📍 Leidsche Rijn</div></div><div class="gc-r">⭐ 4.5</div></div><div class="gtags"><span class="gt">Banden</span><span class="gt">APK</span></div><div class="gc-p">Sterk voor banden en APK. Vaak dezelfde week nog terecht.</div><button class="bk" onclick="openBooking('Bandenservice Leidsche Rijn','Leidsche Rijn')">Afspraak inplannen</button></div>
-        <div class="gc"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px"><div><div class="gc-n">Merkdealer Zeist</div><div class="gc-d">📍 Zeist</div></div><div class="gc-r">⭐ 4.6</div></div><div class="gtags"><span class="gt">Officieel dealer</span><span class="gt">Garantie</span></div><div class="gc-p">Merkdealer met originele onderdelen en garantie op werk.</div><button class="bk" onclick="openBooking('Merkdealer Zeist','Zeist')">Afspraak inplannen</button></div>
-      </div>
+      <div id="garage-list"><div class="empty"><div class="e-ic">🗺️</div><div class="e-t">Vind een garage in de buurt</div>Vul je postcode of plaats in, of gebruik je huidige locatie.</div></div>
     </div>
 
     <div id="view-kosten" class="view">
@@ -893,22 +893,9 @@ body.signed-in .nav-user{display:inline-block}
       <div class="mm-item" onclick="mnv2('overdracht')"><span class="ic">🤝</span> Overdracht</div>
       <div class="mm-item" onclick="mnv2('profiel')"><span class="ic">👤</span> Profiel</div>
       <div class="mm-item" onclick="closeM();showPage('landing')"><span class="ic">←</span> Naar website</div>
+      <div class="mm-item user-flex" onclick="closeM();logout()"><span class="ic">🚪</span> Uitloggen</div>
     </div>
     <div class="m-footer"><a onclick="closeM()">Sluiten</a></div>
-  </div>
-</div>
-
-<!-- BOOKING MODAL -->
-<div class="modal-backdrop" id="modal-booking">
-  <div class="modal-box">
-    <div class="m-title">Afspraak inplannen</div>
-    <div class="m-sub" id="booking-name">Laden...</div>
-    <div class="fg"><div class="fl">Wat wilt u laten doen?</div><div class="spills"><span class="spill" onclick="this.classList.toggle('sel')">APK keuring</span><span class="spill" onclick="this.classList.toggle('sel')">Remblokken</span><span class="spill" onclick="this.classList.toggle('sel')">Olie</span><span class="spill" onclick="this.classList.toggle('sel')">Banden</span><span class="spill" onclick="this.classList.toggle('sel')">Algemene check</span></div></div>
-    <div class="fg"><div class="fl">Datum</div><input type="date" class="fi" id="bdate"></div>
-    <div class="fg"><div class="fl">Tijdslot</div><div class="tgrid"><div class="ts" onclick="selT(this)">08:00</div><div class="ts" onclick="selT(this)">09:00</div><div class="ts un">10:00</div><div class="ts" onclick="selT(this)">11:00</div><div class="ts un">13:00</div><div class="ts" onclick="selT(this)">14:00</div><div class="ts" onclick="selT(this)">15:00</div><div class="ts un">16:00</div><div class="ts" onclick="selT(this)">17:00</div></div></div>
-    <div class="fg"><div class="fl">Opmerkingen</div><input type="text" class="fi" placeholder="Optioneel"></div>
-    <button class="btn-primary" style="width:100%;justify-content:center;border-radius:10px" onclick="confirmBooking()">✅ Afspraak bevestigen</button>
-    <div class="m-footer"><a onclick="closeM()">Annuleren</a></div>
   </div>
 </div>
 
@@ -1033,7 +1020,6 @@ const sb = window.supabase && !SUPABASE_URL.includes('YOUR-PROJECT')
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 
-let selTime='',selGarage='';
 let currentUser=null,profile=null,cars=[],records=[],shareLinks=[],activeCarId=null,lastRdw=null;
 
 function showPage(p){document.querySelectorAll('.page').forEach(x=>{x.classList.remove('active');x.style.display=''});if(p==='app'){const a=document.getElementById('page-app');a.classList.add('active');a.style.display='flex'}else document.getElementById(p==='share'?'page-share':'page-landing').classList.add('active');window.scrollTo(0,0)}
@@ -1060,7 +1046,7 @@ const INFO_CONTENT={
 <li><strong>Onderhoud:</strong> de beurten die je invoert (datum, km-stand, omschrijving, garage, bedrag) en facturen die je uploadt. Facturen kunnen zelf persoonsgegevens bevatten, zoals je adres.</li>
 <li><strong>Voorkeuren:</strong> je instellingen voor herinneringen en nieuwsbrief, en wanneer je akkoord ging met de voorwaarden.</li>
 <li><strong>Technisch:</strong> IP-adres en tijdstip in serverlogs van onze hostingpartijen, voor beveiliging.</li>
-<li><strong>Locatie:</strong> alleen als je zelf op "Gebruik mijn locatie" klikt. Je locatie wordt alleen in je browser gebruikt en niet door ons opgeslagen.</li></ul>
+<li><strong>Locatie:</strong> alleen als je zelf op "Mijn locatie" klikt of een postcode of plaats invult bij Garages. Je locatie wordt afgerond op ongeveer 100 meter en rechtstreeks vanuit je browser naar OpenStreetMap gestuurd om garages op te zoeken. Wij slaan je locatie niet op.</li></ul>
 ${P}Zoek je op de homepage een kenteken op zonder account, dan gaat dat kenteken rechtstreeks van jouw browser naar de openbare RDW-database. Wij slaan dat niet op.</p>
 <h4>3. Waarvoor en op welke grondslag?</h4><ul>
 <li>Je account, onderhoudsboekje, Health Score en herinneringen: <strong>uitvoering van de overeenkomst</strong> (art. 6 lid 1 sub b AVG).</li>
@@ -1073,6 +1059,7 @@ ${P}De AutoHealth Score is een indicatieve berekening. We nemen geen besluiten o
 <h4>5. Met wie delen we gegevens?</h4><p>We verkopen je gegevens nooit. We werken met deze verwerkers, met wie we een verwerkersovereenkomst hebben:</p><ul>
 <li><strong>Supabase</strong> — database, inloggen en opslag van facturen. Je gegevens staan op servers in de EU (Frankfurt).</li>
 <li><strong>Vercel</strong> — hosting van de website en (met toestemming) anonieme statistieken.</li>
+<li><strong>OpenStreetMap</strong> (Nominatim en Overpass API, servers in de EU): ontvangt je zoekopdracht of afgeronde locatie en je IP-adres als je garages zoekt.</li>
 <li><strong>bunny.net</strong> (lettertypen, EU) en <strong>jsDelivr</strong> (laden van programmacode) — deze zien alleen je IP-adres bij het laden van de pagina.</li></ul>
 ${P}Supabase en Vercel zijn bedrijven uit de Verenigde Staten. Voor een eventuele doorgifte buiten de EER vertrouwen we op het EU-US Data Privacy Framework en/of de standaardcontractbepalingen van de Europese Commissie.</p>
 <h4>6. Beveiliging</h4><p>Alle verbindingen zijn versleuteld (HTTPS). Wachtwoorden worden gehasht opgeslagen. Elke gebruiker kan technisch alleen zijn eigen gegevens en facturen inzien.</p>
@@ -1629,12 +1616,59 @@ async function addCar(){
   try{await saveCar(lastRdw);toast('🚗','Auto toegevoegd!',lastRdw.merk+' '+lastRdw.model);sv('dashboard')}
   catch(e){toast('❌','Toevoegen mislukt',e.message)}
 }
-function getGeo(){if(navigator.geolocation){navigator.geolocation.getCurrentPosition(()=>{document.getElementById('garage-sub').textContent='Op basis van jouw huidige locatie'},()=>{document.getElementById('garage-sub').textContent='Utrecht (standaard locatie)'})}else{document.getElementById('garage-sub').textContent='Utrecht (standaard locatie)'}}
+// ---------- garages in de buurt (OpenStreetMap) ----------
+function garageMsg(ic,title,sub){document.getElementById('garage-list').innerHTML=`<div class="empty"><div class="e-ic">${ic}</div><div class="e-t">${title}</div>${sub}</div>`}
+function distKm(lat1,lon1,lat2,lon2){const r=Math.PI/180,a=Math.sin((lat2-lat1)*r/2)**2+Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin((lon2-lon1)*r/2)**2;return 12742*Math.asin(Math.sqrt(a))}
+function getGeo(){
+  if(!navigator.geolocation)return garageMsg('📍','Locatie niet beschikbaar','Zoek op postcode of plaats.');
+  busy('geo-btn',true);
+  navigator.geolocation.getCurrentPosition(
+    p=>{busy('geo-btn',false);loadGarages(p.coords.latitude,p.coords.longitude,'jouw huidige locatie')},
+    ()=>{busy('geo-btn',false);garageMsg('📍','Geen toegang tot je locatie','Sta locatie toe in je browser, of zoek op postcode of plaats.')},
+    {timeout:10000,maximumAge:300000});
+}
+async function searchGarages(){
+  const q=document.getElementById('garage-q').value.trim();
+  if(q.length<2)return toast('⚠️','Vul een postcode of plaats in','');
+  busy('garage-btn',true);
+  try{
+    const res=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=nl&q='+encodeURIComponent(q));
+    const [hit]=res.ok?await res.json():[];
+    if(!hit)garageMsg('🔍','Locatie niet gevonden','Controleer de postcode of plaatsnaam.');
+    else await loadGarages(Number(hit.lat),Number(hit.lon),hit.name||q);
+  }catch(e){garageMsg('⚠️','Zoeken mislukt','Controleer je internetverbinding en probeer het opnieuw.')}
+  finally{busy('garage-btn',false)}
+}
+async function loadGarages(lat,lon,label){
+  // afronden op ~100 m: genoeg om garages te vinden, zonder je exacte locatie te delen
+  lat=Math.round(lat*1000)/1000;lon=Math.round(lon*1000)/1000;
+  const radius=Number(document.getElementById('garage-r').value)||5000;
+  document.getElementById('garage-sub').textContent='Rond '+label+' · '+radius/1000+' km';
+  document.getElementById('garage-list').innerHTML='<div class="empty"><div class="spin" style="margin:0 auto"></div></div>';
+  const query=`[out:json][timeout:25];nwr["shop"~"^(car_repair|tyres)$"](around:${radius},${lat},${lon});out center tags;`;
+  let els;
+  try{
+    const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(query),headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+    if(!res.ok)throw new Error(res.status);
+    els=(await res.json()).elements;
+  }catch(e){return garageMsg('⚠️','Garages laden mislukt','De kaartdienst is even druk. Probeer het over een minuut opnieuw.')}
+  const list=els.map(el=>{const t=el.tags||{},la=el.lat??el.center?.lat,lo=el.lon??el.center?.lon;return {t,la,lo,d:distKm(lat,lon,la,lo)}})
+    .filter(g=>g.t.name&&g.la!=null).sort((x,y)=>x.d-y.d).slice(0,30);
+  if(!list.length)return garageMsg('🔧','Geen garages gevonden','Probeer een grotere zoekstraal.');
+  document.getElementById('garage-list').innerHTML=`<div class="gg">${list.map(garageCard).join('')}</div><div style="font-size:11px;color:var(--t3);margin-top:14px">Gegevens © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:var(--t3)">OpenStreetMap-bijdragers</a>. Klopt er iets niet? Garages kunnen hun gegevens zelf aanpassen op openstreetmap.org.</div>`;
+}
+function garageCard(g){
+  const t=g.t,addr=[[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' '),t['addr:city']].filter(Boolean).join(', ');
+  const tags=[t.shop==='tyres'?'Banden':'Autogarage',t.brand,t['service:vehicle:tyres']==='yes'&&t.shop!=='tyres'?'Banden':null].filter(Boolean);
+  const web=t.website||t['contact:website'],tel=(t.phone||t['contact:phone']||'').split(';')[0].replace(/[^+0-9 ]/g,'').trim();
+  const href=web?(/^https?:\/\//i.test(web)?web:'https://'+web):null;
+  const btn='btn-sm btn-sm-white';
+  return `<div class="gc" style="cursor:default"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="min-width:0"><div class="gc-n">${esc(t.name)}</div><div class="gc-d">📍 ${esc(addr||'Adres onbekend')}</div></div><div class="gc-r" style="white-space:nowrap">${g.d.toLocaleString('nl-NL',{maximumFractionDigits:1})} km</div></div>
+<div class="gtags">${tags.map(x=>`<span class="gt">${esc(x)}</span>`).join('')}</div>${t.opening_hours?`<div class="gc-p">🕒 ${esc(t.opening_hours.slice(0,80))}</div>`:''}
+<div class="gc-act"><a class="${btn}" href="https://www.google.com/maps/dir/?api=1&destination=${g.la},${g.lo}" target="_blank" rel="noopener">🧭 Route</a>${href?`<a class="${btn}" href="${esc(href)}" target="_blank" rel="noopener nofollow">🌐 Website</a>`:''}${tel?`<a class="${btn}" href="tel:${esc(tel.replace(/ /g,''))}">📞 Bellen</a>`:''}</div></div>`;
+}
 function doUpload(){const z=document.getElementById('uzone'),l=document.getElementById('upload-loader');z.classList.add('drag');l.style.display='flex';setTimeout(()=>{z.classList.remove('drag');l.style.display='none';document.getElementById('ai-result').classList.add('show');toast('🧠','Factuur uitgelezen!','Controleer en sla op')},2000)}
 function saveF(){document.getElementById('ai-result').classList.remove('show');toast('✅','Opgeslagen! (demo)','Maak een account aan om echt op te slaan');setTimeout(()=>sv('onderhoud'),800)}
-function openBooking(g,d){if(currentUser){toast('🛠️','Binnenkort beschikbaar','Online boeken bij garages komt eraan');return}selGarage=g;selTime='';document.getElementById('booking-name').textContent=g+' · '+d+' (demo)';document.querySelectorAll('.ts').forEach(s=>s.classList.remove('sel'));const t=new Date();t.setDate(t.getDate()+1);const bd=document.getElementById('bdate');bd.min=bd.value=t.toISOString().split('T')[0];openM('booking')}
-function selT(el){document.querySelectorAll('.ts').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');selTime=el.textContent}
-function confirmBooking(){if(!selTime){toast('⚠️','Kies een tijdslot','');return}const d=document.getElementById('bdate').value,ds=new Date(d).toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long'});closeM();toast('📅','Demo: afspraak ingepland',selGarage+' · '+ds+' om '+selTime)}
 function copyLink(){navigator.clipboard?.writeText(document.getElementById('share-url').value).catch(()=>{});toast('🔗','Link gekopieerd!','Stuur naar de koper!')}
 function togThis(el){el.classList.toggle('on');el.classList.toggle('off')}
 
