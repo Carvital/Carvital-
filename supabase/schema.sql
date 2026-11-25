@@ -186,3 +186,23 @@ $$;
 
 revoke all on function public.get_shared_history(text) from public;
 grant execute on function public.get_shared_history(text) to anon, authenticated;
+
+-- ---------- AI-uitlezing van facturen: daglimiet per gebruiker ----------
+-- De Edge Function parse-invoice telt hier hoeveel facturen iemand in 24 uur liet uitlezen.
+-- Gebruikers kunnen alleen rijen toevoegen en lezen, niet verwijderen, dus de limiet is niet te omzeilen.
+create table if not exists public.invoice_parses (
+  id bigint generated always as identity primary key,
+  user_id uuid not null references auth.users (id) on delete cascade default auth.uid(),
+  created_at timestamptz not null default now()
+);
+create index if not exists invoice_parses_user_idx on public.invoice_parses (user_id, created_at desc);
+
+alter table public.invoice_parses enable row level security;
+
+drop policy if exists "own parses select" on public.invoice_parses;
+create policy "own parses select" on public.invoice_parses
+  for select using (user_id = auth.uid());
+
+drop policy if exists "own parses insert" on public.invoice_parses;
+create policy "own parses insert" on public.invoice_parses
+  for insert with check (user_id = auth.uid());
