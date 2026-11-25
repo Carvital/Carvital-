@@ -433,6 +433,11 @@ select.fi{appearance:auto}
 .chk a{color:var(--gold);cursor:pointer;font-weight:600}
 .m-err{display:none;background:#FEE2E2;border:1px solid #FECACA;color:var(--red);border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:12px}
 .m-err.show{display:block}
+.ai-drop{border:1.5px dashed var(--border2);border-radius:12px;padding:16px;background:var(--bg);margin-bottom:16px}
+.ai-drop .fl{display:flex;align-items:center;gap:6px}
+.ai-status{display:none;align-items:center;gap:10px;margin-top:10px;font-size:13px;color:var(--t2);line-height:1.5}
+.ai-status.show{display:flex}
+.fi.ai-filled{background:#F3ECDF;border-color:var(--sand)}
 .btn-danger{padding:10px 16px;border-radius:10px;border:1.5px solid #FECACA;background:#FEF2F2;color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
 .btn-danger:hover{background:#FEE2E2}
 .rec-del{background:none;border:none;color:var(--t3);cursor:pointer;font-size:12px;padding:2px 6px}
@@ -1124,11 +1129,12 @@ ${P}Zoek je op de homepage een kenteken op zonder account, dan gaat dat kenteken
 ${P}De AutoHealth Score is een indicatieve berekening. We nemen geen besluiten over je die rechtsgevolgen hebben of je in aanmerkelijke mate treffen (art. 22 AVG).</p>
 <h4>4. Hoe lang bewaren we je gegevens?</h4><p>Zolang je account bestaat. Verwijder je je account, dan verwijderen we je gegevens en facturen direct; kopieën in back-ups worden binnen 30 dagen automatisch overschreven. Serverlogs bewaren we maximaal 90 dagen.</p>
 <h4>5. Met wie delen we gegevens?</h4><p>We verkopen je gegevens nooit. We werken met deze verwerkers, met wie we een verwerkersovereenkomst hebben:</p><ul>
+<li><strong>Anthropic</strong> — leest facturen automatisch uit (AI), alleen als je een factuur uploadt bij "Beurt toevoegen". De factuur wordt alleen gebruikt om de gegevens terug te geven en niet om AI-modellen te trainen.</li>
 <li><strong>Supabase</strong> — database, inloggen en opslag van facturen. Je gegevens staan op servers in de EU (Frankfurt).</li>
 <li><strong>Vercel</strong> — hosting van de website en (met toestemming) anonieme statistieken.</li>
 <li><strong>OpenStreetMap</strong> (Nominatim en Overpass API, servers in de EU): ontvangt je zoekopdracht of afgeronde locatie en je IP-adres als je garages zoekt.</li>
 <li><strong>bunny.net</strong> (lettertypen, EU) en <strong>jsDelivr</strong> (laden van programmacode) — deze zien alleen je IP-adres bij het laden van de pagina.</li></ul>
-${P}Supabase en Vercel zijn bedrijven uit de Verenigde Staten. Voor een eventuele doorgifte buiten de EER vertrouwen we op het EU-US Data Privacy Framework en/of de standaardcontractbepalingen van de Europese Commissie.</p>
+${P}Supabase, Vercel en Anthropic zijn bedrijven uit de Verenigde Staten. Voor een eventuele doorgifte buiten de EER vertrouwen we op het EU-US Data Privacy Framework en/of de standaardcontractbepalingen van de Europese Commissie.</p>
 <h4>6. Beveiliging</h4><p>Alle verbindingen zijn versleuteld (HTTPS). Wachtwoorden worden gehasht opgeslagen. Elke gebruiker kan technisch alleen zijn eigen gegevens en facturen inzien.</p>
 <h4>7. Jouw rechten</h4><p>Je hebt recht op inzage, correctie, verwijdering, beperking, overdraagbaarheid en bezwaar, en je kunt gegeven toestemming altijd intrekken. Veel regel je direct zelf onder <strong>Profiel</strong>: je gegevens downloaden, je naam en voorkeuren aanpassen en je account verwijderen. Voor andere verzoeken mail je <strong>${COMPANY.privacyEmail}</strong>; we reageren binnen een maand.</p>
 <h4>8. Klacht</h4><p>Ben je niet tevreden over hoe we met je gegevens omgaan? Laat het ons weten. Je hebt ook het recht een klacht in te dienen bij de Autoriteit Persoonsgegevens (autoriteitpersoonsgegevens.nl).</p>
@@ -1339,11 +1345,10 @@ async function saveRecord(){
   busy('rec-btn',true);
   let invoice_path=null;
   if(file){
-    const ext=(file.name.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'');
-    invoice_path=`${currentUser.id}/${crypto.randomUUID()}.${ext}`;
-    const up=await sb.storage.from('invoices').upload(invoice_path,file,{contentType:file.type});
-    if(up.error){busy('rec-btn',false);return mErr('rec-err','Uploaden mislukt: '+up.error.message)}
+    if(pendingInvoice?.file===file)invoice_path=pendingInvoice.path;
+    else try{invoice_path=await uploadInvoice(file)}catch(e){busy('rec-btn',false);return mErr('rec-err','Uploaden mislukt: '+e.message)}
   }
+  pendingInvoice=null;
   const {error}=await sb.from('maintenance_records').insert({
     user_id:currentUser.id,car_id,datum,omschrijving,categorie,garage:garage||null,invoice_path,
     kilometerstand:Number.isFinite(km)?km:null,bedrag:bedragRaw?Number(bedragRaw):null
@@ -1358,6 +1363,52 @@ async function saveRecord(){
   activeCarId=car_id;
   await loadUserData();
   sv('onderhoud');
+}
+
+// ---------- factuur uitlezen met AI (Edge Function parse-invoice) ----------
+let pendingInvoice=null; // al geüploade factuur die nog niet bij een beurt is opgeslagen
+async function uploadInvoice(file){
+  const ext=(file.name.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const path=`${currentUser.id}/${crypto.randomUUID()}.${ext}`;
+  const up=await sb.storage.from('invoices').upload(path,file,{contentType:file.type});
+  if(up.error)throw up.error;
+  return path;
+}
+async function readInvoice(){
+  mErr('rec-err','');
+  const file=document.getElementById('rec-file').files[0],st=document.getElementById('rec-ai');
+  // een eerder gekozen, niet opgeslagen factuur weer opruimen
+  if(pendingInvoice&&pendingInvoice.file!==file){sb.storage.from('invoices').remove([pendingInvoice.path]);pendingInvoice=null}
+  document.querySelectorAll('#u-upload .ai-filled').forEach(el=>el.classList.remove('ai-filled'));
+  if(!file){st.classList.remove('show');return}
+  if(file.size>20*1024*1024){st.classList.remove('show');return mErr('rec-err','Bestand is groter dan 20 MB.')}
+  st.classList.add('show');st.innerHTML='<div class="spin"></div><span>Factuur wordt uitgelezen… dit duurt een paar seconden.</span>';
+  document.getElementById('rec-btn').disabled=true;
+  try{
+    const path=await uploadInvoice(file);
+    pendingInvoice={file,path};
+    const {data,error}=await sb.functions.invoke('parse-invoice',{body:{path}});
+    if(error){let msg='Uitlezen lukte niet.';try{const b=await error.context?.json();if(b?.error)msg=b.error}catch(e){}throw new Error(msg)}
+    if(document.getElementById('rec-file')?.files[0]!==file)return; // inmiddels een ander bestand gekozen
+    fillFromInvoice(data,st);
+  }catch(e){
+    st.innerHTML=`<span>⚠️ ${esc(e.message||'Uitlezen lukte niet.')} Vul de gegevens zelf in; je factuur wordt wel bij de beurt bewaard.</span>`;
+  }finally{const b=document.getElementById('rec-btn');if(b)b.disabled=false}
+}
+function fillFromInvoice(d,st){
+  const set=(id,v)=>{if(v===null||v===undefined||v==='')return;const el=document.getElementById(id);el.value=v;el.classList.add('ai-filled');el.addEventListener('input',()=>el.classList.remove('ai-filled'),{once:true})};
+  const today=new Date().toISOString().slice(0,10);
+  if(d.datum&&/^\d{4}-\d{2}-\d{2}$/.test(d.datum)&&d.datum<=today)set('rec-datum',d.datum);
+  set('rec-km',Number.isInteger(d.kilometerstand)?d.kilometerstand:null);
+  set('rec-oms',d.omschrijving);
+  set('rec-cat',d.categorie);
+  set('rec-garage',d.garage);
+  set('rec-bedrag',typeof d.bedrag==='number'?d.bedrag.toFixed(2).replace('.',','):null);
+  const notes=[];
+  const kent=normKent(d.kenteken);
+  if(kent){const c=cars.find(c=>c.kenteken===kent);if(c)set('rec-car',c.id);else notes.push(`het kenteken op de factuur (${esc(fmtKent(kent))}) hoort niet bij een van je auto's`)}
+  if(d.is_invoice===false)notes.push('dit lijkt geen garagefactuur');
+  st.innerHTML=`<span>✨ Ingevuld vanaf je factuur (gemarkeerde velden). <strong>Controleer alles</strong> en klik dan op Opslaan.${notes.length?'<br>⚠️ Let op: '+notes.join('; ')+'.':''}</span>`;
 }
 
 async function deleteRecord(id){
@@ -1545,12 +1596,12 @@ function renderUser(){
   let up=head('Beurt toevoegen','Voeg een onderhoudsbeurt, APK of reparatie toe aan je boekje');
   if(!cars.length)up+=EMPTY_CAR;
   else up+=`<div class="card" style="max-width:640px"><div class="m-err" id="rec-err"></div>
+<div class="ai-drop"><label class="fl" for="rec-file">✨ Factuur uploaden en automatisch invullen <span style="font-weight:400;color:var(--t3)">(optioneel)</span></label><input type="file" class="fi" id="rec-file" accept="image/jpeg,image/png,image/webp,application/pdf" onchange="readInvoice()"><div style="font-size:11.5px;color:var(--t3);margin-top:6px;line-height:1.5">JPG, PNG, WEBP of PDF, max 20 MB. We lezen datum, km-stand, werk, garage en bedrag uit; jij controleert alles voor het opslaan. 🔒 Je factuur wordt privé opgeslagen.</div><div class="ai-status" id="rec-ai"></div></div>
 <div class="fg"><label class="fl" for="rec-car">Auto</label><select class="fi" id="rec-car">${cars.map(c=>`<option value="${c.id}" ${c.id===activeCarId?'selected':''}>${esc(c.merk)} ${esc(c.model)} · ${esc(fmtKent(c.kenteken))}</option>`).join('')}</select></div>
 <div class="frow"><div class="fg"><label class="fl" for="rec-datum">Datum</label><input type="date" class="fi" id="rec-datum" max="${new Date().toISOString().slice(0,10)}" value="${new Date().toISOString().slice(0,10)}"></div><div class="fg"><label class="fl" for="rec-km">Kilometerstand</label><input type="number" class="fi" id="rec-km" min="0" max="2000000" placeholder="bijv. 85000"></div></div>
 <div class="fg"><label class="fl" for="rec-oms">Wat is er gedaan?</label><input type="text" class="fi" id="rec-oms" maxlength="200" placeholder="bijv. Grote onderhoudsbeurt, olie en filters"></div>
 <div class="frow"><div class="fg"><label class="fl" for="rec-cat">Categorie</label><select class="fi" id="rec-cat"><option value="onderhoud">Onderhoudsbeurt</option><option value="apk">APK</option><option value="remmen">Remmen</option><option value="banden">Banden</option><option value="reparatie">Reparatie</option><option value="overig">Overig</option></select></div><div class="fg"><label class="fl" for="rec-bedrag">Bedrag (€)</label><input type="text" inputmode="decimal" class="fi" id="rec-bedrag" placeholder="bijv. 389"></div></div>
 <div class="fg"><label class="fl" for="rec-garage">Garage (optioneel)</label><input type="text" class="fi" id="rec-garage" maxlength="120" placeholder="Naam en plaats"></div>
-<div class="fg"><label class="fl" for="rec-file">Factuur (optioneel · JPG, PNG, WEBP of PDF · max 20 MB)</label><input type="file" class="fi" id="rec-file" accept="image/jpeg,image/png,image/webp,application/pdf"><div style="font-size:11px;color:var(--t3);margin-top:4px">🔒 Facturen worden privé opgeslagen in de EU; alleen jij kunt ze openen.</div></div>
 <button class="btn-primary" id="rec-btn" style="border-radius:10px" onclick="saveRecord()">✅ Opslaan in mijn boekje</button></div>`;
   document.getElementById('u-upload').innerHTML=up;
 

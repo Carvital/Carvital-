@@ -15,6 +15,18 @@ Static site (`index.html`, hosted on Vercel) with Supabase for authentication, d
 5. **Company details:** fill in `COMPANY` in `index.html` with your real address, KvK number and btw-id. Dutch law requires these on your website, and they also appear in the privacy statement and terms.
 6. **Data processing agreements (DPAs):** accept the DPA from Supabase (Dashboard → Organization → Legal documents) and from Vercel.
 
+## AI invoice reading (optional)
+
+When a user uploads an invoice under "Beurt toevoegen", the Edge Function `supabase/functions/parse-invoice` sends it to Claude. Claude returns the date, odometer reading, work done, category, garage and amount, and the form is filled in. The user checks everything before saving. The function itself stores nothing.
+
+1. Run `supabase/schema.sql` again. It adds the `invoice_parses` table, which enforces a limit of 20 invoices per user per day.
+2. Create an API key at console.anthropic.com. Accept Anthropic's DPA (Commercial Terms) there too, and set a monthly spend limit.
+3. Install the Supabase CLI and link the project: `supabase login`, then `supabase link --project-ref kppcggewnkddfprutjrh`.
+4. Store the key as a secret, never in the frontend: `supabase secrets set ANTHROPIC_API_KEY=sk-ant-...`
+5. Deploy: `supabase functions deploy parse-invoice`
+
+Without these steps uploading still works, but nothing is filled in automatically. The user sees a message and enters the details by hand.
+
 ## Run locally
 
 ```bash
