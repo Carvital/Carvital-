@@ -375,6 +375,15 @@ html.lenis,html.lenis body{height:auto}
 .kc-ic{font-size:24px;margin-bottom:7px}
 .kc-n{font-family:'Outfit',sans-serif;font-size:32px;font-weight:900;letter-spacing:-1px;margin-top:3px}
 .kc-lb{font-size:11px;color:var(--t3);margin-top:3px}
+.admin-only{display:none!important}
+body.is-admin .ni.admin-only,body.is-admin .mm-item.admin-only{display:flex!important}
+.adm-chart{display:flex;align-items:flex-end;gap:6px;height:160px;margin-top:14px}
+.adm-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%;min-width:0}
+.adm-bar i{display:block;width:100%;max-width:34px;background:var(--sand);border-radius:4px 4px 0 0;min-height:2px;transform-origin:bottom;animation:barUp .6s cubic-bezier(.2,.8,.2,1) backwards}
+.adm-bar b{font-size:11px;font-weight:600;color:var(--ink)}
+.adm-bar span{font-size:10px;color:var(--t3);white-space:nowrap}
+@keyframes barUp{from{transform:scaleY(0)}}
+@media (prefers-reduced-motion:reduce){.adm-bar i{animation:none}}
 .cbr{display:flex;align-items:center;gap:10px;margin-bottom:9px}
 .cb-lb{font-size:12px;color:var(--t2);width:132px;flex-shrink:0}
 .cb-tr{flex:1;height:7px;background:var(--bg3);border-radius:4px;overflow:hidden}
@@ -734,6 +743,7 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
       <div class="ni" onclick="sv('kosten',this)"><span class="ic">💰</span> Kostenoverzicht</div>
       <div class="ni" onclick="sv('overdracht',this)"><span class="ic">🤝</span> Overdracht</div>
       <div class="ni" onclick="sv('profiel',this)"><span class="ic">👤</span> Profiel</div>
+      <div class="ni admin-only" onclick="sv('admin',this)"><span class="ic">🛡️</span> Admin</div>
     </div>
     <div class="sb-sec"><div class="sbl">Mijn Auto's</div>
       <div id="sb-cars"></div>
@@ -824,6 +834,10 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
       <div class="app-view" id="u-profiel"></div>
     </div>
 
+    <div id="view-admin" class="view">
+      <div class="app-view" id="u-admin"></div>
+    </div>
+
   </div>
 </div>
 
@@ -849,6 +863,7 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
       <div class="mm-item" onclick="mnv2('kosten')"><span class="ic">💰</span> Kostenoverzicht</div>
       <div class="mm-item" onclick="mnv2('overdracht')"><span class="ic">🤝</span> Overdracht</div>
       <div class="mm-item" onclick="mnv2('profiel')"><span class="ic">👤</span> Profiel</div>
+      <div class="mm-item admin-only" onclick="mnv2('admin')"><span class="ic">🛡️</span> Admin</div>
       <div class="mm-item" onclick="closeM();showPage('landing')"><span class="ic">←</span> Naar website</div>
       <div class="mm-item user-flex" onclick="closeM();logout()"><span class="ic">🚪</span> Uitloggen</div>
     </div>
@@ -981,7 +996,7 @@ let currentUser=null,profile=null,cars=[],records=[],shareLinks=[],activeCarId=n
 
 function showPage(p){document.querySelectorAll('.page').forEach(x=>{x.classList.remove('active');x.style.display=''});if(p==='app'){const a=document.getElementById('page-app');a.classList.add('active');a.style.display='flex'}else document.getElementById(p==='share'?'page-share':'page-landing').classList.add('active');if(window.lenis)lenis.scrollTo(0,{immediate:true,force:true});window.scrollTo(0,0);updateNav();if(window.ScrollTrigger)requestAnimationFrame(()=>ScrollTrigger.refresh())}
 function showApp(){closeM();showPage('app')}
-function sv(name,el){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+name).classList.add('active');document.querySelectorAll('.ni').forEach(i=>i.classList.remove('active'));if(!el)el=document.querySelector(`.ni[onclick^="sv('${name}'"]`);if(el)el.classList.add('active');window.scrollTo(0,0)}
+function sv(name,el){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+name).classList.add('active');document.querySelectorAll('.ni').forEach(i=>i.classList.remove('active'));if(!el)el=document.querySelector(`.ni[onclick^="sv('${name}'"]`);if(el)el.classList.add('active');window.scrollTo(0,0);if(name==='admin')loadAdmin()}
 function mnv(name,el){sv(name);document.querySelectorAll('.mnb').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active')}
 function mnv2(name){closeM();sv(name);document.querySelectorAll('.mnb').forEach(b=>b.classList.remove('active'))}
 function openM(id){closeM();const m=document.getElementById('modal-'+id);if(m)m.classList.add('open')}
@@ -1021,7 +1036,7 @@ ${P}De AutoHealth Score is een indicatieve berekening. We nemen geen besluiten o
 <li><strong>Brevo</strong> (Frankrijk, EU) — verstuurt de e-mails voor je account, zoals het bevestigen van je e-mailadres en het herstellen van je wachtwoord.</li>
 <li><strong>bunny.net</strong> (lettertypen, EU) en <strong>jsDelivr</strong> (laden van programmacode) — deze zien alleen je IP-adres bij het laden van de pagina.</li></ul>
 ${P}Supabase, Vercel en Anthropic zijn bedrijven uit de Verenigde Staten. Voor een eventuele doorgifte buiten de EER vertrouwen we op het EU-US Data Privacy Framework en/of de standaardcontractbepalingen van de Europese Commissie.</p>
-<h4>6. Beveiliging</h4><p>Alle verbindingen zijn versleuteld (HTTPS). Wachtwoorden worden gehasht opgeslagen. Elke gebruiker kan technisch alleen zijn eigen gegevens en facturen inzien.</p>
+<h4>6. Beveiliging</h4><p>Alle verbindingen zijn versleuteld (HTTPS). Wachtwoorden worden gehasht opgeslagen. Elke gebruiker kan technisch alleen zijn eigen gegevens en facturen inzien. Beheerders van Carvital zien in de app alleen totalen, zoals het aantal gebruikers, en geen gegevens van individuele gebruikers.</p>
 <h4>7. Jouw rechten</h4><p>Je hebt recht op inzage, correctie, verwijdering, beperking, overdraagbaarheid en bezwaar, en je kunt gegeven toestemming altijd intrekken. Veel regel je direct zelf onder <strong>Profiel</strong>: je gegevens downloaden, je naam en voorkeuren aanpassen en je account verwijderen. Voor andere verzoeken mail je <strong>${COMPANY.privacyEmail}</strong>; we reageren binnen een maand.</p>
 <h4>8. Klacht</h4><p>Ben je niet tevreden over hoe we met je gegevens omgaan? Laat het ons weten. Je hebt ook het recht een klacht in te dienen bij de Autoriteit Persoonsgegevens (autoriteitpersoonsgegevens.nl).</p>
 <h4>9. Leeftijd</h4><p>Carvital is bedoeld voor personen van 16 jaar en ouder.</p></div>`},
@@ -1430,6 +1445,23 @@ function carReminders(car,recs){
   return out;
 }
 
+// ---------- admin: alleen totalen, geen gegevens van individuele gebruikers ----------
+async function loadAdmin(){
+  const box=document.getElementById('u-admin');
+  if(!currentUser||!profile?.is_admin){box.innerHTML=head('Admin','Alleen voor beheerders')+'<div class="empty"><div class="e-ic">🔒</div><div class="e-t">Geen toegang</div>Deze pagina is alleen voor beheerders.</div>';return}
+  box.innerHTML=head('Admin','Overzicht van Carvital')+'<div class="empty"><div class="spin" style="margin:0 auto"></div></div>';
+  const {data:d,error}=await sb.rpc('admin_stats');
+  if(error){box.innerHTML=head('Admin','Overzicht van Carvital')+`<div class="empty"><div class="e-ic">⚠️</div><div class="e-t">Statistieken laden mislukt</div>${esc(error.message)}</div>`;return}
+  const card=(ic,label,n,sub)=>`<div class="kc"><div class="kc-ic">${ic}</div><div style="font-size:11px;color:var(--t3)">${label}</div><div class="kc-n">${nf(n)}</div><div class="kc-lb">${sub}</div></div>`;
+  const pct=(a,b)=>b?Math.round(a/b*100)+'%':'-';
+  const weeks=d.signups_per_week||[],max=Math.max(1,...weeks.map(w=>w.count));
+  box.innerHTML=head('Admin','Overzicht van Carvital · alleen totalen, geen persoonsgegevens',`<button class="btn-sm btn-sm-white" onclick="loadAdmin()">↻ Vernieuwen</button>`)+
+`<div class="kt">${card('👥','Gebruikers',d.users_total,`${nf(d.users_confirmed)} bevestigd (${pct(d.users_confirmed,d.users_total)})`)}${card('🆕','Nieuw',d.users_30d,`${nf(d.users_7d)} deze week · 30 dagen`)}${card('🔑','Actief',d.active_30d,'ingelogd in 30 dagen')}</div>
+<div class="kt">${card('🚗',"Auto's",d.cars,d.users_total?(d.cars/d.users_total).toLocaleString('nl-NL',{maximumFractionDigits:1})+' per gebruiker':'-')}${card('📖','Beurten',d.records,`${nf(d.records_30d)} in 30 dagen`)}${card('📎','Facturen',d.invoices,`${nf(d.invoice_parses_30d)} AI-uitlezingen in 30 dagen`)}</div>
+<div class="kt">${card('🤝','Deellinks',d.share_links,'actief')}${card('✉️','Nieuwsbrief',d.marketing_opt_in,pct(d.marketing_opt_in,d.users_total)+' van de gebruikers')}<div class="kc" style="display:flex;flex-direction:column;justify-content:center;font-size:12px;color:var(--t2);line-height:1.6">🔒 Hier staan bewust geen namen of e-mailadressen. Individuele accounts beheer je in het Supabase-dashboard.</div></div>
+<div class="card"><div class="cl">📈 Aanmeldingen per week (laatste 12 weken)</div><div class="adm-chart">${weeks.map((w,i)=>`<div class="adm-bar"><b>${w.count||''}</b><i style="height:${Math.round(w.count/max*100)}%;animation-delay:${i*40}ms"></i><span>${fmtDate(w.week,{day:'numeric',month:'short'})}</span></div>`).join('')}</div></div>`;
+}
+
 // ---------- demo: dezelfde weergave als de echte app, met een voorbeeldauto ----------
 const DEMO_USER={id:'demo',email:'demo@carvital.nl',email_confirmed_at:null};
 function demoData(){
@@ -1478,6 +1510,7 @@ function remRow(r){
 
 function renderUser(){
   const me=currentUser||DEMO_USER;
+  document.body.classList.toggle('is-admin',!!(currentUser&&profile?.is_admin));
   const car=activeCar(),recs=carRecs(car);
   const name=profile?.name||me.email;
   const first=name.split(' ')[0];

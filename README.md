@@ -45,6 +45,21 @@ When a user uploads an invoice under "Beurt toevoegen", the Edge Function `supab
 
 Without these steps uploading still works, but nothing is filled in automatically. The user sees a message and enters the details by hand.
 
+## Admin
+
+Admins see an extra "Admin" page in the app. It shows totals only: users, signups per week, cars, service records, invoices and share links. It never shows names or e-mail addresses. Manage individual accounts in the Supabase dashboard.
+
+1. Run `supabase/schema.sql` again. It adds `profiles.is_admin`, a trigger that stops users from changing that flag themselves, and the `admin_stats()` function.
+2. Create the account yourself under Authentication → Users → Add user, or sign up on the site. Generate the password with a password manager.
+3. In the SQL Editor, make it an admin:
+
+```sql
+update public.profiles set is_admin = true
+where id = (select id from auth.users where email = 'jij@voorbeeld.nl');
+```
+
+Log out and back in. "Admin" then appears in the menu.
+
 ## Garage data
 
 The garage finder searches `data/garages.json` in the browser. The file holds every car repair and tyre shop in the Netherlands from OpenStreetMap (© OpenStreetMap contributors, ODbL). There is no live map service, so searches are instant and a visitor's location never leaves the browser. Postcodes and place names are looked up with PDOK, the Dutch government location service.
