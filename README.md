@@ -11,9 +11,27 @@ Static site (`index.html`, hosted on Vercel) with Supabase for authentication, d
    - Site URL: `https://carvital.nl` (or your Vercel URL). Add `http://localhost:5500` under Redirect URLs for local testing.
    - Leave "Confirm email" on.
    - Set the minimum password length to 8.
-   - Optional: translate the e-mail templates (Authentication → Email Templates) into Dutch, and set up your own SMTP. The built-in Supabase mailer is rate-limited and only meant for testing.
+   - E-mail templates and SMTP: see "Auth e-mails" below.
 5. **Company details:** fill in `COMPANY` in `index.html` with your real address, KvK number and btw-id. Dutch law requires these on your website, and they also appear in the privacy statement and terms.
 6. **Data processing agreements (DPAs):** accept the DPA from Supabase (Dashboard → Organization → Legal documents) and from Vercel.
+
+## Auth e-mails (Dutch templates and own SMTP)
+
+The built-in Supabase mailer sends as "Supabase Auth", allows only a few mails per hour, and is meant for testing only. Before launch:
+
+1. **Brevo** (EU): add the domain `carvital.nl` under Senders, Domains & Dedicated IPs → Domains. The domain owner adds the DNS records Brevo shows (in Vercel → Domains → carvital.nl → DNS Records), then you click Verify. Accept Brevo's DPA.
+2. In Brevo, go to SMTP & API → SMTP → generate an SMTP key.
+3. In Supabase, go to Authentication → Emails → SMTP Settings and enable Custom SMTP:
+   - Sender email `noreply@carvital.nl`, sender name `Carvital`
+   - Host `smtp-relay.brevo.com`, port `587`, username = your Brevo SMTP login, password = the SMTP key
+4. In Supabase, go to Authentication → Rate Limits and raise "emails sent per hour" (for example to 100).
+5. In Supabase, go to Authentication → Emails → Templates and paste the HTML from `supabase/templates/`:
+
+   | Template | File | Subject |
+   |---|---|---|
+   | Confirm signup | `confirmation.html` | Bevestig je e-mailadres voor Carvital |
+   | Reset password | `recovery.html` | Nieuw wachtwoord instellen voor Carvital |
+   | Change email address | `email_change.html` | Bevestig je nieuwe e-mailadres voor Carvital |
 
 ## AI invoice reading (optional)
 
