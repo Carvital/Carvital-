@@ -4,11 +4,40 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#1A1512">
+<link rel="preload" as="image" href="img/hero-1600.webp" media="(min-width: 901px)" fetchpriority="high">
+<link rel="preload" as="image" href="img/hero-900.webp" media="(max-width: 900px)" fetchpriority="high">
+<link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="img/icon-48.png" sizes="48x48" type="image/png">
+<link rel="icon" href="img/icon-96.png" sizes="96x96" type="image/png">
+<link rel="icon" href="img/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 <meta name="color-scheme" content="light only">
 <meta name="supported-color-schemes" content="light">
 <title>Carvital — Altijd weten hoe je auto ervoor staat</title>
 <meta name="description" content="Voer je kenteken in en zie direct hoe je auto ervoor staat. Digitaal onderhoudsboekje, APK-herinneringen en garages bij jou in de buurt.">
+<link rel="canonical" href="https://carvital.nl/">
+<!-- delen op WhatsApp, LinkedIn, Facebook, X -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Carvital">
+<meta property="og:locale" content="nl_NL">
+<meta property="og:url" content="https://carvital.nl/">
+<meta property="og:title" content="Carvital — Altijd weten hoe je auto ervoor staat">
+<meta property="og:description" content="Voer je kenteken in en zie direct hoe je auto ervoor staat. Gratis digitaal onderhoudsboekje, APK-herinneringen en garages bij jou in de buurt.">
+<meta property="og:image" content="https://carvital.nl/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Carvital — onderhoud van je auto bijhouden">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Google: bedrijfsnaam en logo -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+ {"@type":"Organization","@id":"https://carvital.nl/#organization","name":"Carvital","url":"https://carvital.nl/","logo":{"@type":"ImageObject","url":"https://carvital.nl/img/icon-512.png","width":512,"height":512},"email":"hallo@carvital.nl"},
+ {"@type":"WebSite","@id":"https://carvital.nl/#website","name":"Carvital","url":"https://carvital.nl/","inLanguage":"nl-NL","publisher":{"@id":"https://carvital.nl/#organization"}}
+]}
+</script>
 <!-- Vercel Web Analytics is only loaded after cookie consent (see loadAnalytics) -->
 <!-- Bunny Fonts: EU-hosted, privacy-friendly drop-in for Google Fonts (no IP transfer to Google) -->
 <link href="https://fonts.bunny.net/css?family=outfit:300,400,500,600,700,800,900|inter:300,400,500,600&display=swap" rel="stylesheet">
@@ -126,7 +155,23 @@ h1{font-family:'Outfit',sans-serif;font-size:64px;font-weight:700;line-height:1.
 .panel:nth-child(4){--fallback:radial-gradient(ellipse 60% 70% at 72% 32%,#5a4a3d,#261f1a 55%,#161210)}
 .panel:nth-child(5){--fallback:radial-gradient(ellipse 60% 70% at 76% 34%,#4d5560,#20242a 55%,#14161a)}
 .panel:nth-child(6){--fallback:radial-gradient(ellipse 60% 70% at 74% 30%,#857057,#362a20 55%,#1a1512)}
-.panel[style*="--photo"] .panel-ic{display:none}
+.panel.lazy-in .panel-ic{display:none}
+.hero{--photo:url(img/hero-1600.webp)}
+.panel.lazy-in:nth-child(1){--photo:url(img/panel-1-1600.webp)}
+.panel.lazy-in:nth-child(2){--photo:url(img/panel-2-1600.webp)}
+.panel.lazy-in:nth-child(3){--photo:url(img/panel-3-1600.webp)}
+.panel.lazy-in:nth-child(4){--photo:url(img/panel-4-1600.webp)}
+.panel.lazy-in:nth-child(5){--photo:url(img/panel-5-1600.webp)}
+.panel.lazy-in:nth-child(6){--photo:url(img/panel-6-1600.webp)}
+@media(max-width:900px){
+  .hero{--photo:url(img/hero-900.webp)}
+  .panel.lazy-in:nth-child(1){--photo:url(img/panel-1-900.webp)}
+  .panel.lazy-in:nth-child(2){--photo:url(img/panel-2-900.webp)}
+  .panel.lazy-in:nth-child(3){--photo:url(img/panel-3-900.webp)}
+  .panel.lazy-in:nth-child(4){--photo:url(img/panel-4-900.webp)}
+  .panel.lazy-in:nth-child(5){--photo:url(img/panel-5-900.webp)}
+  .panel.lazy-in:nth-child(6){--photo:url(img/panel-6-900.webp)}
+}
 .panel-ic{position:absolute;right:8%;top:50%;transform:translateY(-58%);font-size:180px;line-height:1;opacity:.16;filter:grayscale(1) sepia(.6);pointer-events:none}
 .panel .l-wrap{will-change:opacity;width:100%;padding-bottom:12vh;position:relative}
 .panel-count{font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;letter-spacing:.3em;color:var(--sand);display:flex;align-items:center;gap:14px;margin-bottom:18px}
@@ -346,6 +391,9 @@ html.lenis,html.lenis body{height:auto}
 .gc-r{display:flex;align-items:center;gap:3px;font-size:12px;font-weight:700;color:var(--gold)}
 .gc-d{font-size:11px;color:var(--t3);margin-top:2px}
 .gtags{display:flex;gap:5px;flex-wrap:wrap;margin:10px 0}
+.gt-apk{background:#E5F4E4!important;color:#166534!important;border-color:#BBE5C0!important;font-weight:600}
+.apk-filter{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--t2);cursor:pointer;padding:0 4px;white-space:nowrap}
+.apk-filter input{width:16px;height:16px;accent-color:var(--ink)}
 .gt{padding:3px 8px;border-radius:50px;background:var(--bg3);font-size:10px;color:var(--t2);border:1px solid var(--border)}
 .gc-p{font-size:12px;color:var(--t2);margin-bottom:13px}
 .gc-p strong{color:var(--dark)}
@@ -577,8 +625,8 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
 <!-- LANDING -->
 <div id="page-landing" class="page active">
 
-  <!-- Foto's: img/, zie img/CREDITS.md. Andere foto? Pas --photo aan op .hero of .panel -->
-  <section class="hero" style="--photo:url(img/hero.jpg)">
+  <!-- Foto's: img/ (WebP 1600 en 900 px), zie img/CREDITS.md; ze staan in de CSS bij .hero en .panel.lazy-in -->
+  <section class="hero">
     <div class="l-wrap">
       <div class="eyebrow">Gratis · RDW-gegevens · Data in de EU</div>
       <h1>Altijd weten hoe je auto ervoor staat</h1>
@@ -623,12 +671,12 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
     </div>
   </section>
   <div class="panels">
-    <section class="panel" style="--photo:url(img/panel-1.jpg)"><div class="panel-ic" aria-hidden="true">🏥</div><div class="l-wrap"><div class="panel-count">01 / 06</div><h3>AutoHealth Score</h3><p>Eén cijfer van 0 tot 100 dat laat zien hoe je auto ervoor staat, op basis van bouwjaar, APK-status en je geregistreerde onderhoud.</p><button class="btn-l line" onclick="showApp()">Bekijk de demo →</button></div></section>
-    <section class="panel" style="--photo:url(img/panel-2.jpg)"><div class="panel-ic" aria-hidden="true">🔍</div><div class="l-wrap"><div class="panel-count">02 / 06</div><h3>Kenteken check</h3><p>Merk, model, bouwjaar, APK-datum en openstaande terugroepacties, direct uit de officiële RDW-database.</p><button class="btn-l line" onclick="document.getElementById('lkw-f').focus();window.scrollTo({top:0,behavior:'smooth'})">Kenteken invoeren →</button></div></section>
-    <section class="panel" style="--photo:url(img/panel-3.jpg)"><div class="panel-ic" aria-hidden="true">📖</div><div class="l-wrap"><div class="panel-count">03 / 06</div><h3>Digitaal onderhoudsboekje</h3><p>Al je beurten, APK's en reparaties op één plek, met de factuur erbij. Privé opgeslagen in de EU.</p><button class="btn-l line" onclick="openM('register')">Gratis beginnen →</button></div></section>
-    <section class="panel" style="--photo:url(img/panel-4.jpg)"><div class="panel-ic" aria-hidden="true">🔔</div><div class="l-wrap"><div class="panel-count">04 / 06</div><h3>Slimme reminders</h3><p>Zie in één oogopslag wanneer je APK verloopt, of een onderhoudsbeurt achterloopt en wanneer het tijd is voor winter- of zomerbanden.</p><button class="btn-l line" onclick="showApp()">Bekijk de demo →</button></div></section>
-    <section class="panel" style="--photo:url(img/panel-5.jpg)"><div class="panel-ic" aria-hidden="true">🤝</div><div class="l-wrap"><div class="panel-count">05 / 06</div><h3>Overdragen bij verkoop</h3><p>Deel je complete onderhoudshistorie met een koper via een link of QR-code. Zonder je naam of facturen, en altijd in te trekken.</p><button class="btn-l line" onclick="goSection('overdracht')">Meer over overdracht →</button></div></section>
-    <section class="panel" style="--photo:url(img/panel-6.jpg)"><div class="panel-ic" aria-hidden="true">🗺️</div><div class="l-wrap"><div class="panel-count">06 / 06</div><h3>Garages in de buurt</h3><p>Vind autogarages en bandenspecialisten rond je postcode, met route, website en telefoonnummer.</p><button class="btn-l line" onclick="goSection('garages')">Zoek een garage →</button></div></section>
+    <section class="panel"><div class="panel-ic" aria-hidden="true">🏥</div><div class="l-wrap"><div class="panel-count">01 / 06</div><h3>AutoHealth Score</h3><p>Eén cijfer van 0 tot 100 dat laat zien hoe je auto ervoor staat, op basis van bouwjaar, APK-status en je geregistreerde onderhoud.</p><button class="btn-l line" onclick="showApp()">Bekijk de demo →</button></div></section>
+    <section class="panel"><div class="panel-ic" aria-hidden="true">🔍</div><div class="l-wrap"><div class="panel-count">02 / 06</div><h3>Kenteken check</h3><p>Merk, model, bouwjaar, APK-datum en openstaande terugroepacties, direct uit de officiële RDW-database.</p><button class="btn-l line" onclick="document.getElementById('lkw-f').focus();window.scrollTo({top:0,behavior:'smooth'})">Kenteken invoeren →</button></div></section>
+    <section class="panel"><div class="panel-ic" aria-hidden="true">📖</div><div class="l-wrap"><div class="panel-count">03 / 06</div><h3>Digitaal onderhoudsboekje</h3><p>Al je beurten, APK's en reparaties op één plek, met de factuur erbij. Privé opgeslagen in de EU.</p><button class="btn-l line" onclick="openM('register')">Gratis beginnen →</button></div></section>
+    <section class="panel"><div class="panel-ic" aria-hidden="true">🔔</div><div class="l-wrap"><div class="panel-count">04 / 06</div><h3>Slimme reminders</h3><p>Zie in één oogopslag wanneer je APK verloopt, of een onderhoudsbeurt achterloopt en wanneer het tijd is voor winter- of zomerbanden.</p><button class="btn-l line" onclick="showApp()">Bekijk de demo →</button></div></section>
+    <section class="panel"><div class="panel-ic" aria-hidden="true">🤝</div><div class="l-wrap"><div class="panel-count">05 / 06</div><h3>Overdragen bij verkoop</h3><p>Deel je complete onderhoudshistorie met een koper via een link of QR-code. Zonder je naam of facturen, en altijd in te trekken.</p><button class="btn-l line" onclick="goSection('overdracht')">Meer over overdracht →</button></div></section>
+    <section class="panel"><div class="panel-ic" aria-hidden="true">🗺️</div><div class="l-wrap"><div class="panel-count">06 / 06</div><h3>Garages in de buurt</h3><p>Vind autogarages en bandenspecialisten rond je postcode, met route, website en telefoonnummer.</p><button class="btn-l line" onclick="goSection('garages')">Zoek een garage →</button></div></section>
   </div>
 
   <!-- HOE HET WERKT -->
@@ -816,7 +864,7 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
     <div id="view-garages" class="view">
       <div class="ahd"><div><div class="at">Garages bij jou in de buurt</div><div class="as2" id="garage-sub">Zoek op postcode of plaats, of gebruik je locatie</div></div></div>
       <div class="card" style="margin-bottom:16px">
-        <div class="garage-search"><input class="fi" id="garage-q" placeholder="Postcode of plaats, bijv. 3511 AB" maxlength="60" autocomplete="postal-code" onkeydown="if(event.key==='Enter')searchGarages()"><select class="fi" id="garage-r" aria-label="Zoekstraal"><option value="3000">3 km</option><option value="5000" selected>5 km</option><option value="10000">10 km</option><option value="20000">20 km</option></select><button class="btn-primary" id="garage-btn" style="border-radius:10px;font-size:13px;padding:10px 16px" onclick="searchGarages()">🔍 Zoeken</button><button class="btn-secondary" id="geo-btn" style="border-radius:10px;font-size:13px;padding:10px 16px" onclick="getGeo()">📍 Mijn locatie</button></div>
+        <div class="garage-search"><input class="fi" id="garage-q" placeholder="Postcode of plaats, bijv. 3511 AB" maxlength="60" autocomplete="postal-code" onkeydown="if(event.key==='Enter')searchGarages()"><select class="fi" id="garage-r" aria-label="Zoekstraal"><option value="3000">3 km</option><option value="5000" selected>5 km</option><option value="10000">10 km</option><option value="20000">20 km</option></select><label class="apk-filter"><input type="checkbox" id="garage-apk" onchange="lastGarageSearch&&loadGarages(GARAGE_UI.app,...lastGarageSearch)"> Alleen APK-erkend</label><button class="btn-primary" id="garage-btn" style="border-radius:10px;font-size:13px;padding:10px 16px" onclick="searchGarages()">🔍 Zoeken</button><button class="btn-secondary" id="geo-btn" style="border-radius:10px;font-size:13px;padding:10px 16px" onclick="getGeo()">📍 Mijn locatie</button></div>
         <div style="font-size:11px;color:var(--t3);margin-top:8px">🔒 Je locatie blijft in je browser. Een postcode of plaats zoeken we op via PDOK, de locatieservice van de overheid. Wij slaan niets op.</div>
       </div>
       <div id="garage-list"><div class="empty"><div class="e-ic">🗺️</div><div class="e-t">Vind een garage in de buurt</div>Vul je postcode of plaats in, of gebruik je huidige locatie.</div></div>
@@ -1021,7 +1069,7 @@ const INFO_CONTENT={
 <li><strong>Locatie:</strong> alleen als je zelf op "Mijn locatie" klikt bij Garages. Je locatie wordt alleen in je browser gebruikt om garages in de buurt te tonen; ze wordt niet verstuurd en niet opgeslagen. Vul je een postcode of plaats in, dan zoeken we die op via PDOK (zie hieronder).</li></ul>
 ${P}Zoek je op de homepage een kenteken op zonder account, dan gaat dat kenteken rechtstreeks van jouw browser naar de openbare RDW-database. Wij slaan dat niet op.</p>
 <h4>3. Waarvoor en op welke grondslag?</h4><ul>
-<li>Je account, onderhoudsboekje, Health Score en herinneringen: <strong>uitvoering van de overeenkomst</strong> (art. 6 lid 1 sub b AVG).</li>
+<li>Je account, onderhoudsboekje, Health Score en herinneringen: <strong>uitvoering van de overeenkomst</strong> (art. 6 lid 1 sub b AVG). Voor APK-herinneringen vragen we je actuele APK-datum op bij de openbare RDW-database; zet je ze uit in je profiel, dan krijg je ze niet meer.</li>
 <li>Nieuws en tips per e-mail: <strong>toestemming</strong> (art. 6 lid 1 sub a AVG). Je kunt die altijd intrekken in je profiel.</li>
 <li>Anonieme bezoekersstatistieken: <strong>toestemming</strong> via de cookiebanner.</li>
 <li>Je onderhoudshistorie delen met een koper via een deellink: alleen als je daar zelf voor kiest (uitvoering van de overeenkomst). Wie de link heeft, ziet je auto en beurten, maar niet je naam, e-mailadres of facturen. Je kunt de link altijd intrekken.</li>
@@ -1033,7 +1081,7 @@ ${P}De AutoHealth Score is een indicatieve berekening. We nemen geen besluiten o
 <li><strong>Supabase</strong> — database, inloggen en opslag van facturen. Je gegevens staan op servers in de EU (Frankfurt).</li>
 <li><strong>Vercel</strong> — hosting van de website en (met toestemming) anonieme statistieken.</li>
 <li><strong>PDOK</strong> (Kadaster, Nederlandse overheid): ontvangt de postcode of plaats en je IP-adres als je garages zoekt op postcode of plaats. De garagegegevens zelf komen van OpenStreetMap en staan op onze eigen website.</li>
-<li><strong>Brevo</strong> (Frankrijk, EU) — verstuurt de e-mails voor je account, zoals het bevestigen van je e-mailadres en het herstellen van je wachtwoord.</li>
+<li><strong>Brevo</strong> (Frankrijk, EU) — verstuurt de e-mails voor je account (je e-mailadres bevestigen, je wachtwoord herstellen) en, als je die aan hebt staan, APK-herinneringen.</li>
 <li><strong>bunny.net</strong> (lettertypen, EU) en <strong>jsDelivr</strong> (laden van programmacode) — deze zien alleen je IP-adres bij het laden van de pagina.</li></ul>
 ${P}Supabase, Vercel en Anthropic zijn bedrijven uit de Verenigde Staten. Voor een eventuele doorgifte buiten de EER vertrouwen we op het EU-US Data Privacy Framework en/of de standaardcontractbepalingen van de Europese Commissie.</p>
 <h4>6. Beveiliging</h4><p>Alle verbindingen zijn versleuteld (HTTPS). Wachtwoorden worden gehasht opgeslagen. Elke gebruiker kan technisch alleen zijn eigen gegevens en facturen inzien. Beheerders van Carvital zien in de app alleen totalen, zoals het aantal gebruikers, en geen gegevens van individuele gebruikers.</p>
@@ -1611,7 +1659,7 @@ function renderUser(){
 `<div class="pt2"><div class="pav2">${esc(name.charAt(0).toUpperCase())}</div><div style="flex:1;min-width:0"><div class="pn2">${esc(name)}</div><div class="pe2">${esc(me.email)}</div><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${!currentUser?'<span class="badge bb">Demo</span>':me.email_confirmed_at?'<span class="badge bg">✓ E-mail bevestigd</span>':'<span class="badge bo">E-mail niet bevestigd</span>'}${currentUser?'<span class="badge bgo">Gratis account</span>':''}</div></div>${currentUser?'<button class="btn-secondary" style="border-radius:10px;font-size:13px;padding:9px 16px;flex-shrink:0" onclick="logout()">Uitloggen</button>':'<button class="btn-primary" style="border-radius:10px;font-size:13px;padding:9px 16px;flex-shrink:0" onclick="openM(\'register\')">Gratis account</button>'}</div>
 <div class="g2" style="margin-bottom:14px">
 <div class="card"><div class="cl">✏️ Gegevens</div><div class="fg"><label class="fl" for="p-name">Naam</label><input class="fi" id="p-name" maxlength="100" value="${esc(profile.name||'')}"></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-sm btn-sm-gold" onclick="saveName()">Naam opslaan</button><button class="btn-sm btn-sm-white" onclick="openM('newpass')">Wachtwoord wijzigen</button></div></div>
-<div class="card"><div class="cl">🔔 Voorkeuren</div>${tog('notify_apk','APK-herinneringen')}${tog('notify_maintenance','Onderhoudsalerts')}${tog('marketing_opt_in','Nieuws en tips per e-mail')}<div style="font-size:11px;color:var(--t3);margin-top:8px">Herinneringen per e-mail volgen binnenkort. Je voorkeuren worden nu al bewaard.</div></div>
+<div class="card"><div class="cl">🔔 Voorkeuren</div>${tog('notify_apk','APK-herinneringen per e-mail')}${tog('notify_maintenance','Onderhoudsalerts in de app')}${tog('marketing_opt_in','Nieuws en tips per e-mail')}<div style="font-size:11px;color:var(--t3);margin-top:8px">Met APK-herinneringen aan krijg je 30 dagen voor de vervaldatum een e-mail. We checken de datum eerst bij de RDW, dus na een keuring krijg je geen onterechte mail.</div></div>
 </div>
 <div class="card" style="margin-bottom:14px"><div class="cl">🚗 Mijn auto's</div>${cars.length?cars.map(c=>`<div class="tgr"><span>${esc(c.merk)} ${esc(c.model)} · ${esc(fmtKent(c.kenteken))}</span><button class="rec-del" onclick="removeCar('${c.id}')">🗑️ Verwijderen</button></div>`).join(''):'<div style="font-size:13px;color:var(--t2)">Nog geen auto toegevoegd.</div>'}<button class="btn-sm btn-sm-white" style="margin-top:10px" onclick="sv('kenteken')">＋ Auto toevoegen</button></div>
 <div class="card"><div class="cl">🔒 Privacy (AVG)</div><div style="font-size:12.5px;color:var(--t2);line-height:1.6;margin-bottom:12px">Je gegevens staan in de EU en zijn alleen voor jou zichtbaar. Je kunt ze op elk moment downloaden of laten verwijderen. <a style="color:var(--gold);cursor:pointer" onclick="openInfo('privacy')">Privacyverklaring</a></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-secondary" style="border-radius:10px;font-size:13px;padding:10px 16px" onclick="exportData()">📦 Mijn gegevens downloaden</button><button class="btn-danger" onclick="openM('delete')">Account verwijderen</button></div></div>`;
@@ -1728,6 +1776,11 @@ function initMotion(){
 }
 document.addEventListener('DOMContentLoaded',initMotion);
 
+// paneelfoto's pas laden als je er bijna bent (scheelt ~1 MB bij het openen)
+(()=>{const ps=document.querySelectorAll('.panel');if(!('IntersectionObserver' in window)){ps.forEach(p=>p.classList.add('lazy-in'));return}
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('lazy-in');io.unobserve(e.target)}}),{rootMargin:'150% 0px'});
+  ps.forEach(p=>io.observe(p))})();
+
 // ---------- CTA ----------
 function ctaStart(){const e=document.getElementById('cta-email').value.trim();document.getElementById('remail').value=e;openM('register');document.getElementById(e?'rname':'remail').focus()}
 
@@ -1762,7 +1815,7 @@ async function addCar(){
 }
 // ---------- garages in de buurt (gegevens: OpenStreetMap) ----------
 const GARAGE_UI={
-  app:{q:'garage-q',r:'garage-r',list:'garage-list',sub:'garage-sub',btn:'garage-btn',geo:'geo-btn',max:30},
+  app:{q:'garage-q',r:'garage-r',apk:'garage-apk',list:'garage-list',sub:'garage-sub',btn:'garage-btn',geo:'geo-btn',max:30},
   home:{q:'hgarage-q',list:'hgarage-list',btn:'hgarage-btn',geo:'hgeo-btn',max:6}
 };
 function garageMsg(ui,ic,title,sub){document.getElementById(ui.list).innerHTML=`<div class="empty"><div class="e-ic">${ic}</div><div class="e-t">${title}</div>${sub}</div>`}
@@ -1803,7 +1856,7 @@ let lastGarageSearch=null;
 // Zoeken gebeurt in de browser: snel, en je locatie gaat nergens heen.
 let garageData=null;
 function getGarages(){
-  garageData??=fetch('data/garages.json').then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(d=>d.rows.map(([name,la,lo,street,city,type,brand,website,phone,hours])=>({la,lo,t:{name,'addr:street':street,'addr:city':city,shop:type==='t'?'tyres':'car_repair',brand,website,phone,opening_hours:hours}})));
+  garageData??=fetch('data/garages.json').then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(d=>d.rows.map(([name,la,lo,street,city,type,brand,website,phone,hours,apk])=>({la,lo,apk:!!apk,t:{name,'addr:street':street,'addr:city':city,shop:type==='t'?'tyres':'car_repair',brand,website,phone,opening_hours:hours}})));
   garageData.catch(()=>{garageData=null});
   return garageData;
 }
@@ -1814,20 +1867,21 @@ async function loadGarages(ui,lat,lon,label){
   document.getElementById(ui.list).innerHTML='<div class="empty"><div class="spin" style="margin:0 auto"></div></div>';
   let garages;
   try{garages=await getGarages()}catch(e){return garageMsg(ui,'⚠️','Garages laden mislukt','Controleer je internetverbinding en probeer het opnieuw.')}
-  const all=garages.map(g=>({...g,d:distKm(lat,lon,g.la,g.lo)})).filter(g=>g.d<=radius/1000).sort((x,y)=>x.d-y.d);
-  if(!all.length)return garageMsg(ui,'🔧','Geen garages gevonden',ui.r?'Probeer een grotere zoekstraal.':'Probeer een andere postcode of plaats.');
+  const onlyApk=ui.apk&&document.getElementById(ui.apk)?.checked;
+  const all=garages.map(g=>({...g,d:distKm(lat,lon,g.la,g.lo)})).filter(g=>g.d<=radius/1000&&(!onlyApk||g.apk)).sort((x,y)=>x.d-y.d);
+  if(!all.length)return garageMsg(ui,'🔧','Geen garages gevonden',onlyApk?'Geen APK-erkende garages in deze straal. Probeer een grotere zoekstraal.':ui.r?'Probeer een grotere zoekstraal.':'Probeer een andere postcode of plaats.');
   const more=ui===GARAGE_UI.home&&all.length>ui.max?`<div style="text-align:center;margin-top:16px"><button class="btn-secondary" style="border-radius:10px;font-size:13.5px;padding:11px 18px;background:var(--bg2)" onclick="allGarages()">Bekijk alle ${Math.min(all.length,GARAGE_UI.app.max)} garages →</button></div>`:'';
-  document.getElementById(ui.list).innerHTML=`<div class="${ui===GARAGE_UI.home?'garage-grid':'gg'}">${all.slice(0,ui.max).map(garageCard).join('')}</div>${more}<div style="font-size:11px;color:var(--t3);margin-top:14px">Rond ${esc(label)} · gegevens © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:var(--t3)">OpenStreetMap-bijdragers</a>. Klopt er iets niet? Garages kunnen hun gegevens zelf aanpassen op openstreetmap.org.</div>`;
+  document.getElementById(ui.list).innerHTML=`<div class="${ui===GARAGE_UI.home?'garage-grid':'gg'}">${all.slice(0,ui.max).map(garageCard).join('')}</div>${more}<div style="font-size:11px;color:var(--t3);margin-top:14px">Rond ${esc(label)} · gegevens © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:var(--t3)">OpenStreetMap-bijdragers</a>, APK-erkenning: RDW. Klopt er iets niet? Garages kunnen hun gegevens zelf aanpassen op openstreetmap.org.</div>`;
 }
 function garageCard(g,i=0){
   const t=g.t,addr=[[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' '),t['addr:city']].filter(Boolean).join(', ');
-  const tags=[t.shop==='tyres'?'Banden':'Autogarage',t.brand,t['service:vehicle:tyres']==='yes'&&t.shop!=='tyres'?'Banden':null].filter(Boolean);
+  const tags=[g.apk?'✓ APK-erkend':null,t.shop==='tyres'?'Banden':'Autogarage',t.brand,t['service:vehicle:tyres']==='yes'&&t.shop!=='tyres'?'Banden':null].filter(Boolean);
   const web=t.website||t['contact:website'],tel=(t.phone||t['contact:phone']||'').split(';')[0].replace(/[^+0-9 ]/g,'').trim();
   const href=web?(/^https?:\/\//i.test(web)?web:'https://'+web):null;
   // Google Maps toont sterren, reviews, telefoon en openingstijden; er gaat pas iets naar Google als iemand klikt
   const gq=addr?`${t.name}, ${addr}`:`${t.name} ${g.la},${g.lo}`;
   return `<div class="gc in" style="cursor:default;--i:${Math.min(i,8)}"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="min-width:0"><div class="gc-n">${esc(t.name)}</div><div class="gc-d">📍 ${esc(addr||'Adres onbekend')}</div></div><div class="gc-r" style="white-space:nowrap">${g.d.toLocaleString('nl-NL',{maximumFractionDigits:1})} km</div></div>
-<div class="gtags">${tags.map(x=>`<span class="gt">${esc(x)}</span>`).join('')}</div>${t.opening_hours?`<div class="gc-p">🕒 ${esc(t.opening_hours.slice(0,80))}</div>`:''}
+<div class="gtags">${tags.map(x=>`<span class="gt${x.startsWith('✓')?' gt-apk':''}"${x.startsWith('✓')?' title="Erkend door de RDW voor APK-keuringen van personenauto’s"':''}>${esc(x)}</span>`).join('')}</div>${t.opening_hours?`<div class="gc-p">🕒 ${esc(t.opening_hours.slice(0,80))}</div>`:''}
 <div class="gc-act"><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gq)}" target="_blank" rel="noopener" title="Sterren, reviews en telefoonnummer op Google Maps"><span class="ic">⭐</span>Reviews</a><a href="https://www.google.com/maps/dir/?api=1&destination=${g.la},${g.lo}" target="_blank" rel="noopener"><span class="ic">🧭</span>Route</a>${href?`<a href="${esc(href)}" target="_blank" rel="noopener nofollow"><span class="ic">🌐</span>Website</a>`:''}${tel?`<a href="tel:${esc(tel.replace(/ /g,''))}"><span class="ic">📞</span>Bellen</a>`:''}</div></div>`;
 }
 function copyLink(){navigator.clipboard?.writeText(document.getElementById('share-url').value).catch(()=>{});toast('🔗','Link gekopieerd!','Stuur naar de koper!')}

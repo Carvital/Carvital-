@@ -276,3 +276,42 @@ $$;
 
 revoke all on function public.admin_stats() from public, anon;
 grant execute on function public.admin_stats() to authenticated;
+
+-- ---------- APK-herinneringen per e-mail ----------
+-- De Edge Function send-reminders draait elke ochtend (zie README) en mailt 30 dagen voor de APK-vervaldatum.
+-- Per auto en APK-datum gaat er maar één herinnering uit; deze tabel onthoudt welke al verstuurd zijn.
+create table if not exists public.apk_reminders_sent (
+  car_id uuid not null references public.cars (id) on delete cascade,
+  apk_date date not null,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  sent_at timestamptz not null default now(),
+  primary key (car_id, apk_date)
+);
+-- RLS aan zonder policies: alleen de server (service_role) kan erbij
+alter table public.apk_reminders_sent enable row level security;
+
+-- Auto's waarvan de APK binnen p_days verloopt, van gebruikers die herinneringen willen
+-- en een bevestigd e-mailadres hebben, en die voor deze APK-datum nog geen mail kregen.
+create or replace function public.due_apk_reminders(p_days int default 30)
+returns table (
+  user_id uuid, email text, name text, car_id uuid, kenteken text, merk text, model text, apk_vervaldatum date
+)
+language sql
+stable
+security definer set search_path = ''
+as $$
+  select u.id, u.email::text, p.name, c.id, c.kenteken, c.merk, c.model, c.apk_vervaldatum
+  from public.cars c
+  join auth.users u on u.id = c.user_id
+  join public.profiles p on p.id = c.user_id
+  where p.notify_apk
+    and u.email_confirmed_at is not null
+    and c.apk_vervaldatum between current_date and current_date + p_days
+    and not exists (
+      select 1 from public.apk_reminders_sent s
+      where s.car_id = c.id and s.apk_date = c.apk_vervaldatum
+    );
+$$;
+
+revoke all on function public.due_apk_reminders(int) from public, anon, authenticated;
+grant execute on function public.due_apk_reminders(int) to service_role;
