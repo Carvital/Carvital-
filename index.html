@@ -333,8 +333,14 @@ html.lenis,html.lenis body{height:auto}
 .ai-lb{font-size:11px;color:var(--t3);width:140px;flex-shrink:0}
 .ai-vl{font-size:13px;font-weight:600;color:var(--dark);flex:1}
 .gg{display:grid;grid-template-columns:1fr 1fr;gap:13px}
-.gc{background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);padding:19px;transition:all .2s;cursor:pointer;box-shadow:var(--shadow)}
-.gc:hover{border-color:var(--border2);box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.gc{position:relative;overflow:hidden;background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);padding:19px;transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s,border-color .35s;cursor:pointer;box-shadow:var(--shadow)}
+.gc:hover{border-color:var(--sand);box-shadow:0 18px 40px -18px rgba(26,21,18,.35);transform:translateY(-4px)}
+/* zandkleurige lijn die bij hover van boven naar beneden groeit */
+.gc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--sand);transform:scaleY(0);transform-origin:top;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.gc:hover::before{transform:scaleY(1)}
+/* resultaten komen na elkaar binnen */
+.gc.in{animation:gcIn .6s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i,0) * 70ms)}
+@keyframes gcIn{from{opacity:0;transform:translateY(22px) scale(.97)}}
 .gc.rec{background:#FFFBEB;border-color:#FDE68A}
 .gc-n{font-family:'Outfit',sans-serif;font-size:14.5px;font-weight:800;color:var(--dark)}
 .gc-r{display:flex;align-items:center;gap:3px;font-size:12px;font-weight:700;color:var(--gold)}
@@ -346,8 +352,14 @@ html.lenis,html.lenis body{height:auto}
 .garage-search{display:flex;gap:8px;flex-wrap:wrap}
 .garage-search .fi{flex:1;min-width:180px}
 .garage-search select.fi{flex:0 0 auto;width:auto;min-width:0}
-.gc-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
-.gc-act a{flex:1;min-width:80px;white-space:nowrap;text-align:center;text-decoration:none;justify-content:center}
+.gc-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.gc-act a{flex:1 1 auto;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;text-decoration:none;padding:9px 14px;border-radius:50px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;background:var(--bg3);color:var(--ink);border:1px solid var(--border2);transition:background .25s,color .25s,border-color .25s,box-shadow .25s,transform .3s cubic-bezier(.34,1.56,.64,1)}
+.gc-act a .ic{display:inline-block;transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.gc-act a:hover{background:var(--ink);color:var(--cream);border-color:var(--ink);transform:translateY(-2px);box-shadow:0 10px 20px -10px rgba(26,21,18,.6)}
+.gc-act a:hover .ic{transform:scale(1.25) rotate(-10deg)}
+.gc-act a:active{transform:scale(.95);transition-duration:.1s}
+.gc-act a:focus-visible{outline:2px solid var(--sand);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.gc.in{animation:none}.gc,.gc::before,.gc-act a,.gc-act a .ic{transition:none}}
 .bk{width:100%;padding:10px;border-radius:9px;background:var(--gold);color:#fff;font-size:12.5px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;box-shadow:0 2px 6px rgba(232,148,10,.2)}
 .bk:hover{background:var(--gold2)}
 .rem-sec{margin-bottom:17px}
@@ -1781,17 +1793,16 @@ async function loadGarages(ui,lat,lon,label){
   const more=ui===GARAGE_UI.home&&all.length>ui.max?`<div style="text-align:center;margin-top:16px"><button class="btn-secondary" style="border-radius:10px;font-size:13.5px;padding:11px 18px;background:var(--bg2)" onclick="allGarages()">Bekijk alle ${Math.min(all.length,GARAGE_UI.app.max)} garages →</button></div>`:'';
   document.getElementById(ui.list).innerHTML=`<div class="${ui===GARAGE_UI.home?'garage-grid':'gg'}">${all.slice(0,ui.max).map(garageCard).join('')}</div>${more}<div style="font-size:11px;color:var(--t3);margin-top:14px">Rond ${esc(label)} · gegevens © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:var(--t3)">OpenStreetMap-bijdragers</a>. Klopt er iets niet? Garages kunnen hun gegevens zelf aanpassen op openstreetmap.org.</div>`;
 }
-function garageCard(g){
+function garageCard(g,i=0){
   const t=g.t,addr=[[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' '),t['addr:city']].filter(Boolean).join(', ');
   const tags=[t.shop==='tyres'?'Banden':'Autogarage',t.brand,t['service:vehicle:tyres']==='yes'&&t.shop!=='tyres'?'Banden':null].filter(Boolean);
   const web=t.website||t['contact:website'],tel=(t.phone||t['contact:phone']||'').split(';')[0].replace(/[^+0-9 ]/g,'').trim();
   const href=web?(/^https?:\/\//i.test(web)?web:'https://'+web):null;
-  const btn='btn-sm btn-sm-white';
   // Google Maps toont sterren, reviews, telefoon en openingstijden; er gaat pas iets naar Google als iemand klikt
   const gq=addr?`${t.name}, ${addr}`:`${t.name} ${g.la},${g.lo}`;
-  return `<div class="gc" style="cursor:default"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="min-width:0"><div class="gc-n">${esc(t.name)}</div><div class="gc-d">📍 ${esc(addr||'Adres onbekend')}</div></div><div class="gc-r" style="white-space:nowrap">${g.d.toLocaleString('nl-NL',{maximumFractionDigits:1})} km</div></div>
+  return `<div class="gc in" style="cursor:default;--i:${Math.min(i,8)}"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="min-width:0"><div class="gc-n">${esc(t.name)}</div><div class="gc-d">📍 ${esc(addr||'Adres onbekend')}</div></div><div class="gc-r" style="white-space:nowrap">${g.d.toLocaleString('nl-NL',{maximumFractionDigits:1})} km</div></div>
 <div class="gtags">${tags.map(x=>`<span class="gt">${esc(x)}</span>`).join('')}</div>${t.opening_hours?`<div class="gc-p">🕒 ${esc(t.opening_hours.slice(0,80))}</div>`:''}
-<div class="gc-act"><a class="${btn}" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gq)}" target="_blank" rel="noopener" title="Sterren, reviews en telefoonnummer op Google Maps">⭐ Reviews</a><a class="${btn}" href="https://www.google.com/maps/dir/?api=1&destination=${g.la},${g.lo}" target="_blank" rel="noopener">🧭 Route</a>${href?`<a class="${btn}" href="${esc(href)}" target="_blank" rel="noopener nofollow">🌐 Website</a>`:''}${tel?`<a class="${btn}" href="tel:${esc(tel.replace(/ /g,''))}">📞 Bellen</a>`:''}</div></div>`;
+<div class="gc-act"><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gq)}" target="_blank" rel="noopener" title="Sterren, reviews en telefoonnummer op Google Maps"><span class="ic">⭐</span>Reviews</a><a href="https://www.google.com/maps/dir/?api=1&destination=${g.la},${g.lo}" target="_blank" rel="noopener"><span class="ic">🧭</span>Route</a>${href?`<a href="${esc(href)}" target="_blank" rel="noopener nofollow"><span class="ic">🌐</span>Website</a>`:''}${tel?`<a href="tel:${esc(tel.replace(/ /g,''))}"><span class="ic">📞</span>Bellen</a>`:''}</div></div>`;
 }
 function copyLink(){navigator.clipboard?.writeText(document.getElementById('share-url').value).catch(()=>{});toast('🔗','Link gekopieerd!','Stuur naar de koper!')}
 
