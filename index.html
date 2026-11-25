@@ -2,24 +2,31 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A1512">
 <meta name="color-scheme" content="light only">
 <meta name="supported-color-schemes" content="light">
 <title>Carvital — Altijd weten hoe je auto ervoor staat</title>
 <meta name="description" content="Voer je kenteken in en zie direct hoe je auto ervoor staat. Digitaal onderhoudsboekje, APK-herinneringen en garages bij jou in de buurt.">
 <!-- Vercel Web Analytics is only loaded after cookie consent (see loadAnalytics) -->
 <!-- Bunny Fonts: EU-hosted, privacy-friendly drop-in for Google Fonts (no IP transfer to Google) -->
-<link href="https://fonts.bunny.net/css?family=nunito:400,500,600,700,800,900|inter:300,400,500,600&display=swap" rel="stylesheet">
+<link href="https://fonts.bunny.net/css?family=outfit:300,400,500,600,700,800,900|inter:300,400,500,600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" defer></script>
+<!-- Animaties: GSAP (ScrollTrigger + SplitText) en Lenis voor vloeiend scrollen -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/gsap.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/ScrollTrigger.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/SplitText.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.28/dist/lenis.min.js" defer></script>
 <style>
 :root{
-  --gold:#E8940A;--gold2:#F5B335;--gold3:#FDD07A;
-  --bg:#F8F6F1;--bg2:#FFFFFF;--bg3:#F2EFE8;--bg4:#EAE6DC;
-  --dark:#1C1C1C;--dark2:#2D2D2D;
-  --text:#1C1C1C;--t2:#6B6B6B;--t3:#9B9B9B;
+  --gold:#7A6450;--gold2:#927A62;--gold3:#D2C4B0;
+  --sand:#D2C4B0;--cream:#F2ECE7;--ink:#1A1512;--ink2:#2A231E;--brown:#6B5D50;
+  --bg:#F4F0EC;--bg2:#FFFFFF;--bg3:#EDE6DE;--bg4:#E4DBD0;
+  --dark:#1A1512;--dark2:#2A231E;
+  --text:#1A1512;--t2:#6B5D50;--t3:#9A8D80;
   --green:#16A34A;--orange:#EA580C;--red:#DC2626;--blue:#2563EB;
-  --border:#E4DFD4;--border2:#CFC8B8;
+  --border:#E2D9CE;--border2:#CDBFAF;
   --r:14px;--rl:22px;--rxl:30px;
   --shadow:0 2px 12px rgba(0,0,0,0.07);
   --shadow-lg:0 8px 32px rgba(0,0,0,0.1);
@@ -29,150 +36,186 @@ html{scroll-behavior:smooth;color-scheme:light only}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;color-scheme:light}
 #page-landing{background:var(--bg)}
 
-nav{position:fixed;top:0;left:0;right:0;z-index:500;height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(248,246,241,0.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
-.logo{display:flex;align-items:center;gap:9px;cursor:pointer}
-.lm{width:34px;height:34px;background:var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:900;font-size:16px;color:#fff;box-shadow:0 2px 8px rgba(232,148,10,0.25)}
-.lt{font-family:'Nunito',sans-serif;font-weight:900;font-size:18px;color:var(--dark)}
-.beta{background:#FEF3C7;color:#92400E;font-size:10px;font-weight:700;padding:2px 7px;border-radius:50px;border:1px solid #FDE68A;margin-left:2px}
-.nav-r{display:flex;gap:8px;align-items:center}
-.nb{padding:8px 18px;border-radius:50px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;border:none}
-.nb-ghost{background:transparent;color:var(--t2);border:1.5px solid var(--border2)}
-.nb-ghost:hover{color:var(--dark);border-color:var(--dark)}
-.nb-gold{background:var(--gold);color:#fff;box-shadow:0 2px 8px rgba(232,148,10,0.25)}
-.nb-gold:hover{background:var(--gold2);transform:translateY(-1px)}
+nav{position:fixed;top:0;left:0;right:0;z-index:500;height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 32px;background:rgba(26,21,18,.94);backdrop-filter:blur(16px);border-bottom:1px solid rgba(210,196,176,.12);transition:background .35s,border-color .35s}
+body.at-top nav{background:linear-gradient(rgba(26,21,18,.55),rgba(26,21,18,0));border-bottom-color:transparent;backdrop-filter:none}
+.logo{display:flex;flex-direction:column;cursor:pointer;line-height:1;user-select:none}
+.lt{font-family:'Outfit',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;color:var(--sand)}
+.ls{white-space:nowrap;font-family:'Outfit',sans-serif;font-weight:300;font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:rgba(210,196,176,.65);margin-top:3px}
+.beta{align-self:flex-start;margin-top:5px;font-size:8.5px;font-weight:600;letter-spacing:.2em;color:rgba(210,196,176,.65);border:1px solid rgba(210,196,176,.3);padding:2px 6px}
+.nav-links{display:flex;gap:30px}
+.nav-links a{white-space:nowrap;font-family:'Outfit',sans-serif;font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--sand);cursor:pointer;text-decoration:none;opacity:.85;transition:opacity .2s}
+.nav-links a:hover{opacity:1}
+.nav-r{display:flex;gap:10px;align-items:center}
+.nb{white-space:nowrap;padding:10px 20px;font-size:12.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .25s;border:1px solid rgba(210,196,176,.45);background:transparent;color:var(--sand);border-radius:2px}
+.nb:hover{background:var(--sand);color:var(--ink);border-color:var(--sand)}
+.nb-ghost{border-color:transparent}
+.nb-ghost:hover{background:transparent;color:var(--cream);border-color:transparent}
 
-.page{display:none;min-height:100vh;padding-top:62px}
+.page{display:none;min-height:100vh;padding-top:72px}
 .page.active{display:block}
+#page-landing{padding-top:0;background:var(--bg);overflow-x:clip}
 #page-app{display:none}
 #page-app.active{display:flex;min-height:100vh}
 
+/* gedeelde landingsstijl */
+.eyebrow{font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.28em;text-transform:uppercase;color:var(--brown);display:flex;align-items:center;gap:14px}
+.eyebrow::before{content:'';width:34px;height:1px;background:currentColor;opacity:.6}
+.l-wrap{max-width:1240px;margin:0 auto;padding:0 32px}
+.btn-l{display:inline-flex;align-items:center;gap:10px;padding:15px 26px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .25s;border:1px solid var(--sand);text-decoration:none;white-space:nowrap}
+.btn-l.solid{background:var(--sand);color:var(--ink)}
+.btn-l.solid:hover{background:var(--cream);border-color:var(--cream)}
+.btn-l.line{background:transparent;color:var(--cream);border-color:rgba(242,236,231,.4)}
+.btn-l.line:hover{border-color:var(--cream);background:rgba(242,236,231,.08)}
+.btn-l.dark{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.btn-l.dark:hover{background:var(--brown);border-color:var(--brown)}
+
 /* HERO */
-.hero{max-width:1080px;margin:0 auto;padding:56px 24px 48px;text-align:center;background:var(--bg)}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:50px;padding:6px 16px;margin-bottom:22px;font-size:12.5px;font-weight:600;color:#92400E}
-.badge-dot{width:7px;height:7px;background:var(--gold);border-radius:50%;animation:blink 2s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-h1{font-family:'Nunito',sans-serif;font-size:50px;font-weight:900;line-height:1.1;margin-bottom:16px;color:var(--dark);letter-spacing:-.5px;position:relative;z-index:1}
-h1 .g{color:var(--gold)}
-.hero-sub{font-size:17px;color:var(--t2);line-height:1.75;max-width:520px;margin:0 auto 36px}
+.hero{position:relative;min-height:100vh;min-height:100dvh;display:flex;align-items:center;padding:120px 0 80px;color:var(--cream);overflow:hidden;
+  background:linear-gradient(90deg,rgba(26,21,18,.92) 0%,rgba(26,21,18,.65) 45%,rgba(26,21,18,.25) 100%),var(--photo,radial-gradient(ellipse 70% 60% at 78% 38%,#7a5c3e 0%,#3b2c20 38%,#1a1512 75%));background-size:cover;background-position:center}
+.hero::after{content:'';position:absolute;left:0;right:0;bottom:0;height:160px;background:linear-gradient(rgba(26,21,18,0),rgba(26,21,18,.6));pointer-events:none}
+.hero .l-wrap{position:relative;z-index:1;width:100%}
+.hero .eyebrow{color:var(--sand)}
+h1{font-family:'Outfit',sans-serif;font-size:64px;font-weight:700;line-height:1.02;letter-spacing:-.01em;color:var(--sand);margin:22px 0 22px;max-width:760px}
+.hero-sub{font-size:19px;line-height:1.55;color:rgba(242,236,231,.72);max-width:560px;margin-bottom:38px;font-weight:300}
 
 /* KENTEKEN */
-.kent-box{background:var(--bg2);border-radius:var(--rxl);padding:28px;max-width:580px;margin:0 auto 40px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
-.kent-label{font-size:13px;font-weight:600;color:var(--t2);margin-bottom:12px;text-align:left}
-.kent-row{display:flex;gap:10px;margin-bottom:0}
-.kent-input{flex:1;padding:15px 18px;border-radius:var(--r);background:var(--bg3);border:2px solid var(--border);color:var(--dark);font-family:'Nunito',sans-serif;font-size:22px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;text-align:center;outline:none;transition:all .2s}
-.kent-input:focus{border-color:var(--gold);background:#fff;box-shadow:0 0 0 4px rgba(232,148,10,.08)}
-.kent-input::placeholder{color:var(--t3);font-size:13px;letter-spacing:0;font-family:'Inter',sans-serif;font-weight:400}
-.kent-btn{padding:15px 22px;border-radius:var(--r);background:var(--gold);color:#fff;font-size:14.5px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;white-space:nowrap;box-shadow:0 2px 8px rgba(232,148,10,.25)}
-.kent-btn:hover{background:var(--gold2);transform:translateY(-1px)}
-.kent-loading{display:none;align-items:center;gap:10px;font-size:13.5px;color:var(--t2);margin-top:14px}
+.kent-box{max-width:600px;background:rgba(26,21,18,.55);backdrop-filter:blur(14px);border:1px solid rgba(210,196,176,.2);padding:22px;border-radius:4px}
+.kent-label{font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(210,196,176,.8);margin-bottom:12px}
+.kent-row{display:flex;gap:10px}
+.plate{flex:1;display:flex;border-radius:6px;overflow:hidden;border:2px solid #1a1512;box-shadow:0 0 0 1px rgba(210,196,176,.35)}
+.plate-eu{width:34px;background:#003399;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:6px;font-family:'Outfit',sans-serif;font-weight:700;font-size:12px;gap:4px}
+.plate-eu::before{content:'★';color:#FFCC00;font-size:11px;letter-spacing:-2px}
+.kent-input{flex:1;min-width:0;padding:14px 16px;background:#F7C600;border:none;color:#111;font-family:'Outfit',sans-serif;font-size:26px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;text-align:center;outline:none}
+.kent-input::placeholder{color:rgba(17,17,17,.38);font-size:20px;letter-spacing:.12em}
+.kent-btn{padding:0 26px;background:var(--sand);color:var(--ink);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;border:none;cursor:pointer;border-radius:2px;white-space:nowrap;transition:all .25s}
+.kent-btn:hover{background:var(--cream)}
+.kent-btn:disabled{opacity:.7;cursor:wait}
+.kent-loading{display:none;align-items:center;gap:10px;font-size:13.5px;color:rgba(242,236,231,.75);margin-top:14px}
 .kent-loading.show{display:flex}
-.kent-result{display:none;margin-top:16px;background:linear-gradient(135deg,#FFFBEB,#fff);border:1px solid #FDE68A;border-radius:var(--r);padding:18px;text-align:left;animation:fadeIn .3s ease}
+.kent-result{display:none;margin-top:16px;background:var(--cream);color:var(--ink);border-radius:3px;padding:20px;text-align:left;animation:fadeIn .3s ease}
 .kent-result.show{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.kr-name{font-family:'Nunito',sans-serif;font-size:21px;font-weight:900;color:var(--dark);margin-bottom:3px}
-.kr-meta{font-size:12.5px;color:var(--t2);margin-bottom:14px}
-.kr-score{display:flex;align-items:center;gap:14px;margin-bottom:16px;padding:14px;background:#F0FDF4;border-radius:10px;border:1px solid #BBF7D0}
-.kr-score-num{font-family:'Nunito',sans-serif;font-size:46px;font-weight:900;color:var(--green);line-height:1}
-.kr-score-label{font-size:13.5px;font-weight:700;color:var(--green)}
-.kr-score-sub{font-size:12px;color:var(--t2);margin-top:3px}
+.kr-name{font-family:'Outfit',sans-serif;font-size:24px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.kr-meta{font-size:13px;color:var(--brown);margin-bottom:14px}
+.kr-score{display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:14px 16px;background:#fff;border-left:3px solid var(--brown)}
+.kr-score-num{font-family:'Outfit',sans-serif;font-size:48px;font-weight:700;line-height:1}
+.kr-score-label{font-size:14px;font-weight:600}
+.kr-score-sub{font-size:12px;color:var(--brown);margin-top:3px}
 .kr-actions{display:flex;gap:9px;flex-wrap:wrap}
-.kent-error{display:none;color:var(--red);font-size:13px;margin-top:12px}
+.kent-error{display:none;color:#F3A99F;font-size:13px;margin-top:12px}
 .kent-error.show{display:block}
 
-.hero-trust{display:flex;justify-content:center;align-items:center;gap:24px;flex-wrap:wrap;font-size:13px;color:var(--t2);font-weight:500}
-.ht-item{display:flex;align-items:center;gap:6px}
-.ht-div{width:1px;height:16px;background:var(--border2)}
+.hero-trust{display:flex;gap:28px;flex-wrap:wrap;margin-top:34px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:rgba(210,196,176,.75)}
+.hero-scroll{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);z-index:1;width:1px;height:46px;background:linear-gradient(rgba(210,196,176,0),var(--sand));animation:scrollcue 2.2s ease-in-out infinite}
+@keyframes scrollcue{0%,100%{opacity:.25;transform:translateX(-50%) scaleY(.6);transform-origin:top}50%{opacity:1;transform:translateX(-50%) scaleY(1)}}
 
-/* FEATURES */
-.section{max-width:1080px;margin:0 auto;padding:60px 24px}
-.sec-title{font-family:'Nunito',sans-serif;font-size:32px;font-weight:900;text-align:center;margin-bottom:8px;color:var(--dark)}
-.sec-sub{text-align:center;color:var(--t2);font-size:15px;margin-bottom:36px}
-.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.feat-card{background:var(--bg2);border-radius:var(--rl);padding:26px;border:1px solid var(--border);transition:all .25s;cursor:pointer;position:relative;overflow:hidden}
-.feat-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px);border-color:var(--border2)}
-.feat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--gold);transform:scaleX(0);transition:transform .25s;transform-origin:left}
-.feat-card:hover::after{transform:scaleX(1)}
-.feat-icon{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:23px;margin-bottom:16px}
-.feat-title{font-family:'Nunito',sans-serif;font-size:16.5px;font-weight:800;margin-bottom:8px;color:var(--dark)}
-.feat-desc{font-size:13.5px;color:var(--t2);line-height:1.68}
+/* FUNCTIES: genummerde schermvullende panelen */
+.coll-head{background:var(--ink);padding:120px 0 80px;color:var(--cream)}
+.coll-head .eyebrow{color:var(--sand)}
+.l-h2{font-family:'Outfit',sans-serif;font-size:52px;font-weight:700;line-height:1.05;margin:20px 0 16px;color:var(--sand)}
+.l-lead{font-size:19px;font-weight:300;line-height:1.6;color:rgba(242,236,231,.65);max-width:560px}
+.panels{background:var(--ink)}
+.panel{position:sticky;top:0;height:100vh;height:100svh;display:flex;align-items:flex-end;overflow:hidden;color:var(--cream);
+  background:linear-gradient(0deg,rgba(26,21,18,.95) 0%,rgba(26,21,18,.55) 45%,rgba(26,21,18,.15) 100%),var(--photo,var(--fallback));background-size:cover;background-position:center;box-shadow:0 -24px 48px rgba(0,0,0,.35)}
+.panel:nth-child(1){--fallback:radial-gradient(ellipse 60% 70% at 75% 30%,#6f5640,#2b2019 55%,#1a1512)}
+.panel:nth-child(2){--fallback:radial-gradient(ellipse 60% 70% at 70% 35%,#4f5a55,#222624 55%,#151716)}
+.panel:nth-child(3){--fallback:radial-gradient(ellipse 60% 70% at 78% 28%,#7a6450,#33281f 55%,#1a1512)}
+.panel:nth-child(4){--fallback:radial-gradient(ellipse 60% 70% at 72% 32%,#5a4a3d,#261f1a 55%,#161210)}
+.panel:nth-child(5){--fallback:radial-gradient(ellipse 60% 70% at 76% 34%,#4d5560,#20242a 55%,#14161a)}
+.panel:nth-child(6){--fallback:radial-gradient(ellipse 60% 70% at 74% 30%,#857057,#362a20 55%,#1a1512)}
+.panel-ic{position:absolute;right:8%;top:50%;transform:translateY(-58%);font-size:180px;line-height:1;opacity:.16;filter:grayscale(1) sepia(.6);pointer-events:none}
+.panel .l-wrap{width:100%;padding-bottom:12vh;position:relative}
+.panel-count{font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;letter-spacing:.3em;color:var(--sand);display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.panel-count::before{content:'';width:34px;height:1px;background:var(--sand);opacity:.7}
+.panel h3{font-family:'Outfit',sans-serif;font-size:54px;font-weight:700;line-height:1.02;color:var(--cream);margin-bottom:16px;max-width:720px}
+.panel p{font-size:19px;font-weight:300;line-height:1.6;color:rgba(242,236,231,.72);max-width:560px;margin-bottom:30px}
 
-/* HOW */
-.how-section{background:var(--dark);padding:60px 24px}
-.how-inner{max-width:1080px;margin:0 auto}
-.how-title{font-family:'Nunito',sans-serif;font-size:30px;font-weight:900;color:#fff;text-align:center;margin-bottom:6px}
-.how-sub{text-align:center;color:rgba(255,255,255,.45);font-size:14.5px;margin-bottom:40px}
-.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:rgba(255,255,255,.07);border-radius:var(--rl);overflow:hidden}
-.how-card{background:#252525;padding:26px 20px;position:relative}
-.how-num{font-family:'Nunito',sans-serif;font-size:44px;font-weight:900;color:rgba(232,148,10,.12);position:absolute;top:12px;right:14px;line-height:1}
-.how-icon{width:42px;height:42px;border-radius:12px;background:rgba(232,148,10,.1);border:1px solid rgba(232,148,10,.18);display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:14px}
-.how-card-title{font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:#fff;margin-bottom:7px}
-.how-card-desc{font-size:12.5px;color:rgba(255,255,255,.45);line-height:1.62}
+/* HOE HET WERKT (beige, zoals "wie wij zijn") */
+.how-section{background:#F5F0EB;padding:150px 0}
+.how-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:90px;align-items:start}
+.how-section .l-h2{color:var(--brown)}
+.how-section .l-lead{color:var(--brown)}
+.how-quote{font-family:'Outfit',sans-serif;font-size:24px;font-weight:300;line-height:1.5;color:var(--ink);margin-top:34px;padding-left:22px;border-left:2px solid var(--sand)}
+.how-steps{border-top:1px solid var(--border2)}
+.how-step{display:grid;grid-template-columns:70px 1fr;gap:20px;padding:30px 0;border-bottom:1px solid var(--border2)}
+.how-num{font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;letter-spacing:.2em;color:var(--sand);padding-top:6px}
+.how-card-title{font-family:'Outfit',sans-serif;font-size:24px;font-weight:600;color:var(--ink);margin-bottom:6px}
+.how-card-desc{font-size:15.5px;color:var(--brown);line-height:1.65}
 
 /* OVERDRACHT */
-.od-section{max-width:1080px;margin:0 auto;padding:60px 24px}
-.od-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
-.od-title{font-family:'Nunito',sans-serif;font-size:34px;font-weight:900;color:var(--dark);margin-bottom:14px;line-height:1.15}
-.od-title span{color:var(--gold)}
-.od-desc{font-size:15px;color:var(--t2);line-height:1.75;margin-bottom:22px}
-.od-points{display:flex;flex-direction:column;gap:11px}
-.od-point{display:flex;align-items:flex-start;gap:11px;font-size:13.5px;color:var(--t2);line-height:1.6}
-.od-check{width:26px;height:26px;border-radius:50%;background:#D1FAE5;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:1px;color:var(--green);font-weight:700}
-.od-card{background:var(--bg2);border-radius:var(--rxl);padding:26px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
-.od-car-top{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--border)}
-.od-car-ic{width:46px;height:46px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:21px}
-.od-car-name{font-family:'Nunito',sans-serif;font-size:17px;font-weight:900;color:var(--dark)}
-.od-car-detail{font-size:12px;color:var(--t2);margin-top:2px}
-.od-score-box{display:flex;align-items:center;gap:14px;padding:14px;background:#F0FDF4;border-radius:12px;border:1px solid #BBF7D0;margin-bottom:16px}
-.od-score-num{font-family:'Nunito',sans-serif;font-size:44px;font-weight:900;color:var(--green);line-height:1}
-.od-score-status{font-size:13px;font-weight:700;color:var(--green)}
-.od-history{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
-.od-hist{display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--bg3);border-radius:10px;font-size:12.5px}
-.od-hist-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
-.od-hist-name{flex:1;font-weight:500;color:var(--dark)}
-.od-hist-price{font-weight:700;color:var(--gold)}
-.od-qr-row{display:flex;align-items:center;gap:12px;padding:12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px}
-.od-qr{width:56px;height:56px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:4px;flex-shrink:0;border:1px solid var(--border)}
-.od-qr-info{font-size:12.5px;color:var(--dark2);line-height:1.5}
-.od-qr-info strong{display:block;font-weight:700;margin-bottom:2px;color:var(--dark)}
+.od-section{background:var(--bg);padding:140px 0}
+.od-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.od-title{font-family:'Outfit',sans-serif;font-size:50px;font-weight:700;color:var(--ink);margin:20px 0 18px;line-height:1.05}
+.od-title span{color:var(--brown);font-weight:300}
+.od-desc{font-size:17px;color:var(--brown);line-height:1.7;margin-bottom:28px}
+.od-points{display:flex;flex-direction:column}
+.od-point{display:flex;align-items:flex-start;gap:16px;font-size:15px;color:var(--ink);line-height:1.6;padding:14px 0;border-top:1px solid var(--border)}
+.od-check{font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;letter-spacing:.18em;color:var(--sand);flex-shrink:0;padding-top:3px}
+.od-card{background:var(--bg2);padding:30px;box-shadow:0 30px 60px -20px rgba(26,21,18,.25);border-radius:4px}
+.od-car-top{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.od-car-ic{width:48px;height:48px;background:var(--ink);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:21px}
+.od-car-name{font-family:'Outfit',sans-serif;font-size:19px;font-weight:700;color:var(--ink)}
+.od-car-detail{font-size:12.5px;color:var(--brown);margin-top:2px}
+.od-score-box{display:flex;align-items:center;gap:16px;padding:16px;background:var(--bg);border-left:3px solid var(--green);margin-bottom:16px}
+.od-score-num{font-family:'Outfit',sans-serif;font-size:46px;font-weight:700;color:var(--green);line-height:1}
+.od-score-status{font-size:13.5px;font-weight:600;color:var(--green)}
+.od-history{display:flex;flex-direction:column;margin-bottom:16px}
+.od-hist{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);font-size:13.5px}
+.od-hist-dot{width:6px;height:6px;border-radius:50%;background:var(--sand);flex-shrink:0}
+.od-hist-name{flex:1;color:var(--ink)}
+.od-hist-price{font-weight:600;color:var(--brown)}
+.od-qr-row{display:flex;align-items:center;gap:14px;padding:14px;background:var(--ink);color:var(--cream);border-radius:2px}
+.od-qr{width:56px;height:56px;background:#fff;display:flex;align-items:center;justify-content:center;padding:4px;flex-shrink:0}
+.od-qr-info{font-size:12.5px;color:rgba(242,236,231,.7);line-height:1.5}
+.od-qr-info strong{display:block;font-weight:600;margin-bottom:2px;color:var(--sand)}
 
 /* GARAGES */
-.garage-section{background:var(--bg3);padding:60px 24px}
-.garage-inner{max-width:1080px;margin:0 auto}
-.garage-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.garage-card{background:var(--bg2);border-radius:var(--rl);padding:22px;border:1px solid var(--border);transition:all .2s;cursor:pointer}
-.garage-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
-.garage-card.featured{border-color:#FDE68A;background:linear-gradient(135deg,#FFFBEB,#fff)}
-.garage-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
-.garage-name{font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:var(--dark)}
-.garage-rating{font-size:12.5px;font-weight:700;color:var(--gold)}
-.garage-dist{font-size:11.5px;color:var(--t3);margin-top:2px}
-.garage-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
-.garage-tag{padding:3px 9px;border-radius:50px;background:var(--bg3);font-size:11px;color:var(--t2);border:1px solid var(--border)}
-.garage-info{font-size:13px;color:var(--t2);margin-bottom:14px;line-height:1.6}
-.garage-btn{width:100%;padding:10px;border-radius:10px;background:var(--gold);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;box-shadow:0 2px 6px rgba(232,148,10,.2)}
-.garage-btn:hover{background:var(--gold2)}
+.garage-section{background:#F5F0EB;padding:140px 0}
+.garage-inner{max-width:1240px;margin:0 auto;padding:0 32px}
+.garage-section .sec-title{font-family:'Outfit',sans-serif;font-size:50px;font-weight:700;color:var(--ink);text-align:left;margin:20px 0 12px;line-height:1.05}
+.garage-section .sec-sub{text-align:left;color:var(--brown);font-size:17px;max-width:560px;margin-bottom:34px}
+.garage-section .garage-search{max-width:none!important;margin:0 0 28px!important}
+.garage-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.section{max-width:1080px;margin:0 auto;padding:60px 24px}
+.sec-title{font-family:'Outfit',sans-serif;font-size:32px;font-weight:700;text-align:center;margin-bottom:8px;color:var(--dark)}
+.sec-sub{text-align:center;color:var(--t2);font-size:15px;margin-bottom:36px}
 
 /* CTA */
-.cta-section{background:var(--dark);padding:72px 24px}
-.cta-inner{max-width:560px;margin:0 auto;text-align:center}
-.cta-title{font-family:'Nunito',sans-serif;font-size:38px;font-weight:900;color:#fff;margin-bottom:12px;line-height:1.15}
-.cta-sub{font-size:15.5px;color:rgba(255,255,255,.55);margin-bottom:32px;line-height:1.7}
-.cta-form{display:flex;gap:10px;margin-bottom:14px}
-.cta-input{flex:1;padding:14px 18px;border-radius:var(--r);background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);color:#fff;font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
-.cta-input:focus{border-color:var(--gold)}
-.cta-input::placeholder{color:rgba(255,255,255,.3)}
-.cta-note{font-size:12px;color:rgba(255,255,255,.35)}
-.cta-note strong{color:var(--gold2)}
+.cta-section{background:var(--ink);padding:140px 0;position:relative;overflow:hidden}
+.cta-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 80% at 85% 50%,rgba(122,100,80,.35),transparent 70%);pointer-events:none}
+.cta-inner{position:relative;max-width:1240px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:1.2fr 1fr;gap:60px;align-items:center}
+.cta-section .eyebrow{color:var(--sand)}
+.cta-title{font-family:'Outfit',sans-serif;font-size:52px;font-weight:700;color:var(--sand);margin:20px 0 16px;line-height:1.05}
+.cta-sub{font-size:18px;font-weight:300;color:rgba(242,236,231,.65);line-height:1.6}
+.cta-form{display:flex;gap:10px;margin-bottom:16px}
+.cta-input{flex:1;min-width:0;padding:16px 18px;background:rgba(242,236,231,.06);border:1px solid rgba(210,196,176,.3);border-radius:2px;color:var(--cream);font-size:15px;font-family:'Inter',sans-serif;outline:none}
+.cta-input:focus{border-color:var(--sand)}
+.cta-input::placeholder{color:rgba(242,236,231,.35)}
+.cta-note{font-family:'Outfit',sans-serif;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:rgba(210,196,176,.6)}
 
 /* FOOTER */
-footer{background:#111;padding:48px 24px 24px;border-top:1px solid rgba(255,255,255,.05)}
-.footer-inner{max-width:1080px;margin:0 auto}
-.footer-top{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:48px;margin-bottom:32px}
-.footer-desc{font-size:13px;color:rgba(255,255,255,.35);line-height:1.7;margin-top:12px;max-width:220px}
-.footer-col-title{font-family:'Nunito',sans-serif;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:14px}
-.footer-link{display:block;font-size:13px;color:rgba(255,255,255,.3);text-decoration:none;margin-bottom:9px;cursor:pointer;transition:color .2s}
-.footer-link:hover{color:var(--gold2)}
-.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:20px;border-top:1px solid rgba(255,255,255,.05);font-size:12px;color:rgba(255,255,255,.25)}
+footer{background:var(--ink);color:var(--sand);padding:90px 0 30px;border-top:1px solid rgba(210,196,176,.1)}
+.footer-inner{max-width:1240px;margin:0 auto;padding:0 32px}
+.footer-top{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:48px;margin-bottom:60px}
+.footer-desc{font-size:14px;color:rgba(210,196,176,.6);line-height:1.7;margin-top:18px;max-width:280px;font-weight:300}
+.footer-col-title{font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--sand);margin-bottom:18px}
+.footer-link{display:block;font-size:14px;color:rgba(210,196,176,.6);text-decoration:none;margin-bottom:11px;cursor:pointer;transition:color .2s;font-weight:300}
+.footer-link:hover{color:var(--cream)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:24px;border-top:1px solid rgba(210,196,176,.12);font-size:12.5px;color:rgba(210,196,176,.45)}
+
+/* Lenis (overgenomen uit lenis.css) */
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto!important}
+.lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain}
+.lenis.lenis-stopped{overflow:hidden}
+/* met GSAP actief regelt GSAP het infaden; geen CSS-transities die ermee botsen */
+.motion .reveal{transition:none}
+.split-line{padding-bottom:.08em}
+
+/* zacht infaden bij scrollen */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.panel{position:relative}.hero-scroll{animation:none}}
 
 /* BUTTONS */
 .btn-primary{padding:13px 22px;border-radius:var(--r);background:var(--gold);color:#fff;font-size:14.5px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(232,148,10,.25)}
@@ -193,11 +236,11 @@ footer{background:#111;padding:48px 24px 24px;border-top:1px solid rgba(255,255,
 .mm-item{display:flex;align-items:center;gap:12px;padding:12px 4px;font-size:14px;color:var(--dark);cursor:pointer;border-bottom:1px solid var(--border)}
 .mm-item:last-child{border-bottom:none}
 .mm-item .ic{font-size:18px;width:24px;text-align:center}
-.sidebar{width:218px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:16px 10px;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto;display:flex;flex-direction:column}
+.sidebar{width:218px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:16px 10px;position:sticky;top:72px;height:calc(100vh - 72px);overflow-y:auto;display:flex;flex-direction:column}
 .sbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:5px;padding:0 10px}
 .ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:10px;cursor:pointer;transition:all .15s;font-size:13px;font-weight:500;color:var(--t2);margin-bottom:1px}
 .ni:hover{background:var(--bg3);color:var(--dark)}
-.ni.active{background:#FEF3C7;color:#92400E;font-weight:600}
+.ni.active{background:#EDE3D6;color:var(--ink);font-weight:600}
 .ni .ic{font-size:16px;width:22px;text-align:center;flex-shrink:0}
 .ni .bc{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:50px}
 .sb-sec{margin-bottom:20px}
@@ -211,7 +254,7 @@ footer{background:#111;padding:48px 24px 24px;border-top:1px solid rgba(255,255,
 .view.active{display:block;animation:vin .2s ease}
 @keyframes vin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 .ahd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;flex-wrap:wrap;gap:12px}
-.at{font-family:'Nunito',sans-serif;font-size:24px;font-weight:900;color:var(--dark)}
+.at{font-family:'Outfit',sans-serif;font-size:24px;font-weight:900;color:var(--dark)}
 .as2{font-size:12px;color:var(--t3);margin-top:3px}
 .cchip{display:flex;align-items:center;gap:9px;background:var(--bg2);border:1.5px solid var(--border);border-radius:50px;padding:7px 14px;cursor:pointer;transition:all .2s}
 .cchip:hover{border-color:var(--gold)}
@@ -222,7 +265,7 @@ footer{background:#111;padding:48px 24px 24px;border-top:1px solid rgba(255,255,
 .sp2{grid-column:span 2}
 .card{background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);padding:20px;box-shadow:var(--shadow)}
 .cl{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-bottom:12px;display:flex;align-items:center;gap:5px}
-.score-big{font-family:'Nunito',sans-serif;font-size:72px;font-weight:900;line-height:1;color:var(--green)}
+.score-big{font-family:'Outfit',sans-serif;font-size:72px;font-weight:900;line-height:1;color:var(--green)}
 .score-big sub{font-size:24px;color:var(--t3);font-weight:400}
 .sch2{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:50px;font-size:11px;font-weight:700;margin-top:8px;margin-bottom:16px}
 .sbars{display:flex;flex-direction:column;gap:9px}
@@ -231,7 +274,7 @@ footer{background:#111;padding:48px 24px 24px;border-top:1px solid rgba(255,255,
 .sb-tr{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
 .sb-fl{height:100%;border-radius:3px;transition:width 2s ease}
 .sb-pct{font-size:10.5px;color:var(--t3);width:28px;text-align:right;flex-shrink:0}
-.apk-big{font-family:'Nunito',sans-serif;font-size:52px;font-weight:900;line-height:1;color:var(--gold)}
+.apk-big{font-family:'Outfit',sans-serif;font-size:52px;font-weight:900;line-height:1;color:var(--gold)}
 .apk-tr{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:12px}
 .al2{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:10px;background:var(--bg3);cursor:pointer;transition:background .15s;margin-bottom:7px;border:1px solid var(--border)}
 .al2:hover{background:var(--bg4)}
@@ -266,12 +309,12 @@ footer{background:#111;padding:48px 24px 24px;border-top:1px solid rgba(255,255,
 .tlm{font-size:11px;color:var(--t3)}
 .tlg{font-size:11.5px;color:var(--t2);margin-top:4px}
 .kw{background:var(--bg2);border-radius:var(--rl);padding:24px;margin-bottom:17px;border:1px solid var(--border);box-shadow:var(--shadow)}
-.kf{width:100%;max-width:290px;padding:14px 16px;border-radius:var(--r);background:var(--bg3);border:2px solid var(--border);color:var(--dark);font-family:'Nunito',sans-serif;font-size:24px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;text-align:center;outline:none;transition:all .2s;margin-bottom:12px;display:block}
+.kf{width:100%;max-width:290px;padding:14px 16px;border-radius:var(--r);background:var(--bg3);border:2px solid var(--border);color:var(--dark);font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;text-align:center;outline:none;transition:all .2s;margin-bottom:12px;display:block}
 .kf:focus{border-color:var(--gold);background:#fff}
 .kf::placeholder{color:var(--t3);font-size:12.5px;letter-spacing:0;font-family:'Inter',sans-serif;font-weight:400}
 .rdw-rc{background:#FFFBEB;border:1px solid #FDE68A;border-radius:var(--rl);padding:21px;display:none;box-shadow:var(--shadow)}
 .rdw-rc.show{display:block;animation:fadeIn .32s ease}
-.rdw-n{font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--dark);margin-bottom:3px}
+.rdw-n{font-family:'Outfit',sans-serif;font-size:22px;font-weight:900;color:var(--dark);margin-bottom:3px}
 .rdw-d{font-size:13px;color:var(--t2);margin-bottom:13px}
 .rdw-g{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;padding-top:16px;border-top:1px solid var(--border);margin-top:14px}
 .rdw-f label{font-size:10px;color:var(--t3);display:block;margin-bottom:2px}
@@ -289,7 +332,7 @@ footer{background:#111;padding:48px 24px 24px;border-top:1px solid rgba(255,255,
 .gc{background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);padding:19px;transition:all .2s;cursor:pointer;box-shadow:var(--shadow)}
 .gc:hover{border-color:var(--border2);box-shadow:var(--shadow-lg);transform:translateY(-2px)}
 .gc.rec{background:#FFFBEB;border-color:#FDE68A}
-.gc-n{font-family:'Nunito',sans-serif;font-size:14.5px;font-weight:800;color:var(--dark)}
+.gc-n{font-family:'Outfit',sans-serif;font-size:14.5px;font-weight:800;color:var(--dark)}
 .gc-r{display:flex;align-items:center;gap:3px;font-size:12px;font-weight:700;color:var(--gold)}
 .gc-d{font-size:11px;color:var(--t3);margin-top:2px}
 .gtags{display:flex;gap:5px;flex-wrap:wrap;margin:10px 0}
@@ -297,8 +340,8 @@ footer{background:#111;padding:48px 24px 24px;border-top:1px solid rgba(255,255,
 .gc-p{font-size:12px;color:var(--t2);margin-bottom:13px}
 .gc-p strong{color:var(--dark)}
 .garage-search{display:flex;gap:8px;flex-wrap:wrap}
-.garage-search #garage-q{flex:1;min-width:180px}
-.garage-search #garage-r{width:auto}
+.garage-search .fi{flex:1;min-width:180px}
+.garage-search select.fi{flex:0 0 auto;width:auto;min-width:0}
 .gc-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
 .gc-act a{flex:1;min-width:80px;text-align:center;text-decoration:none;justify-content:center}
 .bk{width:100%;padding:10px;border-radius:9px;background:var(--gold);color:#fff;font-size:12.5px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;box-shadow:0 2px 6px rgba(232,148,10,.2)}
@@ -314,7 +357,7 @@ footer{background:#111;padding:48px 24px 24px;border-top:1px solid rgba(255,255,
 .kt{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-bottom:15px}
 .kc{background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);padding:19px;text-align:center;box-shadow:var(--shadow)}
 .kc-ic{font-size:24px;margin-bottom:7px}
-.kc-n{font-family:'Nunito',sans-serif;font-size:32px;font-weight:900;letter-spacing:-1px;margin-top:3px}
+.kc-n{font-family:'Outfit',sans-serif;font-size:32px;font-weight:900;letter-spacing:-1px;margin-top:3px}
 .kc-lb{font-size:11px;color:var(--t3);margin-top:3px}
 .cbr{display:flex;align-items:center;gap:10px;margin-bottom:9px}
 .cb-lb{font-size:12px;color:var(--t2);width:132px;flex-shrink:0}
@@ -322,14 +365,14 @@ footer{background:#111;padding:48px 24px 24px;border-top:1px solid rgba(255,255,
 .cb-fl{height:100%;border-radius:4px;transition:width 1.5s ease}
 .cb-n{font-size:12px;font-weight:600;color:var(--dark);width:55px;text-align:right;flex-shrink:0}
 .th{background:#FFFBEB;border:1px solid #FDE68A;border-radius:var(--rxl);padding:36px;text-align:center;margin-bottom:17px;box-shadow:var(--shadow)}
-.th-t{font-family:'Nunito',sans-serif;font-size:26px;font-weight:900;color:var(--dark);margin-bottom:6px}
+.th-t{font-family:'Outfit',sans-serif;font-size:26px;font-weight:900;color:var(--dark);margin-bottom:6px}
 .th-s{font-size:14px;color:var(--t2);margin-bottom:22px}
 .qrb{width:138px;height:138px;background:#fff;border-radius:14px;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;padding:10px;border:1px solid var(--border);box-shadow:var(--shadow)}
 .shr{display:flex;gap:9px;max-width:380px;margin:0 auto}
-.shi{flex:1;padding:10px 13px;border-radius:10px;background:var(--bg3);border:1.5px solid var(--border);color:var(--dark);font-size:12px;font-family:'Inter',sans-serif;outline:none}
+.shi{flex:1;min-width:0;padding:10px 13px;border-radius:10px;background:var(--bg3);border:1.5px solid var(--border);color:var(--dark);font-size:12px;font-family:'Inter',sans-serif;outline:none}
 .pt2{background:var(--bg2);border-radius:var(--rl);padding:22px;border:1px solid var(--border);margin-bottom:15px;display:flex;align-items:center;gap:20px;box-shadow:var(--shadow)}
-.pav2{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-size:26px;font-weight:900;color:#fff;flex-shrink:0}
-.pn2{font-family:'Nunito',sans-serif;font-size:20px;font-weight:900;color:var(--dark)}
+.pav2{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-size:26px;font-weight:900;color:#fff;flex-shrink:0}
+.pn2{font-family:'Outfit',sans-serif;font-size:20px;font-weight:900;color:var(--dark)}
 .pe2{font-size:13px;color:var(--t3);margin-top:3px}
 .tgr{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:10px 0;border-bottom:1px solid var(--border);color:var(--dark)}
 .tgr:last-child{border-bottom:none}
@@ -343,7 +386,7 @@ footer{background:#111;padding:48px 24px 24px;border-top:1px solid rgba(255,255,
 .modal-backdrop.open{opacity:1;pointer-events:all}
 .modal-box{background:var(--bg2);border-radius:var(--rxl);padding:32px;width:440px;max-width:92vw;border:1px solid var(--border);transform:translateY(12px) scale(.98);transition:transform .22s;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
 .modal-backdrop.open .modal-box{transform:translateY(0) scale(1)}
-.m-title{font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--dark);margin-bottom:5px}
+.m-title{font-family:'Outfit',sans-serif;font-size:22px;font-weight:900;color:var(--dark);margin-bottom:5px}
 .m-sub{font-size:13px;color:var(--t2);margin-bottom:22px;line-height:1.6}
 .fg{margin-bottom:12px}
 .fl{font-size:11.5px;font-weight:600;margin-bottom:5px;display:block;color:var(--t2)}
@@ -379,7 +422,7 @@ footer{background:#111;padding:48px 24px 24px;border-top:1px solid rgba(255,255,
 .empty .e-ic{font-size:40px;margin-bottom:10px}
 .share-wrap{max-width:760px;margin:0 auto;padding:32px 20px 60px}
 .share-qr svg{display:block;width:100%;height:100%}
-.empty .e-t{font-family:'Nunito',sans-serif;font-size:18px;font-weight:800;color:var(--dark);margin-bottom:4px}
+.empty .e-t{font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:var(--dark);margin-bottom:4px}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 select.fi{appearance:auto}
 .chk{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:10px;cursor:pointer}
@@ -396,15 +439,35 @@ body.signed-in .nav-guest{display:none}
 body.signed-in .nav-user{display:inline-block}
 .ni.user-flex,.mm-item.user-flex{display:none}
 body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
-.legal h4{font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:var(--dark);margin:14px 0 4px}
+.legal h4{font-family:'Outfit',sans-serif;font-size:14px;font-weight:800;color:var(--dark);margin:14px 0 4px}
 .legal ul{margin:6px 0 0 18px}
 #cookie-banner button{min-width:140px}
+@media(max-width:1120px){
+  .nav-links{display:none}
+}
+@media(max-width:480px){
+  .ls{display:none}
+}
 @media(max-width:900px){
-  .hero{padding:40px 20px 32px}
-  h1{font-size:34px}
-  .feat-grid,.how-grid,.garage-grid{grid-template-columns:1fr}
-  .od-grid{grid-template-columns:1fr}
-  .footer-top{grid-template-columns:1fr;gap:24px}
+  nav{padding:0 16px;height:64px}
+  .page{padding-top:64px}
+  .lt{font-size:20px}
+  .ls{font-size:8.5px}
+  .nb{padding:9px 14px;font-size:11.5px}
+  .l-wrap,.garage-inner,.cta-inner,.footer-inner{padding:0 20px}
+  .hero{padding:100px 0 70px}
+  h1{font-size:40px}
+  .hero-sub{font-size:16.5px}
+  .hero-trust{gap:10px 18px;font-size:11px}
+  .l-h2,.od-title,.cta-title,.garage-section .sec-title{font-size:36px}
+  .panel h3{font-size:38px}
+  .panel p,.l-lead{font-size:16.5px}
+  .panel-ic{font-size:120px;right:4%;top:30%}
+  .coll-head{padding:90px 0 60px}
+  .how-section,.od-section,.garage-section,.cta-section{padding:90px 0}
+  .how-grid,.od-grid,.cta-inner{grid-template-columns:1fr;gap:44px}
+  .feat-grid,.garage-grid{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr 1fr;gap:32px}
   .sidebar{display:none}
   .amain{padding:16px;padding-bottom:78px}
   .mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:400;background:rgba(248,246,241,0.98);backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
@@ -412,148 +475,170 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
   .sp2{grid-column:span 1}
   .rdw-g{grid-template-columns:repeat(2,1fr)}
   .kent-row{flex-direction:column}
+  .kent-btn{padding:15px}
   .cta-form{flex-direction:column}
-  nav .nb-ghost{display:none}
+  .footer-bottom{flex-direction:column;align-items:flex-start}
   .ht-div{display:none}
   .pt2{flex-wrap:wrap}
   .pt2 button{width:100%;justify-content:center}
   .frow{grid-template-columns:1fr}
   #cookie-banner button{flex:1;min-width:0}
+  #cookie-banner{padding-bottom:calc(16px + env(safe-area-inset-bottom))!important}
+  /* iOS zoomt in op velden met een kleinere letter dan 16px */
+  .fi,.cta-input,.shi,select{font-size:16px}
+  /* vensters als paneel vanaf de onderkant */
+  .modal-backdrop{align-items:flex-end}
+  .modal-box{width:100%;max-width:100%;border-radius:18px 18px 0 0;padding:26px 20px calc(22px + env(safe-area-inset-bottom));max-height:88vh;max-height:88dvh;transform:translateY(40px);border-left:none;border-right:none;border-bottom:none}
+  .modal-box::before{content:'';display:block;width:40px;height:4px;border-radius:2px;background:var(--border2);margin:-12px auto 16px}
+  .m-footer{font-size:13.5px;margin-top:16px}
+  .m-footer a{display:inline-block;padding:4px 2px}
+  .mm-item{padding:15px 4px;font-size:15px}
+  /* meldingen boven de navigatiebalk onderaan */
+  .toast{left:12px;right:12px;bottom:calc(80px + env(safe-area-inset-bottom));transform:translateY(calc(100% + 140px))}
+  .toast.show{transform:translateY(0)}
+  body:not(:has(#page-app.active)) .toast{bottom:calc(16px + env(safe-area-inset-bottom))}
+  .amain{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+  .btn-sm{padding:11px 16px}
+  .rec-del{padding:8px 6px}
+  .ahd>div,.ahd select.fi{max-width:100%;min-width:0}
+  .ahd select.fi{width:100%!important}
+  .shr{flex-wrap:wrap}
+  .shr .btn-primary{flex:1;justify-content:center}
+}
+@media(max-width:480px){
+  nav{gap:6px;padding:0 12px}
+  .lt{font-size:18px;letter-spacing:.04em}
+  .nav-r{gap:2px}
+  .nb{padding:8px 9px;font-size:10.5px;letter-spacing:.05em}
+  nav .nb-ghost{padding:9px 6px}
+  h1{font-size:36px}
+  .l-h2,.od-title,.cta-title,.garage-section .sec-title{font-size:32px}
+  .panel h3{font-size:34px}
+  .kent-box{padding:16px}
+  .kent-input{font-size:22px}
+  .btn-l{padding:14px 18px;font-size:12px}
+  .kr-actions .btn-l,.cta-form .btn-l{justify-content:center;width:100%}
+  .footer-top{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
 <nav>
-  <div class="logo" onclick="showPage('landing')">
-    <div class="lm">C</div>
-    <span class="lt">Carvital</span>
-    <span class="beta">BÈTA</span>
+  <div class="logo" onclick="showPage('landing')" role="link" aria-label="Carvital home">
+    <span class="lt">CARVITAL</span>
+    <span class="ls">Altijd weten hoe je auto ervoor staat</span>
+  </div>
+  <div class="nav-links">
+    <a onclick="goSection('functies')">Functies</a>
+    <a onclick="goSection('hoe')">Hoe het werkt</a>
+    <a onclick="goSection('overdracht')">Overdracht</a>
+    <a onclick="goSection('garages')">Garages</a>
   </div>
   <div class="nav-r">
     <button class="nb nb-ghost nav-guest" onclick="openM('login')">Inloggen</button>
-    <button class="nb nb-gold nav-guest" onclick="openM('register')">Gratis starten →</button>
-    <button class="nb nb-gold nav-user" onclick="showApp()">Mijn Carvital →</button>
+    <button class="nb nav-guest" onclick="openM('register')">Gratis starten</button>
+    <button class="nb nav-user" onclick="showApp()">Mijn Carvital →</button>
   </div>
 </nav>
 
 <!-- LANDING -->
 <div id="page-landing" class="page active">
 
-  <div class="hero">
-    <div class="hero-badge"><div class="badge-dot"></div>Nieuw gelanceerd in Nederland — word een van de eersten</div>
-    <h1>Altijd weten hoe<br>je <span class="g">auto</span> ervoor staat</h1>
-    <p class="hero-sub">Voer je kenteken in en zie direct de conditie van je auto. Upload facturen voor een volledig digitaal onderhoudsboekje. Vind de beste garage bij jou in de buurt. Gratis — altijd.</p>
+  <!-- Eigen foto toevoegen? Zet bijv. style="--photo:url(img/hero.jpg)" op een .hero of .panel -->
+  <section class="hero">
+    <div class="l-wrap">
+      <div class="eyebrow">Gratis · RDW-gegevens · Data in de EU</div>
+      <h1>Altijd weten hoe je auto ervoor staat</h1>
+      <p class="hero-sub">Voer je kenteken in en zie direct de conditie van je auto. Houd je onderhoud digitaal bij, krijg op tijd een seintje en vind een garage in de buurt.</p>
 
-    <div class="kent-box">
-      <div class="kent-label">🔍 Voer je kenteken in en begin direct</div>
-      <div class="kent-row">
-        <input type="text" class="kent-input" id="lkw-f" placeholder="bijv. AB-123-C" maxlength="8" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
-        <button class="kent-btn" onclick="lkwL()" id="lkw-btn">🚗 Zoek mijn auto op</button>
-      </div>
-      <div class="kent-loading" id="lkw-load"><div class="spin"></div><span>Autogegevens ophalen via RDW...</span></div>
-      <div class="kent-result" id="lkw-res">
-        <div class="kr-name" id="lkw-name">-</div>
-        <div class="kr-meta" id="lkw-meta">-</div>
-        <div class="kr-score">
-          <div class="kr-score-num" id="lkw-score-num">89</div>
-          <div>
-            <div class="kr-score-label" id="lkw-score-label">✅ Uitstekende conditie</div>
-            <div class="kr-score-sub">Indicatieve AutoHealth Score · op basis van bouwjaar en RDW-gegevens</div>
+      <div class="kent-box">
+        <div class="kent-label">Begin met je kenteken</div>
+        <div class="kent-row">
+          <div class="plate"><div class="plate-eu">NL</div><input type="text" class="kent-input" id="lkw-f" placeholder="AB-123-C" maxlength="8" aria-label="Kenteken" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')" onkeydown="if(event.key==='Enter')lkwL()"></div>
+          <button class="kent-btn" onclick="lkwL()" id="lkw-btn">🚗 Zoek mijn auto op</button>
+        </div>
+        <div class="kent-loading" id="lkw-load"><div class="spin"></div><span>Autogegevens ophalen via RDW...</span></div>
+        <div class="kent-result" id="lkw-res">
+          <div class="kr-name" id="lkw-name">-</div>
+          <div class="kr-meta" id="lkw-meta">-</div>
+          <div class="kr-score">
+            <div class="kr-score-num" id="lkw-score-num">89</div>
+            <div>
+              <div class="kr-score-label" id="lkw-score-label">✅ Uitstekende conditie</div>
+              <div class="kr-score-sub">Indicatieve AutoHealth Score · op basis van bouwjaar en RDW-gegevens</div>
+            </div>
+          </div>
+          <div class="kr-actions">
+            <button class="btn-l dark" onclick="openM('register')">Account aanmaken →</button>
+            <button class="btn-l" style="color:var(--ink);border-color:var(--border2)" onclick="showApp()">Bekijk de demo</button>
           </div>
         </div>
-        <div class="kr-actions">
-          <button class="btn-primary" style="font-size:14px;padding:11px 20px;border-radius:10px" onclick="openM('register')">Account aanmaken & beginnen →</button>
-          <button class="btn-secondary" style="font-size:14px;padding:11px 18px;border-radius:10px" onclick="showApp()">Bekijk de app demo</button>
-        </div>
+        <div class="kent-error" id="lkw-err">Kenteken niet gevonden. Controleer het kenteken en probeer het opnieuw.</div>
       </div>
-      <div class="kent-error" id="lkw-err">❌ Kenteken niet gevonden. Controleer het kenteken en probeer het opnieuw.</div>
-    </div>
 
-    <div class="hero-trust">
-      <div class="ht-item">✅ Gratis voor autobezitters</div>
-      <div class="ht-div"></div>
-      <div class="ht-item">🔒 Gegevens opgeslagen in de EU</div>
-      <div class="ht-div"></div>
-      <div class="ht-item">🇳🇱 Gemaakt in Nederland</div>
-      <div class="ht-div"></div>
-      <div class="ht-item">⚡ Start in 30 seconden</div>
+      <div class="hero-trust"><span>Gratis voor autobezitters</span><span>Gemaakt in Nederland</span><span>Start in 30 seconden</span></div>
     </div>
+    <div class="hero-scroll" aria-hidden="true"></div>
+  </section>
+
+  <!-- FUNCTIES -->
+  <section id="functies" class="coll-head">
+    <div class="l-wrap reveal">
+      <div class="eyebrow">Functies</div>
+      <h2 class="l-h2">Alles voor je auto,<br>op één plek</h2>
+      <p class="l-lead">Van RDW-gegevens tot een compleet onderhoudsboekje. Simpel, overzichtelijk en gratis voor elke autobezitter.</p>
+    </div>
+  </section>
+  <div class="panels">
+    <section class="panel"><div class="panel-ic" aria-hidden="true">🏥</div><div class="l-wrap"><div class="panel-count">01 / 06</div><h3>AutoHealth Score</h3><p>Eén cijfer van 0 tot 100 dat laat zien hoe je auto ervoor staat, op basis van bouwjaar, APK-status en je geregistreerde onderhoud.</p><button class="btn-l line" onclick="showApp()">Bekijk de demo →</button></div></section>
+    <section class="panel"><div class="panel-ic" aria-hidden="true">🔍</div><div class="l-wrap"><div class="panel-count">02 / 06</div><h3>Kenteken check</h3><p>Merk, model, bouwjaar, APK-datum en openstaande terugroepacties, direct uit de officiële RDW-database.</p><button class="btn-l line" onclick="document.getElementById('lkw-f').focus();window.scrollTo({top:0,behavior:'smooth'})">Kenteken invoeren →</button></div></section>
+    <section class="panel"><div class="panel-ic" aria-hidden="true">📖</div><div class="l-wrap"><div class="panel-count">03 / 06</div><h3>Digitaal onderhoudsboekje</h3><p>Al je beurten, APK's en reparaties op één plek, met de factuur erbij. Privé opgeslagen in de EU.</p><button class="btn-l line" onclick="openM('register')">Gratis beginnen →</button></div></section>
+    <section class="panel"><div class="panel-ic" aria-hidden="true">🔔</div><div class="l-wrap"><div class="panel-count">04 / 06</div><h3>Slimme reminders</h3><p>Zie in één oogopslag wanneer je APK verloopt, of een onderhoudsbeurt achterloopt en wanneer het tijd is voor winter- of zomerbanden.</p><button class="btn-l line" onclick="showApp()">Bekijk de demo →</button></div></section>
+    <section class="panel"><div class="panel-ic" aria-hidden="true">🤝</div><div class="l-wrap"><div class="panel-count">05 / 06</div><h3>Overdragen bij verkoop</h3><p>Deel je complete onderhoudshistorie met een koper via een link of QR-code. Zonder je naam of facturen, en altijd in te trekken.</p><button class="btn-l line" onclick="goSection('overdracht')">Meer over overdracht →</button></div></section>
+    <section class="panel"><div class="panel-ic" aria-hidden="true">🗺️</div><div class="l-wrap"><div class="panel-count">06 / 06</div><h3>Garages in de buurt</h3><p>Vind autogarages en bandenspecialisten rond je postcode, met route, website en telefoonnummer.</p><button class="btn-l line" onclick="goSection('garages')">Zoek een garage →</button></div></section>
   </div>
 
-  <!-- FEATURES -->
-  <div class="section" style="padding-top:0">
-    <div class="sec-title">Alles voor je auto op één plek</div>
-    <p class="sec-sub">Simpel, snel en gratis — voor elke Nederlandse autobezitter</p>
-    <div class="feat-grid">
-      <div class="feat-card" onclick="showApp()">
-        <div class="feat-icon" style="background:#D1FAE5">🏥</div>
-        <div class="feat-title">AutoHealth Score</div>
-        <div class="feat-desc">Zie direct hoe je auto ervoor staat op een schaal van 0–100. Gebaseerd op APK, kilometerstand, distributieriem, remmen en vloeistoffen.</div>
+  <!-- HOE HET WERKT -->
+  <section id="hoe" class="how-section">
+    <div class="l-wrap how-grid">
+      <div class="reveal">
+        <div class="eyebrow">Hoe het werkt</div>
+        <h2 class="l-h2">In vier stappen geregeld</h2>
+        <p class="l-lead">Carvital combineert de officiële RDW-gegevens met jouw eigen onderhoudshistorie. Zo weet je altijd waar je staat, zonder mappen vol bonnetjes.</p>
+        <div class="how-quote">Een auto met een complete historie is bij verkoop meer waard en geeft kopers vertrouwen.</div>
       </div>
-      <div class="feat-card" onclick="showApp()">
-        <div class="feat-icon" style="background:#FEF3C7">📄</div>
-        <div class="feat-title">Factuur uploaden</div>
-        <div class="feat-desc">Foto van je factuur uploaden is genoeg. Onze AI leest alles automatisch uit en werkt je Health Score en onderhoudsboekje direct bij.</div>
-      </div>
-      <div class="feat-card" onclick="showApp()">
-        <div class="feat-icon" style="background:#DBEAFE">📖</div>
-        <div class="feat-title">Digitaal Onderhoudsboekje</div>
-        <div class="feat-desc">Alle onderhoudsbeurten netjes bijgehouden. Bij verkoop overdraagbaar via QR-code — maakt je auto aantoonbaar meer waard.</div>
-      </div>
-      <div class="feat-card" onclick="showApp()">
-        <div class="feat-icon" style="background:#EDE9FE">🔔</div>
-        <div class="feat-title">Slimme Reminders</div>
-        <div class="feat-desc">Nooit meer je APK vergeten of onderhoud missen. Persoonlijke herinneringen op het juiste moment, gebaseerd op jouw auto en km-stand.</div>
-      </div>
-      <div class="feat-card" onclick="showApp()">
-        <div class="feat-icon" style="background:#FFE4E6">🗺️</div>
-        <div class="feat-title">Garage bij jou in de buurt</div>
-        <div class="feat-desc">Score daalt? Binnen 30 seconden een afspraak bij de beste garage bij jou in de buurt. AI beveelt de juiste garage aan voor jouw auto.</div>
-      </div>
-      <div class="feat-card" onclick="showApp()">
-        <div class="feat-icon" style="background:#FEF3C7">🔮</div>
-        <div class="feat-title">Voorspellende AI</div>
-        <div class="feat-desc">Op basis van facturen van vergelijkbare auto's voorspellen wij wanneer onderdelen bij jouw model aandacht nodig hebben — voordat ze kapotgaan.</div>
+      <div class="how-steps reveal">
+        <div class="how-step"><div class="how-num">01</div><div><div class="how-card-title">Kenteken invoeren</div><div class="how-card-desc">We halen je autogegevens automatisch op bij de RDW. Geen formulieren invullen.</div></div></div>
+        <div class="how-step"><div class="how-num">02</div><div><div class="how-card-title">Onderhoud toevoegen</div><div class="how-card-desc">Voeg je beurten, APK's en reparaties toe, met de factuur erbij als je wilt.</div></div></div>
+        <div class="how-step"><div class="how-num">03</div><div><div class="how-card-title">Overzicht houden</div><div class="how-card-desc">Je Health Score, kosten en aandachtspunten worden direct bijgewerkt.</div></div></div>
+        <div class="how-step"><div class="how-num">04</div><div><div class="how-card-title">Garage vinden of verkopen</div><div class="how-card-desc">Zoek een garage in de buurt, of deel je historie met een koper.</div></div></div>
       </div>
     </div>
-  </div>
-
-  <!-- HOW IT WORKS -->
-  <div class="how-section">
-    <div class="how-inner">
-      <div class="how-title">Hoe werkt het?</div>
-      <p class="how-sub">In 4 simpele stappen alles geregeld</p>
-      <div class="how-grid">
-        <div class="how-card"><div class="how-num">1</div><div class="how-icon">🔑</div><div class="how-card-title">Kenteken invoeren</div><div class="how-card-desc">Wij halen automatisch al je autogegevens op via de officiële RDW database. Geen gedoe.</div></div>
-        <div class="how-card"><div class="how-num">2</div><div class="how-icon">📄</div><div class="how-card-title">Facturen uploaden</div><div class="how-card-desc">Upload je onderhoudfacturen. AI leest alles uit en werkt je Health Score direct bij.</div></div>
-        <div class="how-card"><div class="how-num">3</div><div class="how-icon">🔔</div><div class="how-card-title">Reminders ontvangen</div><div class="how-card-desc">Persoonlijke meldingen als onderhoud nodig is. Op het juiste moment, voor jouw auto.</div></div>
-        <div class="how-card"><div class="how-num">4</div><div class="how-icon">🔧</div><div class="how-card-title">Garage boeken</div><div class="how-card-desc">Met één tik de beste garage in de buurt boeken. Geen bellen, geen wachten.</div></div>
-      </div>
-    </div>
-  </div>
+  </section>
 
   <!-- OVERDRACHT -->
-  <div class="od-section">
-    <div class="od-grid">
-      <div>
+  <section id="overdracht" class="od-section">
+    <div class="l-wrap od-grid">
+      <div class="reveal">
+        <div class="eyebrow">Overdracht</div>
         <div class="od-title">Je auto verkopen?<br><span>Geef de historie mee.</span></div>
-        <p class="od-desc">Met Carvital heeft elke koper direct inzicht in de volledige onderhoudshistorie. Dat wekt vertrouwen bij de koper en helpt je auto sneller te verkopen.</p>
+        <p class="od-desc">Met Carvital ziet een koper direct de volledige onderhoudshistorie. Dat wekt vertrouwen en helpt je auto sneller te verkopen.</p>
         <div class="od-points">
-          <div class="od-point"><div class="od-check">✓</div><span>Koper scant QR-code en ziet alle beurten direct op zijn telefoon</span></div>
-          <div class="od-point"><div class="od-check">✓</div><span>Een complete, controleerbare onderhoudshistorie geeft kopers vertrouwen</span></div>
-          <div class="od-point"><div class="od-check">✓</div><span>Koper activeert Carvital automatisch — geen extra moeite</span></div>
-          <div class="od-point"><div class="od-check">✓</div><span>Facturen worden bij elke beurt bewaard — geen twijfel over de onderhoudshistorie</span></div>
+          <div class="od-point"><div class="od-check">01</div><span>De koper scant een QR-code en ziet alle beurten op zijn telefoon, zonder account</span></div>
+          <div class="od-point"><div class="od-check">02</div><span>Een complete, controleerbare historie met APK-gegevens van de RDW</span></div>
+          <div class="od-point"><div class="od-check">03</div><span>Je naam, e-mailadres en facturen blijven privé</span></div>
+          <div class="od-point"><div class="od-check">04</div><span>Je kunt de link op elk moment weer intrekken</span></div>
         </div>
       </div>
-      <div class="od-card">
+      <div class="od-card reveal">
         <div class="od-car-top">
           <div class="od-car-ic">🚗</div>
-          <div><div class="od-car-name">Volkswagen Golf</div><div class="od-car-detail">AB-123-C · 2018 · 87.432 km</div></div>
+          <div><div class="od-car-name">Volkswagen Golf</div><div class="od-car-detail">AB-123-C · 2018 · 87.432 km · voorbeeld</div></div>
         </div>
         <div class="od-score-box">
-          <div class="od-score-num">89</div>
-          <div><div class="od-score-status">✅ Uitstekende conditie</div><div style="font-size:12px;color:var(--t2);margin-top:3px">AutoHealth Score · bijgewerkt vandaag</div></div>
+          <div class="od-score-num" data-count="89">89</div>
+          <div><div class="od-score-status">✅ Uitstekende conditie</div><div style="font-size:12px;color:var(--brown);margin-top:3px">AutoHealth Score · indicatief</div></div>
         </div>
         <div class="od-history">
           <div class="od-hist"><div class="od-hist-dot"></div><span class="od-hist-name">Grote onderhoudsbeurt</span><span class="od-hist-price">€ 389</span></div>
@@ -561,78 +646,54 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
           <div class="od-hist"><div class="od-hist-dot"></div><span class="od-hist-name">APK keuring — geslaagd</span><span class="od-hist-price">€ 45</span></div>
         </div>
         <div class="od-qr-row">
-          <div class="od-qr">
-            <svg viewBox="0 0 60 60" width="48" height="48"><rect width="60" height="60" fill="white"/><rect x="5" y="5" width="20" height="20" fill="#1C1C1C"/><rect x="7" y="7" width="16" height="16" fill="white"/><rect x="9" y="9" width="12" height="12" fill="#1C1C1C"/><rect x="35" y="5" width="20" height="20" fill="#1C1C1C"/><rect x="37" y="7" width="16" height="16" fill="white"/><rect x="39" y="9" width="12" height="12" fill="#1C1C1C"/><rect x="5" y="35" width="20" height="20" fill="#1C1C1C"/><rect x="7" y="37" width="16" height="16" fill="white"/><rect x="9" y="39" width="12" height="12" fill="#1C1C1C"/><rect x="35" y="35" width="4" height="4" fill="#1C1C1C"/><rect x="41" y="35" width="4" height="4" fill="#1C1C1C"/><rect x="47" y="35" width="8" height="4" fill="#1C1C1C"/><rect x="35" y="41" width="8" height="4" fill="#1C1C1C"/><rect x="45" y="41" width="4" height="4" fill="#1C1C1C"/><rect x="35" y="47" width="4" height="8" fill="#1C1C1C"/><rect x="41" y="47" width="14" height="4" fill="#1C1C1C"/><rect x="51" y="47" width="4" height="8" fill="#1C1C1C"/></svg>
-          </div>
-          <div class="od-qr-info"><strong>Scan voor volledige historie</strong>Koper ziet direct alle beurten en activeert Carvital automatisch</div>
+          <div class="od-qr share-qr" id="od-demo-qr"></div>
+          <div class="od-qr-info"><strong>Scan voor de volledige historie</strong>De koper ziet direct alle beurten, zonder account</div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
   <!-- GARAGES -->
-  <div class="garage-section">
+  <section id="garages" class="garage-section">
     <div class="garage-inner">
+      <div class="eyebrow">Garages</div>
       <div class="sec-title">Garages bij jou in de buurt</div>
-      <p class="sec-sub">Carvital beveelt de beste garage aan op basis van jouw auto en locatie <span class="badge bb" style="margin-left:4px">Voorbeeldweergave</span></p>
-      <div class="garage-grid">
-        <div class="garage-card featured">
-          <div class="garage-top">
-            <div><div class="garage-name">Garage Vermeulen <span style="font-size:10px;color:#92400E;background:#FEF3C7;padding:2px 7px;border-radius:50px;margin-left:4px;font-weight:700">Aanbevolen</span></div><div class="garage-dist">📍 Utrecht Centrum</div></div>
-            <div class="garage-rating">⭐ 4.9</div>
-          </div>
-          <div class="garage-tags"><span class="garage-tag">VW Specialist</span><span class="garage-tag">APK erkend</span><span class="garage-tag">Remmen</span></div>
-          <div class="garage-info">Gespecialiseerd in Volkswagen, Audi en Seat. Bekend om eerlijke prijzen en snelle service. Ideaal voor jouw Golf.</div>
-          <button class="garage-btn" onclick="openM('register')">Afspraak inplannen →</button>
-        </div>
-        <div class="garage-card">
-          <div class="garage-top">
-            <div><div class="garage-name">AutoService Utrecht</div><div class="garage-dist">📍 Overvecht, Utrecht</div></div>
-            <div class="garage-rating">⭐ 4.7</div>
-          </div>
-          <div class="garage-tags"><span class="garage-tag">Alle merken</span><span class="garage-tag">APK erkend</span><span class="garage-tag">Snelservice</span></div>
-          <div class="garage-info">Erkend garagebedrijf voor alle merken. Snel geholpen zonder verrassingen. APK-keuring mogelijk op korte termijn.</div>
-          <button class="garage-btn" onclick="openM('register')">Afspraak inplannen →</button>
-        </div>
-        <div class="garage-card">
-          <div class="garage-top">
-            <div><div class="garage-name">Bandenservice Leidsche Rijn</div><div class="garage-dist">📍 Leidsche Rijn, Utrecht</div></div>
-            <div class="garage-rating">⭐ 4.5</div>
-          </div>
-          <div class="garage-tags"><span class="garage-tag">Banden specialist</span><span class="garage-tag">APK erkend</span><span class="garage-tag">Remmen</span></div>
-          <div class="garage-info">Sterke keuze voor banden, remmen en APK-keuringen. Vaak dezelfde week nog terecht.</div>
-          <button class="garage-btn" onclick="openM('register')">Afspraak inplannen →</button>
-        </div>
-      </div>
-      <div style="text-align:center;margin-top:20px;font-size:13px;color:var(--t3)">🔍 Bovenstaande garages zijn voorbeelden. Garage-aanbevelingen en online boeken volgen binnenkort.</div>
+      <p class="sec-sub">Vind direct een autogarage of bandenspecialist in de buurt, met route, website en telefoonnummer</p>
+      <div class="garage-search" style="max-width:620px;margin:0 auto 22px"><input class="fi" id="hgarage-q" placeholder="Postcode of plaats, bijv. 3511 AB" maxlength="60" autocomplete="postal-code" style="background:var(--bg2);border-radius:2px;padding:15px 16px;font-size:15px" onkeydown="if(event.key==='Enter')searchGarages('home')"><button class="btn-l dark" id="hgarage-btn" onclick="searchGarages('home')">Zoek garages</button><button class="btn-l" id="hgeo-btn" style="color:var(--ink);border-color:var(--border2)" onclick="getGeo('home')">📍 Mijn locatie</button></div>
+      <div id="hgarage-list"></div>
     </div>
-  </div>
+  </section>
 
   <!-- CTA -->
-  <div class="cta-section">
-    <div class="cta-inner">
-      <div class="cta-title">Gratis beginnen duurt 30 seconden</div>
-      <p class="cta-sub">Geen creditcard nodig. Maak een account aan en zie direct hoe je auto ervoor staat.</p>
-      <div class="cta-form">
-        <input type="email" class="cta-input" placeholder="jouw@email.nl" id="cta-email">
-        <button class="btn-primary" onclick="ctaStart()" style="border-radius:var(--r);white-space:nowrap">Gratis starten →</button>
+  <section class="cta-section">
+    <div class="cta-inner reveal">
+      <div>
+        <div class="eyebrow">Gratis account</div>
+        <div class="cta-title">Klaar om grip te krijgen op je auto?</div>
+        <p class="cta-sub">Maak in 30 seconden een gratis account aan en zie direct hoe je auto ervoor staat. Geen creditcard nodig.</p>
       </div>
-      <div class="cta-note">✅ Gratis &nbsp;·&nbsp; Geen creditcard &nbsp;·&nbsp; <strong>Altijd opzegbaar</strong></div>
+      <div>
+        <div class="cta-form">
+          <input type="email" class="cta-input" placeholder="jouw@email.nl" id="cta-email" aria-label="E-mailadres" onkeydown="if(event.key==='Enter')ctaStart()">
+          <button class="btn-l solid" onclick="ctaStart()">Gratis starten →</button>
+        </div>
+        <div class="cta-note">Gratis · Geen creditcard · Altijd opzegbaar</div>
+      </div>
     </div>
-  </div>
+  </section>
 
   <footer>
     <div class="footer-inner">
       <div class="footer-top">
         <div>
-          <div class="logo"><div class="lm">C</div><span class="lt" style="color:#fff">Carvital</span><span class="beta">BÈTA</span></div>
-          <div class="footer-desc">De slimste manier om voor je auto te zorgen. Gratis voor autobezitters — altijd.</div>
+          <div class="logo" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="lt">CARVITAL</span><span class="ls">Altijd weten hoe je auto ervoor staat</span></div>
+          <div class="footer-desc">De slimste manier om voor je auto te zorgen. Gratis voor autobezitters, altijd. Nu in bèta.</div>
         </div>
         <div><div class="footer-col-title">App</div><a class="footer-link" onclick="showApp()">Health Score</a><a class="footer-link" onclick="showApp()">Onderhoudsboekje</a><a class="footer-link" onclick="showApp()">Garage Finder</a><a class="footer-link" onclick="showApp()">Reminders</a></div>
         <div><div class="footer-col-title">Bedrijf</div><a class="footer-link" onclick="openInfo('about')">Over ons</a><a class="footer-link" onclick="openInfo('garages')">Voor Garages</a><a class="footer-link" onclick="openInfo('blog')">Blog</a><a class="footer-link" onclick="openInfo('contact')">Contact</a></div>
         <div><div class="footer-col-title">Legal</div><a class="footer-link" onclick="openInfo('privacy')">Privacy</a><a class="footer-link" onclick="openInfo('terms')">Voorwaarden</a><a class="footer-link" onclick="openInfo('gdpr')">AVG / GDPR</a><a class="footer-link" onclick="openInfo('cookies')">Cookies</a><a class="footer-link" onclick="openCookieSettings()">Cookie-instellingen</a></div>
       </div>
-      <div class="footer-bottom" style="flex-wrap:wrap;gap:8px"><span>© 2026 Carvital · <span class="co-info"></span></span><span>🇳🇱 Nederland · Data in de EU · BÈTA versie</span></div>
+      <div class="footer-bottom" style="flex-wrap:wrap;gap:8px"><span>© 2026 Carvital · <span class="co-info"></span></span><span>Nederland · Data in de EU · Bèta</span></div>
     </div>
   </footer>
 </div>
@@ -685,7 +746,7 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
       </div>
       <div class="g3" style="margin-bottom:14px">
         <div class="card"><div class="cl">📋 Volgende APK</div><div class="apk-big">21</div><div style="font-size:12px;color:var(--t3);margin-top:2px">dagen · 18 maart 2027</div><div class="apk-tr"><div style="width:7%;height:100%;background:var(--gold);border-radius:3px"></div></div><button class="bk" style="margin-top:13px" onclick="sv('garages',document.querySelectorAll('.ni')[5])">APK inplannen →</button></div>
-        <div class="card"><div class="cl">💰 Verwachte kosten</div><div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--green)">€ 320 – 520</div><div style="font-size:11px;color:var(--t3);margin-top:3px">Aankomende 6 maanden</div><div class="mbars"><div class="mbar" style="height:30%;background:rgba(22,163,74,.2)"></div><div class="mbar" style="height:50%;background:rgba(22,163,74,.2)"></div><div class="mbar" style="height:40%;background:rgba(22,163,74,.2)"></div><div class="mbar" style="height:80%;background:rgba(232,148,10,.3)"></div><div class="mbar" style="height:60%;background:rgba(22,163,74,.2)"></div><div class="mbar" style="height:35%;background:rgba(22,163,74,.2)"></div></div></div>
+        <div class="card"><div class="cl">💰 Verwachte kosten</div><div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:900;color:var(--green)">€ 320 – 520</div><div style="font-size:11px;color:var(--t3);margin-top:3px">Aankomende 6 maanden</div><div class="mbars"><div class="mbar" style="height:30%;background:rgba(22,163,74,.2)"></div><div class="mbar" style="height:50%;background:rgba(22,163,74,.2)"></div><div class="mbar" style="height:40%;background:rgba(22,163,74,.2)"></div><div class="mbar" style="height:80%;background:rgba(232,148,10,.3)"></div><div class="mbar" style="height:60%;background:rgba(22,163,74,.2)"></div><div class="mbar" style="height:35%;background:rgba(22,163,74,.2)"></div></div></div>
         <div class="card"><div class="cl">📊 Mijn Auto</div><div class="srows"><div class="srow"><span class="sr-lb">Kilometerstand</span><span class="sr-vl">87.432 km</span></div><div class="srow"><span class="sr-lb">Laatste beurt</span><span class="sr-vl">3 mnd geleden</span></div><div class="srow"><span class="sr-lb">Facturen</span><span class="sr-vl">12 stuks</span></div><div class="srow" style="border:none"><span class="sr-lb">Totaal bespaard</span><span class="sr-vl" style="color:var(--green)">€ 840</span></div></div></div>
       </div>
       <div class="card"><div class="cl">⚠️ Aandachtspunten <span class="badge bo" style="margin-left:4px">3 actief</span></div>
@@ -753,7 +814,7 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
       <div class="ahd"><div><div class="at">Factuur uploaden</div><div class="as2">AI leest automatisch alle gegevens uit en werkt je Health Score bij</div></div></div>
       <div class="uz" id="uzone" onclick="doUpload()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="event.preventDefault();this.classList.remove('drag');doUpload()">
         <div style="font-size:48px;margin-bottom:14px">📸</div>
-        <div style="font-family:'Nunito',sans-serif;font-size:19px;font-weight:800;margin-bottom:7px;color:var(--dark)">Foto of PDF van factuur</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:19px;font-weight:800;margin-bottom:7px;color:var(--dark)">Foto of PDF van factuur</div>
         <div style="font-size:13.5px;color:var(--t2)">Klik om te uploaden of sleep hierheen · JPG, PNG, PDF · max 20MB</div>
       </div>
       <div id="upload-loader" class="ldr" style="display:none"><div class="spin"></div><div><div style="font-size:13px;font-weight:600;color:var(--dark)">AI analyseert factuur...</div><div style="font-size:11px;color:var(--t3)">Even geduld</div></div></div>
@@ -763,7 +824,7 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
         <div class="ai-rw"><div class="ai-lb">Kilometerstand</div><div class="ai-vl">85.000 km</div></div>
         <div class="ai-rw"><div class="ai-lb">Garage</div><div class="ai-vl">Garage Vermeulen, Utrecht</div></div>
         <div class="ai-rw"><div class="ai-lb">Werkzaamheden</div><div class="ai-vl">Grote onderhoudsbeurt, olie, filters, bougies</div></div>
-        <div class="ai-rw"><div class="ai-lb">Totaalbedrag</div><div class="ai-vl" style="color:var(--gold);font-family:'Nunito',sans-serif;font-size:20px;font-weight:900">€ 389</div></div>
+        <div class="ai-rw"><div class="ai-lb">Totaalbedrag</div><div class="ai-vl" style="color:var(--gold);font-family:'Outfit',sans-serif;font-size:20px;font-weight:900">€ 389</div></div>
         <div class="ai-rw"><div class="ai-lb">Health Score effect</div><div class="ai-vl"><span class="badge bg">+4 punten → 89/100</span></div></div>
         <div style="display:flex;gap:9px;margin-top:16px">
           <button class="btn-primary" style="border-radius:10px;font-size:13px;padding:10px 19px" onclick="saveF()">✅ Opslaan in mijn boekje</button>
@@ -840,9 +901,9 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
         <div class="shr"><input class="shi" type="text" value="carvital.nl/auto/AB-123-C/historie" readonly id="share-url"><button class="btn-primary" style="border-radius:10px;font-size:12.5px;padding:10px 16px;white-space:nowrap" onclick="copyLink()">📋 Kopieer</button></div>
       </div>
       <div class="g3">
-        <div class="card" style="text-align:center"><div style="font-size:28px;margin-bottom:6px">📋</div><div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--dark)">12</div><div style="font-size:12px;color:var(--t3);margin-top:3px">Geverifieerde beurten</div></div>
-        <div class="card" style="text-align:center"><div style="font-size:28px;margin-bottom:6px">💰</div><div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--dark)">€ 2.340</div><div style="font-size:12px;color:var(--t3);margin-top:3px">Totaal onderhoud</div></div>
-        <div class="card" style="text-align:center"><div style="font-size:28px;margin-bottom:6px">📈</div><div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--green)">Meer waard</div><div style="font-size:12px;color:var(--t3);margin-top:3px">Door volledige historie</div></div>
+        <div class="card" style="text-align:center"><div style="font-size:28px;margin-bottom:6px">📋</div><div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:900;color:var(--dark)">12</div><div style="font-size:12px;color:var(--t3);margin-top:3px">Geverifieerde beurten</div></div>
+        <div class="card" style="text-align:center"><div style="font-size:28px;margin-bottom:6px">💰</div><div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:900;color:var(--dark)">€ 2.340</div><div style="font-size:12px;color:var(--t3);margin-top:3px">Totaal onderhoud</div></div>
+        <div class="card" style="text-align:center"><div style="font-size:28px;margin-bottom:6px">📈</div><div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:900;color:var(--green)">Meer waard</div><div style="font-size:12px;color:var(--t3);margin-top:3px">Door volledige historie</div></div>
       </div>
       </div>
       <div class="user-only" id="u-overdracht"></div>
@@ -988,7 +1049,7 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
 
 <div id="cookie-banner" role="dialog" aria-label="Cookie-instellingen" style="position:fixed;bottom:0;left:0;right:0;z-index:800;background:#fff;border-top:1px solid #E4DFD4;padding:16px 24px;display:none;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:0 -4px 24px rgba(0,0,0,0.08)">
   <div style="flex:1;min-width:200px">
-    <div style="font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:#1C1C1C;margin-bottom:3px">🍪 Cookies en statistieken</div>
+    <div style="font-family:'Outfit',sans-serif;font-size:14px;font-weight:800;color:#1C1C1C;margin-bottom:3px">🍪 Cookies en statistieken</div>
     <div style="font-size:12.5px;color:#6B6B6B;line-height:1.5">We gebruiken alleen noodzakelijke opslag om je ingelogd te houden. Met jouw toestemming meten we ook anoniem hoe de site wordt gebruikt (Vercel Web Analytics, zonder cookies of advertentietracking). Je kunt je keuze altijd wijzigen via "Cookie-instellingen" onderaan de pagina. <a onclick="openInfo('cookies')" style="color:#E8940A;text-decoration:none;font-weight:600;cursor:pointer">Cookiebeleid</a></div>
   </div>
   <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap">
@@ -1022,7 +1083,7 @@ const sb = window.supabase && !SUPABASE_URL.includes('YOUR-PROJECT')
 
 let currentUser=null,profile=null,cars=[],records=[],shareLinks=[],activeCarId=null,lastRdw=null;
 
-function showPage(p){document.querySelectorAll('.page').forEach(x=>{x.classList.remove('active');x.style.display=''});if(p==='app'){const a=document.getElementById('page-app');a.classList.add('active');a.style.display='flex'}else document.getElementById(p==='share'?'page-share':'page-landing').classList.add('active');window.scrollTo(0,0)}
+function showPage(p){document.querySelectorAll('.page').forEach(x=>{x.classList.remove('active');x.style.display=''});if(p==='app'){const a=document.getElementById('page-app');a.classList.add('active');a.style.display='flex'}else document.getElementById(p==='share'?'page-share':'page-landing').classList.add('active');if(window.lenis)lenis.scrollTo(0,{immediate:true,force:true});window.scrollTo(0,0);updateNav();if(window.ScrollTrigger)requestAnimationFrame(()=>ScrollTrigger.refresh())}
 function showApp(){closeM();showPage('app')}
 function sv(name,el){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+name).classList.add('active');document.querySelectorAll('.ni').forEach(i=>i.classList.remove('active'));if(!el)el=document.querySelector(`.ni[onclick^="sv('${name}'"]`);if(el)el.classList.add('active');window.scrollTo(0,0)}
 function mnv(name,el){sv(name);document.querySelectorAll('.mnb').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active')}
@@ -1461,7 +1522,7 @@ function renderUser(){
     dash+=`<div class="card" style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px"><div><div class="cl">🏥 AutoHealth Score</div><div class="score-big" style="color:${st.c}">${s}<sub>/100</sub></div><span class="sch2" style="background:${st.bg};color:${st.c}">${st.label}</span></div><div style="flex:1;min-width:195px;font-size:12.5px;color:var(--t2);line-height:1.7"><div class="cl">ℹ️ Hoe berekend</div>Indicatieve score op basis van het bouwjaar (${car.bouwjaar||'onbekend'}), de APK-status bij de RDW en je geregistreerde onderhoud (${beurten(recs.length)}). Voeg beurten toe voor een nauwkeuriger beeld. Geen vervanging voor een inspectie door een garage.</div></div>
 <div class="g3" style="margin-bottom:14px">
 <div class="card"><div class="cl">📋 Volgende APK</div>${apkDays===null?'<div style="font-size:13px;color:var(--t3)">Onbekend</div>':`<div class="apk-big" style="${apkDays<0?'color:var(--red)':''}">${apkDays<0?'Verlopen':apkDays}</div><div style="font-size:12px;color:var(--t3);margin-top:2px">${apkDays<0?'sinds':'dagen ·'} ${fmtDate(car.apk_vervaldatum)}</div>`}</div>
-<div class="card"><div class="cl">💰 Onderhoud ${year}</div><div style="font-family:'Nunito',sans-serif;font-size:26px;font-weight:900;color:var(--gold)">${eur(yearCost)}</div><div style="font-size:11px;color:var(--t3);margin-top:3px">${beurten(recs.filter(r=>new Date(r.datum).getFullYear()===year).length)} dit jaar</div></div>
+<div class="card"><div class="cl">💰 Onderhoud ${year}</div><div style="font-family:'Outfit',sans-serif;font-size:26px;font-weight:900;color:var(--gold)">${eur(yearCost)}</div><div style="font-size:11px;color:var(--t3);margin-top:3px">${beurten(recs.filter(r=>new Date(r.datum).getFullYear()===year).length)} dit jaar</div></div>
 <div class="card"><div class="cl">📊 Mijn Auto</div><div class="srows"><div class="srow"><span class="sr-lb">Kenteken</span><span class="sr-vl">${esc(fmtKent(car.kenteken))}</span></div><div class="srow"><span class="sr-lb">Kilometerstand</span><span class="sr-vl">${car.kilometerstand?nf(car.kilometerstand)+' km':'-'}</span></div><div class="srow"><span class="sr-lb">Laatste beurt</span><span class="sr-vl">${recs[0]?fmtDate(recs[0].datum,{month:'short',year:'numeric'}):'-'}</span></div><div class="srow" style="border:none"><span class="sr-lb">Brandstof</span><span class="sr-vl">${esc(car.brandstof||'-')}</span></div></div></div></div>
 <div class="card"><div class="cl">⚠️ Aandachtspunten ${open.length?`<span class="badge bo" style="margin-left:4px">${open.length} actief</span>`:''}</div>${open.length?open.map(remRow).join(''):'<div style="font-size:13px;color:var(--t2)">Alles op schema 🎉</div>'}</div>`;
   }
@@ -1584,6 +1645,81 @@ async function openSharedHistory(token){
   body.innerHTML=res.data?renderSharedHistory(res.data):`<div class="empty"><div class="e-ic">🔍</div><div class="e-t">Deze link werkt niet (meer)</div>De eigenaar heeft de link mogelijk ingetrokken. Vraag om een nieuwe link.<div style="margin-top:14px"><button class="btn-primary" style="border-radius:10px" onclick="location.hash='';showPage('landing')">Naar Carvital</button></div></div>`;
 }
 
+// ---------- landingspagina ----------
+function goSection(id){
+  if(!document.getElementById('page-landing').classList.contains('active'))showPage('landing');
+  requestAnimationFrame(()=>{const el=document.getElementById(id);if(!el)return;if(window.lenis)lenis.scrollTo(el);else el.scrollIntoView({behavior:'smooth'})});
+}
+function updateNav(){document.body.classList.toggle('at-top',document.getElementById('page-landing').classList.contains('active')&&scrollY<40)}
+addEventListener('scroll',updateNav,{passive:true});
+const revealObs='IntersectionObserver' in window?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');revealObs.unobserve(e.target)}}),{threshold:.12}):null;
+document.querySelectorAll('.reveal').forEach(el=>revealObs?revealObs.observe(el):el.classList.add('in'));
+
+// ---------- animaties (GSAP + Lenis) ----------
+// De bibliotheken laden met defer; ze zijn er pas bij DOMContentLoaded.
+function initMotion(){
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce||!window.gsap||!window.ScrollTrigger)return;
+  gsap.registerPlugin(ScrollTrigger,...(window.SplitText?[SplitText]:[]));
+  document.documentElement.classList.add('motion');
+  revealObs?.disconnect();
+
+  // vloeiend scrollen; vensters en de zijbalk scrollen zelf
+  if(window.Lenis){
+    window.lenis=new Lenis({lerp:.1,wheelMultiplier:1});
+    lenis.on('scroll',()=>{ScrollTrigger.update();updateNav()});
+    gsap.ticker.add(t=>lenis.raf(t*1000));
+    gsap.ticker.lagSmoothing(0);
+    document.querySelectorAll('.modal-box,.sidebar,#cookie-banner').forEach(e=>e.setAttribute('data-lenis-prevent',''));
+  }
+  const split=(el,type)=>window.SplitText?SplitText.create(el,{type,mask:type.includes('lines')?'lines':undefined,linesClass:'split-line'}):null;
+  const ease='power3.out';
+
+  // hero: titel komt per woord omhoog uit een masker, daarna de rest
+  const h1=split('.hero h1','words,lines');
+  const intro=gsap.timeline({delay:.1});
+  if(h1)intro.from(h1.words,{yPercent:110,duration:1.1,ease:'power4.out',stagger:.06});
+  intro.from(['.hero .eyebrow','.hero-sub','.kent-box','.hero-trust'],{y:28,opacity:0,duration:.9,ease,stagger:.1},h1?'-=.7':0);
+  // hero zakt weg bij scrollen
+  gsap.to('.hero .l-wrap',{yPercent:-10,opacity:.35,ease:'none',scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:true}});
+
+  // koppen: woorden komen vervaagd binnen (vergelijkbaar met BlurText van React Bits)
+  document.querySelectorAll('#page-landing .l-h2,#page-landing .od-title,#page-landing .cta-title,#page-landing .garage-section .sec-title').forEach(el=>{
+    const sp=split(el,'words');
+    gsap.from(sp?sp.words:el,{opacity:0,y:28,filter:'blur(10px)',duration:.9,ease,stagger:.05,scrollTrigger:{trigger:el,start:'top 85%'}});
+  });
+
+  // blokken die infaden
+  gsap.utils.toArray('#page-landing .reveal').forEach(el=>gsap.fromTo(el,{opacity:0,y:40},{opacity:1,y:0,duration:1,ease,scrollTrigger:{trigger:el,start:'top 85%'}}));
+  gsap.from('.how-step',{opacity:0,x:40,duration:.8,ease,stagger:.12,scrollTrigger:{trigger:'.how-steps',start:'top 80%'}});
+  gsap.from('.od-point',{opacity:0,x:-30,duration:.7,ease,stagger:.1,scrollTrigger:{trigger:'.od-points',start:'top 85%'}});
+
+  // genummerde panelen: inhoud schuift in, icoon beweegt mee, vorige paneel wijkt terug
+  const panels=gsap.utils.toArray('.panel');
+  panels.forEach((p,i)=>{
+    gsap.from(p.querySelectorAll('.panel-count,h3,p,.btn-l'),{y:50,opacity:0,duration:.9,ease,stagger:.08,scrollTrigger:{trigger:p,start:'top 55%'}});
+    gsap.fromTo(p.querySelector('.panel-ic'),{y:80,rotate:-6},{y:-80,rotate:6,ease:'none',scrollTrigger:{trigger:p,start:'top bottom',end:'bottom top',scrub:true}});
+    if(panels[i+1])gsap.to(p.querySelector('.l-wrap'),{opacity:0,scale:.94,ease:'none',scrollTrigger:{trigger:panels[i+1],start:'top bottom',end:'top 20%',scrub:true}});
+  });
+
+  // cijfers tellen op (vergelijkbaar met CountUp van React Bits)
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const o={v:0},end=+el.dataset.count;
+    gsap.to(o,{v:end,duration:1.6,ease:'power2.out',scrollTrigger:{trigger:el,start:'top 85%'},onUpdate:()=>{el.textContent=Math.round(o.v)}});
+  });
+
+  // magnetische knoppen op desktop
+  if(matchMedia('(hover:hover) and (pointer:fine)').matches)document.querySelectorAll('#page-landing .btn-l.solid,.kent-btn').forEach(b=>{
+    const x=gsap.quickTo(b,'x',{duration:.4,ease:'power3'}),y=gsap.quickTo(b,'y',{duration:.4,ease:'power3'});
+    b.addEventListener('mousemove',e=>{const r=b.getBoundingClientRect();x((e.clientX-r.left-r.width/2)*.25);y((e.clientY-r.top-r.height/2)*.35)});
+    b.addEventListener('mouseleave',()=>{x(0);y(0)});
+  });
+
+  // na het laden van de lettertypen kloppen de posities pas echt
+  document.fonts?.ready.then(()=>ScrollTrigger.refresh());
+}
+document.addEventListener('DOMContentLoaded',initMotion);
+
 // ---------- CTA ----------
 function ctaStart(){const e=document.getElementById('cta-email').value.trim();document.getElementById('remail').value=e;openM('register');document.getElementById(e?'rname':'remail').focus()}
 
@@ -1617,45 +1753,63 @@ async function addCar(){
   catch(e){toast('❌','Toevoegen mislukt',e.message)}
 }
 // ---------- garages in de buurt (OpenStreetMap) ----------
-function garageMsg(ic,title,sub){document.getElementById('garage-list').innerHTML=`<div class="empty"><div class="e-ic">${ic}</div><div class="e-t">${title}</div>${sub}</div>`}
+const GARAGE_UI={
+  app:{q:'garage-q',r:'garage-r',list:'garage-list',sub:'garage-sub',btn:'garage-btn',geo:'geo-btn',max:30},
+  home:{q:'hgarage-q',list:'hgarage-list',btn:'hgarage-btn',geo:'hgeo-btn',max:6}
+};
+function garageMsg(ui,ic,title,sub){document.getElementById(ui.list).innerHTML=`<div class="empty"><div class="e-ic">${ic}</div><div class="e-t">${title}</div>${sub}</div>`}
 function distKm(lat1,lon1,lat2,lon2){const r=Math.PI/180,a=Math.sin((lat2-lat1)*r/2)**2+Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin((lon2-lon1)*r/2)**2;return 12742*Math.asin(Math.sqrt(a))}
-function getGeo(){
-  if(!navigator.geolocation)return garageMsg('📍','Locatie niet beschikbaar','Zoek op postcode of plaats.');
-  busy('geo-btn',true);
+function getGeo(where='app'){
+  const ui=GARAGE_UI[where];
+  if(!navigator.geolocation)return garageMsg(ui,'📍','Locatie niet beschikbaar','Zoek op postcode of plaats.');
+  busy(ui.geo,true);
   navigator.geolocation.getCurrentPosition(
-    p=>{busy('geo-btn',false);loadGarages(p.coords.latitude,p.coords.longitude,'jouw huidige locatie')},
-    ()=>{busy('geo-btn',false);garageMsg('📍','Geen toegang tot je locatie','Sta locatie toe in je browser, of zoek op postcode of plaats.')},
+    p=>{busy(ui.geo,false);loadGarages(ui,p.coords.latitude,p.coords.longitude,'jouw huidige locatie')},
+    ()=>{busy(ui.geo,false);garageMsg(ui,'📍','Geen toegang tot je locatie','Sta locatie toe in je browser, of zoek op postcode of plaats.')},
     {timeout:10000,maximumAge:300000});
 }
-async function searchGarages(){
-  const q=document.getElementById('garage-q').value.trim();
+async function searchGarages(where='app'){
+  const ui=GARAGE_UI[where],q=document.getElementById(ui.q).value.trim();
   if(q.length<2)return toast('⚠️','Vul een postcode of plaats in','');
-  busy('garage-btn',true);
+  busy(ui.btn,true);
   try{
     const res=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=nl&q='+encodeURIComponent(q));
     const [hit]=res.ok?await res.json():[];
-    if(!hit)garageMsg('🔍','Locatie niet gevonden','Controleer de postcode of plaatsnaam.');
-    else await loadGarages(Number(hit.lat),Number(hit.lon),hit.name||q);
-  }catch(e){garageMsg('⚠️','Zoeken mislukt','Controleer je internetverbinding en probeer het opnieuw.')}
-  finally{busy('garage-btn',false)}
+    if(!hit)garageMsg(ui,'🔍','Locatie niet gevonden','Controleer de postcode of plaatsnaam.');
+    else await loadGarages(ui,Number(hit.lat),Number(hit.lon),hit.name||q);
+  }catch(e){garageMsg(ui,'⚠️','Zoeken mislukt','Controleer je internetverbinding en probeer het opnieuw.')}
+  finally{busy(ui.btn,false)}
 }
-async function loadGarages(lat,lon,label){
+// vanaf de homepage door naar de volledige lijst in de app
+function allGarages(){
+  document.getElementById('garage-q').value=document.getElementById('hgarage-q').value;
+  showApp();sv('garages');
+  if(lastGarageSearch)loadGarages(GARAGE_UI.app,...lastGarageSearch);
+}
+let lastGarageSearch=null;
+const garageCache={};
+async function loadGarages(ui,lat,lon,label){
   // afronden op ~100 m: genoeg om garages te vinden, zonder je exacte locatie te delen
   lat=Math.round(lat*1000)/1000;lon=Math.round(lon*1000)/1000;
-  const radius=Number(document.getElementById('garage-r').value)||5000;
-  document.getElementById('garage-sub').textContent='Rond '+label+' · '+radius/1000+' km';
-  document.getElementById('garage-list').innerHTML='<div class="empty"><div class="spin" style="margin:0 auto"></div></div>';
+  lastGarageSearch=[lat,lon,label];
+  const radius=ui.r?Number(document.getElementById(ui.r).value)||5000:5000;
+  if(ui.sub)document.getElementById(ui.sub).textContent='Rond '+label+' · '+radius/1000+' km';
+  document.getElementById(ui.list).innerHTML='<div class="empty"><div class="spin" style="margin:0 auto"></div></div>';
   const query=`[out:json][timeout:25];nwr["shop"~"^(car_repair|tyres)$"](around:${radius},${lat},${lon});out center tags;`;
-  let els;
-  try{
-    const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(query),headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+  let els=garageCache[query];
+  if(!els)try{
+    const post=()=>fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(query),headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+    let res=await post();
+    // de publieke Overpass-server weigert soms kort achter elkaar gestuurde zoekopdrachten
+    if(res.status===429||res.status===504){await new Promise(r=>setTimeout(r,2000));res=await post()}
     if(!res.ok)throw new Error(res.status);
-    els=(await res.json()).elements;
-  }catch(e){return garageMsg('⚠️','Garages laden mislukt','De kaartdienst is even druk. Probeer het over een minuut opnieuw.')}
-  const list=els.map(el=>{const t=el.tags||{},la=el.lat??el.center?.lat,lo=el.lon??el.center?.lon;return {t,la,lo,d:distKm(lat,lon,la,lo)}})
-    .filter(g=>g.t.name&&g.la!=null).sort((x,y)=>x.d-y.d).slice(0,30);
-  if(!list.length)return garageMsg('🔧','Geen garages gevonden','Probeer een grotere zoekstraal.');
-  document.getElementById('garage-list').innerHTML=`<div class="gg">${list.map(garageCard).join('')}</div><div style="font-size:11px;color:var(--t3);margin-top:14px">Gegevens © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:var(--t3)">OpenStreetMap-bijdragers</a>. Klopt er iets niet? Garages kunnen hun gegevens zelf aanpassen op openstreetmap.org.</div>`;
+    els=garageCache[query]=(await res.json()).elements;
+  }catch(e){return garageMsg(ui,'⚠️','Garages laden mislukt','De kaartdienst is even druk. Probeer het over een minuut opnieuw.')}
+  const all=els.map(el=>{const t=el.tags||{},la=el.lat??el.center?.lat,lo=el.lon??el.center?.lon;return {t,la,lo,d:distKm(lat,lon,la,lo)}})
+    .filter(g=>g.t.name&&g.la!=null).sort((x,y)=>x.d-y.d);
+  if(!all.length)return garageMsg(ui,'🔧','Geen garages gevonden',ui.r?'Probeer een grotere zoekstraal.':'Probeer een andere postcode of plaats.');
+  const more=ui===GARAGE_UI.home&&all.length>ui.max?`<div style="text-align:center;margin-top:16px"><button class="btn-secondary" style="border-radius:10px;font-size:13.5px;padding:11px 18px;background:var(--bg2)" onclick="allGarages()">Bekijk alle ${Math.min(all.length,GARAGE_UI.app.max)} garages →</button></div>`:'';
+  document.getElementById(ui.list).innerHTML=`<div class="${ui===GARAGE_UI.home?'garage-grid':'gg'}">${all.slice(0,ui.max).map(garageCard).join('')}</div>${more}<div style="font-size:11px;color:var(--t3);margin-top:14px">Rond ${esc(label)} · gegevens © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:var(--t3)">OpenStreetMap-bijdragers</a>. Klopt er iets niet? Garages kunnen hun gegevens zelf aanpassen op openstreetmap.org. Je zoekopdracht of afgeronde locatie gaat alleen naar OpenStreetMap; wij slaan niets op.</div>`;
 }
 function garageCard(g){
   const t=g.t,addr=[[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' '),t['addr:city']].filter(Boolean).join(', ');
@@ -1698,6 +1852,8 @@ initAuth();
 function openInfoFromHash(){const k=location.hash.slice(1),m=k.match(/^historie=([a-f0-9]{32})$/);if(m)openSharedHistory(m[1]);else if(INFO_CONTENT[k])openInfo(k)}
 window.addEventListener('hashchange',openInfoFromHash);
 openInfoFromHash();
+updateNav();
+const demoQr=document.getElementById('od-demo-qr');if(demoQr)drawQr(demoQr,location.origin+location.pathname+'#overdracht');
 </script>
 </body>
 </html>
