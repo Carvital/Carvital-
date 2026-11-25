@@ -347,7 +347,7 @@ html.lenis,html.lenis body{height:auto}
 .garage-search .fi{flex:1;min-width:180px}
 .garage-search select.fi{flex:0 0 auto;width:auto;min-width:0}
 .gc-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
-.gc-act a{flex:1;min-width:80px;text-align:center;text-decoration:none;justify-content:center}
+.gc-act a{flex:1;min-width:80px;white-space:nowrap;text-align:center;text-decoration:none;justify-content:center}
 .bk{width:100%;padding:10px;border-radius:9px;background:var(--gold);color:#fff;font-size:12.5px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;box-shadow:0 2px 6px rgba(232,148,10,.2)}
 .bk:hover{background:var(--gold2)}
 .rem-sec{margin-bottom:17px}
@@ -1787,9 +1787,11 @@ function garageCard(g){
   const web=t.website||t['contact:website'],tel=(t.phone||t['contact:phone']||'').split(';')[0].replace(/[^+0-9 ]/g,'').trim();
   const href=web?(/^https?:\/\//i.test(web)?web:'https://'+web):null;
   const btn='btn-sm btn-sm-white';
+  // Google Maps toont sterren, reviews, telefoon en openingstijden; er gaat pas iets naar Google als iemand klikt
+  const gq=addr?`${t.name}, ${addr}`:`${t.name} ${g.la},${g.lo}`;
   return `<div class="gc" style="cursor:default"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="min-width:0"><div class="gc-n">${esc(t.name)}</div><div class="gc-d">📍 ${esc(addr||'Adres onbekend')}</div></div><div class="gc-r" style="white-space:nowrap">${g.d.toLocaleString('nl-NL',{maximumFractionDigits:1})} km</div></div>
 <div class="gtags">${tags.map(x=>`<span class="gt">${esc(x)}</span>`).join('')}</div>${t.opening_hours?`<div class="gc-p">🕒 ${esc(t.opening_hours.slice(0,80))}</div>`:''}
-<div class="gc-act"><a class="${btn}" href="https://www.google.com/maps/dir/?api=1&destination=${g.la},${g.lo}" target="_blank" rel="noopener">🧭 Route</a>${href?`<a class="${btn}" href="${esc(href)}" target="_blank" rel="noopener nofollow">🌐 Website</a>`:''}${tel?`<a class="${btn}" href="tel:${esc(tel.replace(/ /g,''))}">📞 Bellen</a>`:''}</div></div>`;
+<div class="gc-act"><a class="${btn}" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gq)}" target="_blank" rel="noopener" title="Sterren, reviews en telefoonnummer op Google Maps">⭐ Reviews</a><a class="${btn}" href="https://www.google.com/maps/dir/?api=1&destination=${g.la},${g.lo}" target="_blank" rel="noopener">🧭 Route</a>${href?`<a class="${btn}" href="${esc(href)}" target="_blank" rel="noopener nofollow">🌐 Website</a>`:''}${tel?`<a class="${btn}" href="tel:${esc(tel.replace(/ /g,''))}">📞 Bellen</a>`:''}</div></div>`;
 }
 function copyLink(){navigator.clipboard?.writeText(document.getElementById('share-url').value).catch(()=>{});toast('🔗','Link gekopieerd!','Stuur naar de koper!')}
 
