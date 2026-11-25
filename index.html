@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#1A1512">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="color-scheme" content="light only">
 <meta name="supported-color-schemes" content="light">
 <title>Carvital — Altijd weten hoe je auto ervoor staat</title>
@@ -38,7 +39,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overf
 
 nav{position:fixed;top:0;left:0;right:0;z-index:500;height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 32px;background:rgba(26,21,18,.94);backdrop-filter:blur(16px);border-bottom:1px solid rgba(210,196,176,.12);transition:background .35s,border-color .35s}
 body.at-top nav{background:linear-gradient(rgba(26,21,18,.55),rgba(26,21,18,0));border-bottom-color:transparent;backdrop-filter:none}
-.logo{display:flex;flex-direction:column;cursor:pointer;line-height:1;user-select:none}
+.logo{display:flex;align-items:center;gap:11px;cursor:pointer;line-height:1;user-select:none;color:var(--sand)}
+.logo-ic{width:40px;height:43px;flex-shrink:0}
+.logo-tx{display:flex;flex-direction:column}
 .lt{font-family:'Outfit',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;color:var(--sand)}
 .ls{white-space:nowrap;font-family:'Outfit',sans-serif;font-weight:300;font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:rgba(210,196,176,.65);margin-top:3px}
 .beta{align-self:flex-start;margin-top:5px;font-size:8.5px;font-weight:600;letter-spacing:.2em;color:rgba(210,196,176,.65);border:1px solid rgba(210,196,176,.3);padding:2px 6px}
@@ -452,6 +455,7 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
   nav{padding:0 16px;height:64px}
   .page{padding-top:64px}
   .lt{font-size:20px}
+  .logo-ic{width:34px;height:37px}
   .ls{font-size:8.5px}
   .nb{padding:9px 14px;font-size:11.5px}
   .l-wrap,.garage-inner,.cta-inner,.footer-inner{padding:0 20px}
@@ -508,6 +512,8 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
 @media(max-width:480px){
   nav{gap:6px;padding:0 12px}
   .lt{font-size:18px;letter-spacing:.04em}
+  .logo{gap:8px}
+  .logo-ic{width:30px;height:32px}
   .nav-r{gap:2px}
   .nb{padding:8px 9px;font-size:10.5px;letter-spacing:.05em}
   nav .nb-ghost{padding:9px 6px}
@@ -526,8 +532,8 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
 
 <nav>
   <div class="logo" onclick="showPage('landing')" role="link" aria-label="Carvital home">
-    <span class="lt">CARVITAL</span>
-    <span class="ls">Altijd weten hoe je auto ervoor staat</span>
+    <svg class="logo-ic" viewBox="0 0 52 56" aria-hidden="true"><path d="M7 12h5v32H7a5 5 0 0 1-5-5V17a5 5 0 0 1 5-5z" fill="currentColor"/><rect x="3.25" y="13.25" width="45.5" height="29.5" rx="4" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M36.8 21.1A9 9 0 1 0 36.8 34.9" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>
+    <div class="logo-tx"><span class="lt">CARVITAL</span><span class="ls">Altijd weten hoe je auto ervoor staat</span></div>
   </div>
   <div class="nav-links">
     <a onclick="goSection('functies')">Functies</a>
@@ -686,7 +692,7 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
     <div class="footer-inner">
       <div class="footer-top">
         <div>
-          <div class="logo" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="lt">CARVITAL</span><span class="ls">Altijd weten hoe je auto ervoor staat</span></div>
+          <div class="logo" onclick="window.scrollTo({top:0,behavior:'smooth'})"><svg class="logo-ic" viewBox="0 0 52 56" aria-hidden="true"><path d="M7 12h5v32H7a5 5 0 0 1-5-5V17a5 5 0 0 1 5-5z" fill="currentColor"/><rect x="3.25" y="13.25" width="45.5" height="29.5" rx="4" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M36.8 21.1A9 9 0 1 0 36.8 34.9" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg><div class="logo-tx"><span class="lt">CARVITAL</span><span class="ls">Altijd weten hoe je auto ervoor staat</span></div></div>
           <div class="footer-desc">De slimste manier om voor je auto te zorgen. Gratis voor autobezitters, altijd. Nu in bèta.</div>
         </div>
         <div><div class="footer-col-title">App</div><a class="footer-link" onclick="showApp()">Health Score</a><a class="footer-link" onclick="showApp()">Onderhoudsboekje</a><a class="footer-link" onclick="showApp()">Garage Finder</a><a class="footer-link" onclick="showApp()">Reminders</a></div>
