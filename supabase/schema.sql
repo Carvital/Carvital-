@@ -206,3 +206,73 @@ create policy "own parses select" on public.invoice_parses
 drop policy if exists "own parses insert" on public.invoice_parses;
 create policy "own parses insert" on public.invoice_parses
   for insert with check (user_id = auth.uid());
+
+-- ---------- admin-rol ----------
+-- Alleen in te stellen via de SQL Editor of het dashboard, nooit door de gebruiker zelf:
+--   update public.profiles set is_admin = true
+--   where id = (select id from auth.users where email = 'jij@voorbeeld.nl');
+alter table public.profiles add column if not exists is_admin boolean not null default false;
+
+-- Gebruikers mogen hun eigen profiel aanpassen (RLS), maar nooit is_admin.
+-- Via de app (rol anon/authenticated) blijft is_admin altijd zoals het was.
+create or replace function public.protect_is_admin()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if coalesce(auth.role(), '') in ('anon', 'authenticated') then
+    if tg_op = 'INSERT' then
+      new.is_admin := false;
+    else
+      new.is_admin := old.is_admin;
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists protect_is_admin on public.profiles;
+create trigger protect_is_admin
+  before insert or update on public.profiles
+  for each row execute function public.protect_is_admin();
+
+-- Statistieken voor beheerders: alleen totalen, geen gegevens van individuele gebruikers.
+create or replace function public.admin_stats()
+returns json
+language plpgsql
+stable
+security definer set search_path = ''
+as $$
+begin
+  if not exists (select 1 from public.profiles where id = auth.uid() and is_admin) then
+    raise exception 'forbidden' using errcode = '42501';
+  end if;
+  return json_build_object(
+    'users_total', (select count(*) from auth.users),
+    'users_confirmed', (select count(*) from auth.users where email_confirmed_at is not null),
+    'users_7d', (select count(*) from auth.users where created_at > now() - interval '7 days'),
+    'users_30d', (select count(*) from auth.users where created_at > now() - interval '30 days'),
+    'active_30d', (select count(*) from auth.users where last_sign_in_at > now() - interval '30 days'),
+    'marketing_opt_in', (select count(*) from public.profiles where marketing_opt_in),
+    'cars', (select count(*) from public.cars),
+    'records', (select count(*) from public.maintenance_records),
+    'records_30d', (select count(*) from public.maintenance_records where created_at > now() - interval '30 days'),
+    'invoices', (select count(*) from public.maintenance_records where invoice_path is not null),
+    'invoice_parses_30d', (select count(*) from public.invoice_parses where created_at > now() - interval '30 days'),
+    'share_links', (select count(*) from public.share_links),
+    'signups_per_week', coalesce((
+      select json_agg(json_build_object('week', w.week, 'count', w.n) order by w.week)
+      from (
+        select gs::date as week,
+               (select count(*) from auth.users u
+                 where u.created_at >= gs and u.created_at < gs + interval '7 days') as n
+        from generate_series(date_trunc('week', now()) - interval '11 weeks', date_trunc('week', now()), interval '1 week') gs
+      ) w
+    ), '[]'::json)
+  );
+end;
+$$;
+
+revoke all on function public.admin_stats() from public, anon;
+grant execute on function public.admin_stats() to authenticated;

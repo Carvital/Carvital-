@@ -37,8 +37,8 @@ html{scroll-behavior:smooth;color-scheme:light only}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;color-scheme:light}
 #page-landing{background:var(--bg)}
 
-nav{position:fixed;top:0;left:0;right:0;z-index:500;height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 32px;background:rgba(26,21,18,.94);backdrop-filter:blur(16px);border-bottom:1px solid rgba(210,196,176,.12);transition:background .35s,border-color .35s}
-body.at-top nav{background:linear-gradient(rgba(26,21,18,.55),rgba(26,21,18,0));border-bottom-color:transparent;backdrop-filter:none}
+nav{position:fixed;top:0;left:0;right:0;z-index:500;height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 32px;background:rgba(26,21,18,.97);border-bottom:1px solid rgba(210,196,176,.12);transition:background .35s,border-color .35s}
+body.at-top nav{background:linear-gradient(rgba(26,21,18,.6),rgba(26,21,18,0));border-bottom-color:transparent}
 .logo{display:flex;align-items:center;gap:11px;cursor:pointer;line-height:1;user-select:none;color:var(--sand)}
 .logo-ic{width:40px;height:43px;flex-shrink:0}
 .logo-tx{display:flex;flex-direction:column}
@@ -82,7 +82,7 @@ h1{font-family:'Outfit',sans-serif;font-size:64px;font-weight:700;line-height:1.
 .hero-sub{font-size:19px;line-height:1.55;color:rgba(242,236,231,.72);max-width:560px;margin-bottom:38px;font-weight:300}
 
 /* KENTEKEN */
-.kent-box{max-width:600px;background:rgba(26,21,18,.55);backdrop-filter:blur(14px);border:1px solid rgba(210,196,176,.2);padding:22px;border-radius:4px}
+.kent-box{max-width:600px;background:rgba(26,21,18,.8);border:1px solid rgba(210,196,176,.2);padding:22px;border-radius:4px}
 .kent-label{font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(210,196,176,.8);margin-bottom:12px}
 .kent-row{display:flex;gap:10px}
 .plate{flex:1;display:flex;border-radius:6px;overflow:hidden;border:2px solid #1a1512;box-shadow:0 0 0 1px rgba(210,196,176,.35)}
@@ -128,7 +128,7 @@ h1{font-family:'Outfit',sans-serif;font-size:64px;font-weight:700;line-height:1.
 .panel:nth-child(6){--fallback:radial-gradient(ellipse 60% 70% at 74% 30%,#857057,#362a20 55%,#1a1512)}
 .panel[style*="--photo"] .panel-ic{display:none}
 .panel-ic{position:absolute;right:8%;top:50%;transform:translateY(-58%);font-size:180px;line-height:1;opacity:.16;filter:grayscale(1) sepia(.6);pointer-events:none}
-.panel .l-wrap{width:100%;padding-bottom:12vh;position:relative}
+.panel .l-wrap{will-change:opacity;width:100%;padding-bottom:12vh;position:relative}
 .panel-count{font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;letter-spacing:.3em;color:var(--sand);display:flex;align-items:center;gap:14px;margin-bottom:18px}
 .panel-count::before{content:'';width:34px;height:1px;background:var(--sand);opacity:.7}
 .panel h3{font-family:'Outfit',sans-serif;font-size:54px;font-weight:700;line-height:1.02;color:var(--cream);margin-bottom:16px;max-width:720px}
@@ -375,6 +375,15 @@ html.lenis,html.lenis body{height:auto}
 .kc-ic{font-size:24px;margin-bottom:7px}
 .kc-n{font-family:'Outfit',sans-serif;font-size:32px;font-weight:900;letter-spacing:-1px;margin-top:3px}
 .kc-lb{font-size:11px;color:var(--t3);margin-top:3px}
+.admin-only{display:none!important}
+body.is-admin .ni.admin-only,body.is-admin .mm-item.admin-only{display:flex!important}
+.adm-chart{display:flex;align-items:flex-end;gap:6px;height:160px;margin-top:14px}
+.adm-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%;min-width:0}
+.adm-bar i{display:block;width:100%;max-width:34px;background:var(--sand);border-radius:4px 4px 0 0;min-height:2px;transform-origin:bottom;animation:barUp .6s cubic-bezier(.2,.8,.2,1) backwards}
+.adm-bar b{font-size:11px;font-weight:600;color:var(--ink)}
+.adm-bar span{font-size:10px;color:var(--t3);white-space:nowrap}
+@keyframes barUp{from{transform:scaleY(0)}}
+@media (prefers-reduced-motion:reduce){.adm-bar i{animation:none}}
 .cbr{display:flex;align-items:center;gap:10px;margin-bottom:9px}
 .cb-lb{font-size:12px;color:var(--t2);width:132px;flex-shrink:0}
 .cb-tr{flex:1;height:7px;background:var(--bg3);border-radius:4px;overflow:hidden}
@@ -398,7 +407,7 @@ html.lenis,html.lenis body{height:auto}
 .tog-th{width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .tog.on .tog-th{left:21px}
 .tog.off .tog-th{left:2px}
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);z-index:600;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
+.modal-backdrop{position:fixed;inset:0;background:rgba(26,21,18,.6);z-index:600;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
 .modal-backdrop.open{opacity:1;pointer-events:all}
 .modal-box{background:var(--bg2);border-radius:var(--rxl);padding:32px;width:440px;max-width:92vw;border:1px solid var(--border);transform:translateY(12px) scale(.98);transition:transform .22s;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
 .modal-backdrop.open .modal-box{transform:translateY(0) scale(1)}
@@ -491,7 +500,7 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
   .footer-top{grid-template-columns:1fr 1fr;gap:32px}
   .sidebar{display:none}
   .amain{padding:16px;padding-bottom:78px}
-  .mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:400;background:rgba(248,246,241,0.98);backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  .mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:400;background:rgba(248,246,241,0.99);border-top:1px solid var(--border);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
   .g2,.g3,.kt,.gg{grid-template-columns:1fr}
   .sp2{grid-column:span 1}
   .rdw-g{grid-template-columns:repeat(2,1fr)}
@@ -734,6 +743,7 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
       <div class="ni" onclick="sv('kosten',this)"><span class="ic">💰</span> Kostenoverzicht</div>
       <div class="ni" onclick="sv('overdracht',this)"><span class="ic">🤝</span> Overdracht</div>
       <div class="ni" onclick="sv('profiel',this)"><span class="ic">👤</span> Profiel</div>
+      <div class="ni admin-only" onclick="sv('admin',this)"><span class="ic">🛡️</span> Admin</div>
     </div>
     <div class="sb-sec"><div class="sbl">Mijn Auto's</div>
       <div id="sb-cars"></div>
@@ -824,6 +834,10 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
       <div class="app-view" id="u-profiel"></div>
     </div>
 
+    <div id="view-admin" class="view">
+      <div class="app-view" id="u-admin"></div>
+    </div>
+
   </div>
 </div>
 
@@ -849,6 +863,7 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
       <div class="mm-item" onclick="mnv2('kosten')"><span class="ic">💰</span> Kostenoverzicht</div>
       <div class="mm-item" onclick="mnv2('overdracht')"><span class="ic">🤝</span> Overdracht</div>
       <div class="mm-item" onclick="mnv2('profiel')"><span class="ic">👤</span> Profiel</div>
+      <div class="mm-item admin-only" onclick="mnv2('admin')"><span class="ic">🛡️</span> Admin</div>
       <div class="mm-item" onclick="closeM();showPage('landing')"><span class="ic">←</span> Naar website</div>
       <div class="mm-item user-flex" onclick="closeM();logout()"><span class="ic">🚪</span> Uitloggen</div>
     </div>
@@ -981,7 +996,7 @@ let currentUser=null,profile=null,cars=[],records=[],shareLinks=[],activeCarId=n
 
 function showPage(p){document.querySelectorAll('.page').forEach(x=>{x.classList.remove('active');x.style.display=''});if(p==='app'){const a=document.getElementById('page-app');a.classList.add('active');a.style.display='flex'}else document.getElementById(p==='share'?'page-share':'page-landing').classList.add('active');if(window.lenis)lenis.scrollTo(0,{immediate:true,force:true});window.scrollTo(0,0);updateNav();if(window.ScrollTrigger)requestAnimationFrame(()=>ScrollTrigger.refresh())}
 function showApp(){closeM();showPage('app')}
-function sv(name,el){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+name).classList.add('active');document.querySelectorAll('.ni').forEach(i=>i.classList.remove('active'));if(!el)el=document.querySelector(`.ni[onclick^="sv('${name}'"]`);if(el)el.classList.add('active');window.scrollTo(0,0)}
+function sv(name,el){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+name).classList.add('active');document.querySelectorAll('.ni').forEach(i=>i.classList.remove('active'));if(!el)el=document.querySelector(`.ni[onclick^="sv('${name}'"]`);if(el)el.classList.add('active');window.scrollTo(0,0);if(name==='admin')loadAdmin()}
 function mnv(name,el){sv(name);document.querySelectorAll('.mnb').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active')}
 function mnv2(name){closeM();sv(name);document.querySelectorAll('.mnb').forEach(b=>b.classList.remove('active'))}
 function openM(id){closeM();const m=document.getElementById('modal-'+id);if(m)m.classList.add('open')}
@@ -1021,7 +1036,7 @@ ${P}De AutoHealth Score is een indicatieve berekening. We nemen geen besluiten o
 <li><strong>Brevo</strong> (Frankrijk, EU) — verstuurt de e-mails voor je account, zoals het bevestigen van je e-mailadres en het herstellen van je wachtwoord.</li>
 <li><strong>bunny.net</strong> (lettertypen, EU) en <strong>jsDelivr</strong> (laden van programmacode) — deze zien alleen je IP-adres bij het laden van de pagina.</li></ul>
 ${P}Supabase, Vercel en Anthropic zijn bedrijven uit de Verenigde Staten. Voor een eventuele doorgifte buiten de EER vertrouwen we op het EU-US Data Privacy Framework en/of de standaardcontractbepalingen van de Europese Commissie.</p>
-<h4>6. Beveiliging</h4><p>Alle verbindingen zijn versleuteld (HTTPS). Wachtwoorden worden gehasht opgeslagen. Elke gebruiker kan technisch alleen zijn eigen gegevens en facturen inzien.</p>
+<h4>6. Beveiliging</h4><p>Alle verbindingen zijn versleuteld (HTTPS). Wachtwoorden worden gehasht opgeslagen. Elke gebruiker kan technisch alleen zijn eigen gegevens en facturen inzien. Beheerders van Carvital zien in de app alleen totalen, zoals het aantal gebruikers, en geen gegevens van individuele gebruikers.</p>
 <h4>7. Jouw rechten</h4><p>Je hebt recht op inzage, correctie, verwijdering, beperking, overdraagbaarheid en bezwaar, en je kunt gegeven toestemming altijd intrekken. Veel regel je direct zelf onder <strong>Profiel</strong>: je gegevens downloaden, je naam en voorkeuren aanpassen en je account verwijderen. Voor andere verzoeken mail je <strong>${COMPANY.privacyEmail}</strong>; we reageren binnen een maand.</p>
 <h4>8. Klacht</h4><p>Ben je niet tevreden over hoe we met je gegevens omgaan? Laat het ons weten. Je hebt ook het recht een klacht in te dienen bij de Autoriteit Persoonsgegevens (autoriteitpersoonsgegevens.nl).</p>
 <h4>9. Leeftijd</h4><p>Carvital is bedoeld voor personen van 16 jaar en ouder.</p></div>`},
@@ -1430,6 +1445,23 @@ function carReminders(car,recs){
   return out;
 }
 
+// ---------- admin: alleen totalen, geen gegevens van individuele gebruikers ----------
+async function loadAdmin(){
+  const box=document.getElementById('u-admin');
+  if(!currentUser||!profile?.is_admin){box.innerHTML=head('Admin','Alleen voor beheerders')+'<div class="empty"><div class="e-ic">🔒</div><div class="e-t">Geen toegang</div>Deze pagina is alleen voor beheerders.</div>';return}
+  box.innerHTML=head('Admin','Overzicht van Carvital')+'<div class="empty"><div class="spin" style="margin:0 auto"></div></div>';
+  const {data:d,error}=await sb.rpc('admin_stats');
+  if(error){box.innerHTML=head('Admin','Overzicht van Carvital')+`<div class="empty"><div class="e-ic">⚠️</div><div class="e-t">Statistieken laden mislukt</div>${esc(error.message)}</div>`;return}
+  const card=(ic,label,n,sub)=>`<div class="kc"><div class="kc-ic">${ic}</div><div style="font-size:11px;color:var(--t3)">${label}</div><div class="kc-n">${nf(n)}</div><div class="kc-lb">${sub}</div></div>`;
+  const pct=(a,b)=>b?Math.round(a/b*100)+'%':'-';
+  const weeks=d.signups_per_week||[],max=Math.max(1,...weeks.map(w=>w.count));
+  box.innerHTML=head('Admin','Overzicht van Carvital · alleen totalen, geen persoonsgegevens',`<button class="btn-sm btn-sm-white" onclick="loadAdmin()">↻ Vernieuwen</button>`)+
+`<div class="kt">${card('👥','Gebruikers',d.users_total,`${nf(d.users_confirmed)} bevestigd (${pct(d.users_confirmed,d.users_total)})`)}${card('🆕','Nieuw',d.users_30d,`${nf(d.users_7d)} deze week · 30 dagen`)}${card('🔑','Actief',d.active_30d,'ingelogd in 30 dagen')}</div>
+<div class="kt">${card('🚗',"Auto's",d.cars,d.users_total?(d.cars/d.users_total).toLocaleString('nl-NL',{maximumFractionDigits:1})+' per gebruiker':'-')}${card('📖','Beurten',d.records,`${nf(d.records_30d)} in 30 dagen`)}${card('📎','Facturen',d.invoices,`${nf(d.invoice_parses_30d)} AI-uitlezingen in 30 dagen`)}</div>
+<div class="kt">${card('🤝','Deellinks',d.share_links,'actief')}${card('✉️','Nieuwsbrief',d.marketing_opt_in,pct(d.marketing_opt_in,d.users_total)+' van de gebruikers')}<div class="kc" style="display:flex;flex-direction:column;justify-content:center;font-size:12px;color:var(--t2);line-height:1.6">🔒 Hier staan bewust geen namen of e-mailadressen. Individuele accounts beheer je in het Supabase-dashboard.</div></div>
+<div class="card"><div class="cl">📈 Aanmeldingen per week (laatste 12 weken)</div><div class="adm-chart">${weeks.map((w,i)=>`<div class="adm-bar"><b>${w.count||''}</b><i style="height:${Math.round(w.count/max*100)}%;animation-delay:${i*40}ms"></i><span>${fmtDate(w.week,{day:'numeric',month:'short'})}</span></div>`).join('')}</div></div>`;
+}
+
 // ---------- demo: dezelfde weergave als de echte app, met een voorbeeldauto ----------
 const DEMO_USER={id:'demo',email:'demo@carvital.nl',email_confirmed_at:null};
 function demoData(){
@@ -1478,6 +1510,7 @@ function remRow(r){
 
 function renderUser(){
   const me=currentUser||DEMO_USER;
+  document.body.classList.toggle('is-admin',!!(currentUser&&profile?.is_admin));
   const car=activeCar(),recs=carRecs(car);
   const name=profile?.name||me.email;
   const first=name.split(' ')[0];
@@ -1648,7 +1681,7 @@ function initMotion(){
 
   // vloeiend scrollen; vensters en de zijbalk scrollen zelf
   if(window.Lenis){
-    window.lenis=new Lenis({lerp:.1,wheelMultiplier:1});
+    window.lenis=new Lenis({lerp:.14,wheelMultiplier:1});
     lenis.on('scroll',()=>{ScrollTrigger.update();updateNav()});
     gsap.ticker.add(t=>lenis.raf(t*1000));
     gsap.ticker.lagSmoothing(0);
@@ -1665,10 +1698,10 @@ function initMotion(){
   // hero zakt weg bij scrollen
   gsap.to('.hero .l-wrap',{yPercent:-10,opacity:.35,ease:'none',scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:true}});
 
-  // koppen: woorden komen vervaagd binnen (vergelijkbaar met BlurText van React Bits)
+  // koppen: woorden schuiven een voor een omhoog in beeld
   document.querySelectorAll('#page-landing .l-h2,#page-landing .od-title,#page-landing .cta-title,#page-landing .garage-section .sec-title').forEach(el=>{
     const sp=split(el,'words');
-    gsap.from(sp?sp.words:el,{opacity:0,y:28,filter:'blur(10px)',duration:.9,ease,stagger:.05,scrollTrigger:{trigger:el,start:'top 85%'}});
+    gsap.from(sp?sp.words:el,{opacity:0,y:28,duration:.8,ease,stagger:.04,scrollTrigger:{trigger:el,start:'top 85%'}});
   });
 
   // blokken die infaden
@@ -1681,20 +1714,13 @@ function initMotion(){
   panels.forEach((p,i)=>{
     gsap.from(p.querySelectorAll('.panel-count,h3,p,.btn-l'),{y:50,opacity:0,duration:.9,ease,stagger:.08,scrollTrigger:{trigger:p,start:'top 55%'}});
     gsap.fromTo(p.querySelector('.panel-ic'),{y:80,rotate:-6},{y:-80,rotate:6,ease:'none',scrollTrigger:{trigger:p,start:'top bottom',end:'bottom top',scrub:true}});
-    if(panels[i+1])gsap.to(p.querySelector('.l-wrap'),{opacity:0,scale:.94,ease:'none',scrollTrigger:{trigger:panels[i+1],start:'top bottom',end:'top 20%',scrub:true}});
+    if(panels[i+1])gsap.to(p.querySelector('.l-wrap'),{opacity:0,ease:'none',scrollTrigger:{trigger:panels[i+1],start:'top bottom',end:'top 20%',scrub:true}});
   });
 
   // cijfers tellen op (vergelijkbaar met CountUp van React Bits)
   document.querySelectorAll('[data-count]').forEach(el=>{
     const o={v:0},end=+el.dataset.count;
     gsap.to(o,{v:end,duration:1.6,ease:'power2.out',scrollTrigger:{trigger:el,start:'top 85%'},onUpdate:()=>{el.textContent=Math.round(o.v)}});
-  });
-
-  // magnetische knoppen op desktop
-  if(matchMedia('(hover:hover) and (pointer:fine)').matches)document.querySelectorAll('#page-landing .btn-l.solid,.kent-btn').forEach(b=>{
-    const x=gsap.quickTo(b,'x',{duration:.4,ease:'power3'}),y=gsap.quickTo(b,'y',{duration:.4,ease:'power3'});
-    b.addEventListener('mousemove',e=>{const r=b.getBoundingClientRect();x((e.clientX-r.left-r.width/2)*.25);y((e.clientY-r.top-r.height/2)*.35)});
-    b.addEventListener('mouseleave',()=>{x(0);y(0)});
   });
 
   // na het laden van de lettertypen kloppen de posities pas echt
