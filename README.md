@@ -45,6 +45,16 @@ When a user uploads an invoice under "Beurt toevoegen", the Edge Function `supab
 
 Without these steps uploading still works, but nothing is filled in automatically. The user sees a message and enters the details by hand.
 
+## Garage data
+
+The garage finder searches `data/garages.json` in the browser. The file holds every car repair and tyre shop in the Netherlands from OpenStreetMap (© OpenStreetMap contributors, ODbL). There is no live map service, so searches are instant and a visitor's location never leaves the browser. Postcodes and place names are looked up with PDOK, the Dutch government location service.
+
+To refresh the data (every few months is enough), run:
+
+```bash
+.venv/Scripts/python.exe scripts/build_garages.py
+```
+
 ## Run locally
 
 ```bash
@@ -61,5 +71,5 @@ Then open http://localhost:5500.
 - Registration has a terms/16+ checkbox and a separate optional marketing opt-in. Neither is pre-ticked. The consent time and terms version are stored.
 - Users can export their data themselves (JSON), and delete their account including invoices, under Profiel.
 - Invoices go into a private bucket. Each user can only access their own folder.
-- Location is only used when the user clicks the location button, and it is not stored.
+- Location is only used when the user clicks the location button. It stays in the browser and is not stored.
 - Sharing the history with a buyer (Overdracht) is opt-in per car. The public link (`#historie=<token>`) shows the car and records only: no name, e-mail or invoices. The owner can revoke it at any time.
