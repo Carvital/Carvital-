@@ -347,7 +347,7 @@ html.lenis,html.lenis body{height:auto}
 .garage-search .fi{flex:1;min-width:180px}
 .garage-search select.fi{flex:0 0 auto;width:auto;min-width:0}
 .gc-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
-.gc-act a{flex:1;min-width:80px;text-align:center;text-decoration:none;justify-content:center}
+.gc-act a{flex:1;min-width:80px;white-space:nowrap;text-align:center;text-decoration:none;justify-content:center}
 .bk{width:100%;padding:10px;border-radius:9px;background:var(--gold);color:#fff;font-size:12.5px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;box-shadow:0 2px 6px rgba(232,148,10,.2)}
 .bk:hover{background:var(--gold2)}
 .rem-sec{margin-bottom:17px}
@@ -795,7 +795,7 @@ body.signed-in .ni.user-flex,body.signed-in .mm-item.user-flex{display:flex}
       <div class="ahd"><div><div class="at">Garages bij jou in de buurt</div><div class="as2" id="garage-sub">Zoek op postcode of plaats, of gebruik je locatie</div></div></div>
       <div class="card" style="margin-bottom:16px">
         <div class="garage-search"><input class="fi" id="garage-q" placeholder="Postcode of plaats, bijv. 3511 AB" maxlength="60" autocomplete="postal-code" onkeydown="if(event.key==='Enter')searchGarages()"><select class="fi" id="garage-r" aria-label="Zoekstraal"><option value="3000">3 km</option><option value="5000" selected>5 km</option><option value="10000">10 km</option><option value="20000">20 km</option></select><button class="btn-primary" id="garage-btn" style="border-radius:10px;font-size:13px;padding:10px 16px" onclick="searchGarages()">🔍 Zoeken</button><button class="btn-secondary" id="geo-btn" style="border-radius:10px;font-size:13px;padding:10px 16px" onclick="getGeo()">📍 Mijn locatie</button></div>
-        <div style="font-size:11px;color:var(--t3);margin-top:8px">🔒 Je zoekopdracht of afgeronde locatie gaat alleen naar OpenStreetMap om garages op te zoeken. Wij slaan niets op.</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:8px">🔒 Je locatie blijft in je browser. Een postcode of plaats zoeken we op via PDOK, de locatieservice van de overheid. Wij slaan niets op.</div>
       </div>
       <div id="garage-list"><div class="empty"><div class="e-ic">🗺️</div><div class="e-t">Vind een garage in de buurt</div>Vul je postcode of plaats in, of gebruik je huidige locatie.</div></div>
     </div>
@@ -991,7 +991,7 @@ const INFO_CONTENT={
 <li><strong>Onderhoud:</strong> de beurten die je invoert (datum, km-stand, omschrijving, garage, bedrag) en facturen die je uploadt. Facturen kunnen zelf persoonsgegevens bevatten, zoals je adres.</li>
 <li><strong>Voorkeuren:</strong> je instellingen voor herinneringen en nieuwsbrief, en wanneer je akkoord ging met de voorwaarden.</li>
 <li><strong>Technisch:</strong> IP-adres en tijdstip in serverlogs van onze hostingpartijen, voor beveiliging.</li>
-<li><strong>Locatie:</strong> alleen als je zelf op "Mijn locatie" klikt of een postcode of plaats invult bij Garages. Je locatie wordt afgerond op ongeveer 100 meter en rechtstreeks vanuit je browser naar OpenStreetMap gestuurd om garages op te zoeken. Wij slaan je locatie niet op.</li></ul>
+<li><strong>Locatie:</strong> alleen als je zelf op "Mijn locatie" klikt bij Garages. Je locatie wordt alleen in je browser gebruikt om garages in de buurt te tonen; ze wordt niet verstuurd en niet opgeslagen. Vul je een postcode of plaats in, dan zoeken we die op via PDOK (zie hieronder).</li></ul>
 ${P}Zoek je op de homepage een kenteken op zonder account, dan gaat dat kenteken rechtstreeks van jouw browser naar de openbare RDW-database. Wij slaan dat niet op.</p>
 <h4>3. Waarvoor en op welke grondslag?</h4><ul>
 <li>Je account, onderhoudsboekje, Health Score en herinneringen: <strong>uitvoering van de overeenkomst</strong> (art. 6 lid 1 sub b AVG).</li>
@@ -1005,7 +1005,7 @@ ${P}De AutoHealth Score is een indicatieve berekening. We nemen geen besluiten o
 <li><strong>Anthropic</strong> — leest facturen automatisch uit (AI), alleen als je een factuur uploadt bij "Beurt toevoegen". De factuur wordt alleen gebruikt om de gegevens terug te geven en niet om AI-modellen te trainen.</li>
 <li><strong>Supabase</strong> — database, inloggen en opslag van facturen. Je gegevens staan op servers in de EU (Frankfurt).</li>
 <li><strong>Vercel</strong> — hosting van de website en (met toestemming) anonieme statistieken.</li>
-<li><strong>OpenStreetMap</strong> (Nominatim en Overpass API, servers in de EU): ontvangt je zoekopdracht of afgeronde locatie en je IP-adres als je garages zoekt.</li>
+<li><strong>PDOK</strong> (Kadaster, Nederlandse overheid): ontvangt de postcode of plaats en je IP-adres als je garages zoekt op postcode of plaats. De garagegegevens zelf komen van OpenStreetMap en staan op onze eigen website.</li>
 <li><strong>Brevo</strong> (Frankrijk, EU) — verstuurt de e-mails voor je account, zoals het bevestigen van je e-mailadres en het herstellen van je wachtwoord.</li>
 <li><strong>bunny.net</strong> (lettertypen, EU) en <strong>jsDelivr</strong> (laden van programmacode) — deze zien alleen je IP-adres bij het laden van de pagina.</li></ul>
 ${P}Supabase, Vercel en Anthropic zijn bedrijven uit de Verenigde Staten. Voor een eventuele doorgifte buiten de EER vertrouwen we op het EU-US Data Privacy Framework en/of de standaardcontractbepalingen van de Europese Commissie.</p>
@@ -1722,7 +1722,7 @@ async function addCar(){
   try{await saveCar(lastRdw);toast('🚗','Auto toegevoegd!',lastRdw.merk+' '+lastRdw.model);sv('dashboard')}
   catch(e){toast('❌','Toevoegen mislukt',e.message)}
 }
-// ---------- garages in de buurt (OpenStreetMap) ----------
+// ---------- garages in de buurt (gegevens: OpenStreetMap) ----------
 const GARAGE_UI={
   app:{q:'garage-q',r:'garage-r',list:'garage-list',sub:'garage-sub',btn:'garage-btn',geo:'geo-btn',max:30},
   home:{q:'hgarage-q',list:'hgarage-list',btn:'hgarage-btn',geo:'hgeo-btn',max:6}
@@ -1743,10 +1743,14 @@ async function searchGarages(where='app'){
   if(q.length<2)return toast('⚠️','Vul een postcode of plaats in','');
   busy(ui.btn,true);
   try{
-    const res=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=nl&q='+encodeURIComponent(q));
-    const [hit]=res.ok?await res.json():[];
-    if(!hit)garageMsg(ui,'🔍','Locatie niet gevonden','Controleer de postcode of plaatsnaam.');
-    else await loadGarages(ui,Number(hit.lat),Number(hit.lon),hit.name||q);
+    // een postcode alleen als postcode zoeken, anders matcht "9711 AA" ook "Aa en Hunze"
+    const pc=q.replace(/\s+/g,'').toUpperCase().match(/^(\d{4})([A-Z]{2})?$/);
+    const fq=pc?'type:postcode':'type:(woonplaats%20OR%20gemeente)';
+    const res=await fetch(`https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?rows=1&fl=weergavenaam,centroide_ll&fq=${fq}&q=${encodeURIComponent(pc?pc[1]+(pc[2]||''):q)}`);
+    const hit=res.ok?(await res.json()).response?.docs?.[0]:null;
+    const pt=hit?.centroide_ll?.match(/POINT\(([\d.]+) ([\d.]+)\)/);
+    if(!pt)garageMsg(ui,'🔍','Locatie niet gevonden','Controleer de postcode of plaatsnaam.');
+    else await loadGarages(ui,Number(pt[2]),Number(pt[1]),hit.weergavenaam.split(',')[0].replace(/^Gemeente /,''));
   }catch(e){garageMsg(ui,'⚠️','Zoeken mislukt','Controleer je internetverbinding en probeer het opnieuw.')}
   finally{busy(ui.btn,false)}
 }
@@ -1757,29 +1761,25 @@ function allGarages(){
   if(lastGarageSearch)loadGarages(GARAGE_UI.app,...lastGarageSearch);
 }
 let lastGarageSearch=null;
-const garageCache={};
+// Alle Nederlandse garages staan in data/garages.json (uit OpenStreetMap, zie scripts/build_garages.py).
+// Zoeken gebeurt in de browser: snel, en je locatie gaat nergens heen.
+let garageData=null;
+function getGarages(){
+  garageData??=fetch('data/garages.json').then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(d=>d.rows.map(([name,la,lo,street,city,type,brand,website,phone,hours])=>({la,lo,t:{name,'addr:street':street,'addr:city':city,shop:type==='t'?'tyres':'car_repair',brand,website,phone,opening_hours:hours}})));
+  garageData.catch(()=>{garageData=null});
+  return garageData;
+}
 async function loadGarages(ui,lat,lon,label){
-  // afronden op ~100 m: genoeg om garages te vinden, zonder je exacte locatie te delen
-  lat=Math.round(lat*1000)/1000;lon=Math.round(lon*1000)/1000;
   lastGarageSearch=[lat,lon,label];
   const radius=ui.r?Number(document.getElementById(ui.r).value)||5000:5000;
   if(ui.sub)document.getElementById(ui.sub).textContent='Rond '+label+' · '+radius/1000+' km';
   document.getElementById(ui.list).innerHTML='<div class="empty"><div class="spin" style="margin:0 auto"></div></div>';
-  const query=`[out:json][timeout:25];nwr["shop"~"^(car_repair|tyres)$"](around:${radius},${lat},${lon});out center tags;`;
-  let els=garageCache[query];
-  if(!els)try{
-    const post=()=>fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(query),headers:{'Content-Type':'application/x-www-form-urlencoded'}});
-    let res=await post();
-    // de publieke Overpass-server weigert soms kort achter elkaar gestuurde zoekopdrachten
-    if(res.status===429||res.status===504){await new Promise(r=>setTimeout(r,2000));res=await post()}
-    if(!res.ok)throw new Error(res.status);
-    els=garageCache[query]=(await res.json()).elements;
-  }catch(e){return garageMsg(ui,'⚠️','Garages laden mislukt','De kaartdienst is even druk. Probeer het over een minuut opnieuw.')}
-  const all=els.map(el=>{const t=el.tags||{},la=el.lat??el.center?.lat,lo=el.lon??el.center?.lon;return {t,la,lo,d:distKm(lat,lon,la,lo)}})
-    .filter(g=>g.t.name&&g.la!=null).sort((x,y)=>x.d-y.d);
+  let garages;
+  try{garages=await getGarages()}catch(e){return garageMsg(ui,'⚠️','Garages laden mislukt','Controleer je internetverbinding en probeer het opnieuw.')}
+  const all=garages.map(g=>({...g,d:distKm(lat,lon,g.la,g.lo)})).filter(g=>g.d<=radius/1000).sort((x,y)=>x.d-y.d);
   if(!all.length)return garageMsg(ui,'🔧','Geen garages gevonden',ui.r?'Probeer een grotere zoekstraal.':'Probeer een andere postcode of plaats.');
   const more=ui===GARAGE_UI.home&&all.length>ui.max?`<div style="text-align:center;margin-top:16px"><button class="btn-secondary" style="border-radius:10px;font-size:13.5px;padding:11px 18px;background:var(--bg2)" onclick="allGarages()">Bekijk alle ${Math.min(all.length,GARAGE_UI.app.max)} garages →</button></div>`:'';
-  document.getElementById(ui.list).innerHTML=`<div class="${ui===GARAGE_UI.home?'garage-grid':'gg'}">${all.slice(0,ui.max).map(garageCard).join('')}</div>${more}<div style="font-size:11px;color:var(--t3);margin-top:14px">Rond ${esc(label)} · gegevens © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:var(--t3)">OpenStreetMap-bijdragers</a>. Klopt er iets niet? Garages kunnen hun gegevens zelf aanpassen op openstreetmap.org. Je zoekopdracht of afgeronde locatie gaat alleen naar OpenStreetMap; wij slaan niets op.</div>`;
+  document.getElementById(ui.list).innerHTML=`<div class="${ui===GARAGE_UI.home?'garage-grid':'gg'}">${all.slice(0,ui.max).map(garageCard).join('')}</div>${more}<div style="font-size:11px;color:var(--t3);margin-top:14px">Rond ${esc(label)} · gegevens © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:var(--t3)">OpenStreetMap-bijdragers</a>. Klopt er iets niet? Garages kunnen hun gegevens zelf aanpassen op openstreetmap.org.</div>`;
 }
 function garageCard(g){
   const t=g.t,addr=[[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' '),t['addr:city']].filter(Boolean).join(', ');
@@ -1787,9 +1787,11 @@ function garageCard(g){
   const web=t.website||t['contact:website'],tel=(t.phone||t['contact:phone']||'').split(';')[0].replace(/[^+0-9 ]/g,'').trim();
   const href=web?(/^https?:\/\//i.test(web)?web:'https://'+web):null;
   const btn='btn-sm btn-sm-white';
+  // Google Maps toont sterren, reviews, telefoon en openingstijden; er gaat pas iets naar Google als iemand klikt
+  const gq=addr?`${t.name}, ${addr}`:`${t.name} ${g.la},${g.lo}`;
   return `<div class="gc" style="cursor:default"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="min-width:0"><div class="gc-n">${esc(t.name)}</div><div class="gc-d">📍 ${esc(addr||'Adres onbekend')}</div></div><div class="gc-r" style="white-space:nowrap">${g.d.toLocaleString('nl-NL',{maximumFractionDigits:1})} km</div></div>
 <div class="gtags">${tags.map(x=>`<span class="gt">${esc(x)}</span>`).join('')}</div>${t.opening_hours?`<div class="gc-p">🕒 ${esc(t.opening_hours.slice(0,80))}</div>`:''}
-<div class="gc-act"><a class="${btn}" href="https://www.google.com/maps/dir/?api=1&destination=${g.la},${g.lo}" target="_blank" rel="noopener">🧭 Route</a>${href?`<a class="${btn}" href="${esc(href)}" target="_blank" rel="noopener nofollow">🌐 Website</a>`:''}${tel?`<a class="${btn}" href="tel:${esc(tel.replace(/ /g,''))}">📞 Bellen</a>`:''}</div></div>`;
+<div class="gc-act"><a class="${btn}" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gq)}" target="_blank" rel="noopener" title="Sterren, reviews en telefoonnummer op Google Maps">⭐ Reviews</a><a class="${btn}" href="https://www.google.com/maps/dir/?api=1&destination=${g.la},${g.lo}" target="_blank" rel="noopener">🧭 Route</a>${href?`<a class="${btn}" href="${esc(href)}" target="_blank" rel="noopener nofollow">🌐 Website</a>`:''}${tel?`<a class="${btn}" href="tel:${esc(tel.replace(/ /g,''))}">📞 Bellen</a>`:''}</div></div>`;
 }
 function copyLink(){navigator.clipboard?.writeText(document.getElementById('share-url').value).catch(()=>{});toast('🔗','Link gekopieerd!','Stuur naar de koper!')}
 
