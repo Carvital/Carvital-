@@ -60,11 +60,63 @@ where id = (select id from auth.users where email = 'jij@voorbeeld.nl');
 
 Log out and back in. "Admin" then appears in the menu.
 
+## APK reminders by e-mail
+
+The Edge Function `supabase/functions/send-reminders` mails users 30 days before their APK expiry date. It only mails users who have APK reminders switched on and a confirmed e-mail address, and it sends one mail per car per APK date. Before each mail it looks up the current date at the RDW, so someone who already had the inspection done gets no mail.
+
+1. Run `supabase/schema.sql` again. It adds the `apk_reminders_sent` table and the `due_apk_reminders()` function.
+2. The sender domain `carvital.nl` must be verified in Brevo (see "Auth e-mails"). Then create an API key under Brevo → SMTP & API → API Keys.
+3. Create a random secret, for example with `openssl rand -hex 32`. Then set the secrets and deploy:
+
+```bash
+supabase secrets set BREVO_API_KEY=xkeysib-... CRON_SECRET=<random secret>
+```
+```bash
+supabase functions deploy send-reminders --no-verify-jwt
+```
+
+4. Test it without sending anything. This lists which cars would get a mail:
+
+```bash
+curl -X POST "https://kppcggewnkddfprutjrh.supabase.co/functions/v1/send-reminders?dry=1" -H "x-cron-secret: <random secret>"
+```
+
+5. Schedule it every morning. In Supabase, go to Database → Extensions and enable `pg_cron` and `pg_net`. Then run this in the SQL Editor:
+
+```sql
+select cron.schedule('apk-herinneringen', '0 7 * * *', $$
+  select net.http_post(
+    url := 'https://kppcggewnkddfprutjrh.supabase.co/functions/v1/send-reminders',
+    headers := jsonb_build_object('x-cron-secret', '<random secret>', 'Content-Type', 'application/json'),
+    body := '{}'::jsonb
+  );
+$$);
+```
+
+The job runs at 07:00 UTC, which is 08:00 or 09:00 Dutch time. The function returns only counts (sent, skipped, failed), never e-mail addresses.
+
+## Google (logo and search results)
+
+The site has PNG icons (`img/icon-*.png`, `img/apple-touch-icon.png`), `site.webmanifest`, Open Graph tags with `img/og-image.jpg` for link previews, structured data (`Organization` with the logo), `robots.txt` and `sitemap.xml`. All absolute URLs assume `https://carvital.nl`.
+
+To tell Google about the site, you don't need the domain owner:
+
+1. Go to search.google.com/search-console → Add property → **URL prefix** → `https://carvital.nl/`.
+2. Choose the verification method **HTML file**. Download the `google….html` file, put it in the root of this repo, commit it and let it deploy. Then click Verify.
+3. Go to Sitemaps and submit `sitemap.xml`.
+4. Go to URL inspection, enter `https://carvital.nl/` and click Request indexing.
+
+Google usually updates the logo and favicon in search results within a few days to a few weeks.
+
+## Garage data refresh
+
+The GitHub Action `.github/workflows/update-garages.yml` runs `scripts/build_garages.py` on the 1st of every month. It commits `data/garages.json` to `main` only when the garages themselves changed. If the export fails, the old file stays. To run it by hand, go to GitHub → Actions → "Garagegegevens verversen" → Run workflow.
+
 ## Garage data
 
 The garage finder searches `data/garages.json` in the browser. The file holds every car repair and tyre shop in the Netherlands from OpenStreetMap (© OpenStreetMap contributors, ODbL). There is no live map service, so searches are instant and a visitor's location never leaves the browser. Postcodes and place names are looked up with PDOK, the Dutch government location service.
 
-To refresh the data (every few months is enough), run:
+The data is refreshed automatically every month (see "Garage data refresh"). To refresh it by hand, run:
 
 ```bash
 .venv/Scripts/python.exe scripts/build_garages.py

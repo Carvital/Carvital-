@@ -1,0 +1,46 @@
+# Ververst data/garages.json (garages uit OpenStreetMap + APK-erkenningen van de RDW).
+# Draait op de 1e van elke maand; handmatig starten kan via Actions → "Garagegegevens verversen" → Run workflow.
+name: Garagegegevens verversen
+
+on:
+  schedule:
+    - cron: "17 3 1 * *" # 1e van de maand, 03:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-garages
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Het script stopt met een fout (en laat het oude bestand staan) als de export mislukt
+      - name: Garages ophalen
+        run: python scripts/build_garages.py
+
+      - name: Opslaan als er iets veranderd is
+        run: |
+          # alleen de datum veranderd? dan niets opslaan (het bestand is één regel, dus vergelijk de garages zelf)
+          if git diff --quiet -- data/garages.json; then
+            echo "Geen wijzigingen."; exit 0
+          fi
+          if git show HEAD:data/garages.json | python -c "import json,sys; old=json.loads(sys.stdin.buffer.read())['rows']; new=json.load(open('data/garages.json',encoding='utf-8'))['rows']; sys.exit(0 if old != new else 1)"; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/garages.json
+            git commit -m "Garagegegevens verversen ($(date -u +%Y-%m-%d))"
+            git push
+          else
+            echo "Alleen de datum is veranderd; niets opgeslagen."
+          fi
